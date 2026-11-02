@@ -688,3 +688,6 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 
 /* Símbolo do Stater (megafone) na barra lateral */
 .sb-mark { width: 36px; height: 36px; display: block; flex: none; }
+
+/* Título Stater em maiúsculas (Unbounded) */
+.sb-title { font-family: 'Unbounded', var(--font-ui), sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 1.5px; text-transform: uppercase; }
