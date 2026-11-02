@@ -685,7 +685,3 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Gráficos com cores padrão em todas as marcas (promotores a verde) */
 :root { --promoter: #22a03b; }
 .compo .p, .minibar .p, .ov-dnp i.p { background: var(--promoter); color: #fff; }
-
-/* Logo Stater (megafone) na barra lateral */
-.sb-head-img { flex-direction: column; align-items: flex-start; gap: 4px; }
-.sb-marca { width: 168px; height: auto; display: block; }
