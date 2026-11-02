@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261102-1447';
-import { base, junta, desenhar } from '../charts.js?v=20261102-1447';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261102-1447';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1447';
-import { icon } from '../icons.js?v=20261102-1447';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261102-1459';
+import { base, junta, desenhar } from '../charts.js?v=20261102-1459';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261102-1459';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1459';
+import { icon } from '../icons.js?v=20261102-1459';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
