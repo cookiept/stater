@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1410';
-import { icon } from './icons.js?v=20261102-1410';
-import { logo } from './logos.js?v=20261102-1410';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1410';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1410';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1410';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1410';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1410';
-import * as vNps from './views/nps.js?v=20261102-1410';
-import * as vCausas from './views/causas.js?v=20261102-1410';
-import * as vMolho from './views/molho.js?v=20261102-1410';
-import { exemplos } from './exemplo.js?v=20261102-1410';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1421';
+import { icon } from './icons.js?v=20261102-1421';
+import { logo } from './logos.js?v=20261102-1421';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1421';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1421';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1421';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1421';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1421';
+import * as vNps from './views/nps.js?v=20261102-1421';
+import * as vCausas from './views/causas.js?v=20261102-1421';
+import * as vMolho from './views/molho.js?v=20261102-1421';
+import { exemplos } from './exemplo.js?v=20261102-1421';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -308,10 +308,10 @@ function overview() {
         ${r ? `<div class="val"><b class="num">${fmt(r.nps)}</b><span class="muted">NPS · ${fmt(r.total)} respostas</span></div>
           <div class="compo" style="height:10px" aria-hidden="true"><div class="d" style="flex:${r.pctD}"></div><div class="n" style="flex:${r.pctN}"></div><div class="p" style="flex:${r.pctP}"></div></div>
           <div class="ov-dnp num"><span><i class="d"></i>Detratores ${fmt(r.pctD)}%</span><span><i class="n"></i>Neutros ${fmt(r.pctN)}%</span><span><i class="p"></i>Promotores ${fmt(r.pctP)}%</span></div>
-          <dl class="ov-mais">
-            <div><dt>Média</dt><dd class="num">${fmt(r.media, 1)}</dd></div>
-            <div><dt>Período</dt><dd>${esc(formatarPeriodo(rec.data.periodo))}</dd></div>
-          </dl>
+          <div class="ov-info">
+            <span>${icon('calendar')}<b>${esc(formatarPeriodo(rec.data.periodo))}</b></span>
+            <span>${icon('star')}Nota média <b class="num">${fmt(r.media, 1)}</b> / 10</span>
+          </div>
           ${r.total < LIMITES.poucasRespostas ? `<div class="badge mid">Poucas respostas ${def('amostra')}</div>` : ''}
           ${rec.exemplo ? '<div class="muted">Dados de exemplo</div>' : ''}`
         : `<div class="wait">${vivas ? 'A aguardar dados da tab NPS' : 'NPS ainda sem acesso'}</div>`}
@@ -378,7 +378,7 @@ function montarOverview() {
     stroke: { show: true, width: 4, colors: ['transparent'] },
     dataLabels: {
       enabled: true, offsetY: -20, formatter: v => (v == null ? '' : fmt(v)),
-      style: { fontSize: '12px', fontWeight: 700, colors: ['#1a1a1a', '#767676'] },
+      style: { fontSize: '12px', fontWeight: 700, colors: ['#1a1a1a', '#5f5f5f'] },
     },
     yaxis: { min: -100, max: 100, tickAmount: 10 },
     annotations: { yaxis: [{ y: 0, borderColor: '#9a9a9a', strokeDashArray: 0, borderWidth: 1 }] },

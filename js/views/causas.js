@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261102-1410';
-import { base, junta, desenhar } from '../charts.js?v=20261102-1410';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261102-1410';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1410';
-import { icon } from '../icons.js?v=20261102-1410';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261102-1421';
+import { base, junta, desenhar } from '../charts.js?v=20261102-1421';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261102-1421';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1421';
+import { icon } from '../icons.js?v=20261102-1421';
 
 export const npsGlobal = data => {
   const a = data.amostraGrupo;
@@ -149,7 +149,7 @@ export function mount(rec, brand, meta) {
     colors: [CORES.det, CORES.neu, CORES.pro],
     plotOptions: { bar: { horizontal: true, barHeight: '62%', borderRadius: 4, borderRadiusApplication: 'around', borderRadiusWhenStacked: 'all' } },
     stroke: { width: 2, colors: ['#fff'] },
-    dataLabels: { enabled: true, formatter: (v) => (v >= 8 ? `${fmt(v)}%` : ''), style: { fontSize: '11px', fontWeight: 600, colors: ['#fff', '#1a1a1a', '#fff'] }, dropShadow: { enabled: false } },
+    dataLabels: { enabled: true, formatter: (v) => (v >= 8 ? `${fmt(v)}%` : ''), style: { fontSize: '12px', fontWeight: 600, colors: ['#fff', '#1a1a1a', '#fff'] }, dropShadow: { enabled: false } },
     xaxis: { categories: cs.map(c => [c.nome.length > 30 ? c.nome.slice(0, 29) + '…' : c.nome, c.zero ? '0 menções' : `${fmt(c.total)} menções · NPS ${fmt(c.nps)}`]), labels: { formatter: v => `${v}%` }, axisBorder: { show: false } },
     yaxis: { labels: { minWidth: 230, maxWidth: 230, offsetX: 4, style: { fontSize: '12px', colors: ['#1a1a1a'] } } },
     tooltip: { shared: true, intersect: false, y: { formatter: (v, { seriesIndex, dataPointIndex }) => `${fmt(v)} (${fmt([cs[dataPointIndex].pctD, cs[dataPointIndex].pctN, cs[dataPointIndex].pctP][seriesIndex], 1)}%)` } },
@@ -161,11 +161,11 @@ export function mount(rec, brand, meta) {
     series: comM.map(c => ({ name: c.nome, data: [[c.total, c.nps]] })),
     colors: comM.map(c => (c.nps < meta ? CORES.det : CORES.pro)),
     markers: { size: 11, strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
-    xaxis: { type: 'numeric', tickAmount: 5, min: 0, max: Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15), labels: { formatter: v => fmt(v) }, title: { text: 'Menções', style: { fontSize: '11px', fontWeight: 500, color: '#767676' } } },
-    yaxis: { min: Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10), max: 100, tickAmount: 4, title: { text: 'NPS', style: { fontSize: '11px', fontWeight: 500, color: '#767676' } } },
+    xaxis: { type: 'numeric', tickAmount: 5, min: 0, max: Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15), labels: { formatter: v => fmt(v) }, title: { text: 'Menções', style: { fontSize: '12px', fontWeight: 500, color: '#5f5f5f' } } },
+    yaxis: { min: Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10), max: 100, tickAmount: 4, title: { text: 'NPS', style: { fontSize: '12px', fontWeight: 500, color: '#5f5f5f' } } },
     annotations: { yaxis: [
-      { y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600 } } },
-      ...(g ? [{ y: g.nps, borderColor: '#b4b4b4', strokeDashArray: 2, label: { text: `NPS geral ${fmt(g.nps)}`, position: 'left', textAnchor: 'start', borderColor: 'transparent', style: { background: '#f0f0f0', color: '#494949' } } }] : []),
+      { y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } },
+      ...(g ? [{ y: g.nps, borderColor: '#b4b4b4', strokeDashArray: 2, label: { text: `NPS geral ${fmt(g.nps)}`, position: 'left', textAnchor: 'start', borderColor: 'transparent', style: { background: '#f0f0f0', color: '#494949', fontSize: '12px' } } }] : []),
     ] },
     tooltip: { custom: ({ seriesIndex }) => { const c = comM[seriesIndex]; return `<div style="padding:10px 12px;font-size:12px"><b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções</div>`; } },
     grid: { xaxis: { lines: { show: true } } },

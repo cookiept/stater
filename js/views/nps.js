@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261102-1410';
-import { base, junta, desenhar } from '../charts.js?v=20261102-1410';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261102-1410';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1410';
-import { icon } from '../icons.js?v=20261102-1410';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261102-1421';
+import { base, junta, desenhar } from '../charts.js?v=20261102-1421';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261102-1421';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1421';
+import { icon } from '../icons.js?v=20261102-1421';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -124,8 +124,8 @@ export function mount(rec, brand, meta) {
     colors: cores,
     plotOptions: { bar: { distributed: true, borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '62%', dataLabels: { position: 'top' } } },
     dataLabels: {
-      enabled: true, offsetY: -18, style: { fontSize: '11px', fontWeight: 600, colors: ['#494949'] },
-      formatter: v => `${fmt((v / r.total) * 100, v / r.total < 0.1 ? 1 : 0)}%`,
+      enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] },
+      formatter: v => `${fmt((v / r.total) * 100, 0)}%`,
     },
     xaxis: { categories: c.map((_, i) => String(i)), axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { fontSize: '12px', fontWeight: 600 } } },
     yaxis: { labels: { formatter: v => fmt(v) } },
@@ -140,10 +140,10 @@ export function mount(rec, brand, meta) {
     series: [{ name: 'NPS (fictício)', data: desvios.map(d => r.nps + d) }],
     colors: desvios.map((_, i) => (i >= 9 ? CORES.pro : CORES.proClaro)),
     plotOptions: { bar: { borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '58%', distributed: true, dataLabels: { position: 'top' } } },
-    dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '11px', fontWeight: 600, colors: ['#494949'] } },
+    dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] } },
     xaxis: { categories: meses, axisBorder: { show: false }, axisTicks: { show: false } },
     yaxis: { min: Math.min(0, r.nps - 20), max: 100, tickAmount: 4 },
-    annotations: { yaxis: [{ y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', offsetY: -2, borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600 } } }] },
+    annotations: { yaxis: [{ y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', offsetY: -2, borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } }] },
     tooltip: { y: { formatter: v => `${v} (fictício)` } },
   }));
 }
