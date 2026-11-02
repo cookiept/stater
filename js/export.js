@@ -114,7 +114,7 @@ function capaRelatorio(p, b, titulo, sub) {
   s.addText(`Stater · Grupo Brisa · ${new Date().toLocaleDateString('pt-PT')}`, { x: 0.8, y: 6.5, w: 11.7, h: 0.4, fontSize: 11, color: 'D0D7DC', fontFace: fonte(b), margin: 0 });
 }
 
-// Overview: um slide com o gráfico NPS vs meta e a lista de alertas
+// Overview: capa e um slide com o gráfico NPS vs meta
 export async function exportarOverview(grupo, dados, alertas) {
   const P = await biblioteca();
   const p = novo(P, grupo);
@@ -124,11 +124,7 @@ export async function exportarOverview(grupo, dados, alertas) {
   s.addChart(p.ChartType.bar, [
     { name: 'NPS', labels: com.map(d => d.b.name), values: com.map(d => d.r.nps) },
     { name: 'Meta', labels: com.map(d => d.b.name), values: com.map(d => d.m) },
-  ], { ...baseGrafico(grupo), w: 7.6, barDir: 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: ['22A03B', 'D6DDE3'], showValue: true, valAxisMinVal: -20, valAxisMaxVal: 100 });
-  s.addText('ALERTAS ABAIXO DA META', { x: 8.4, y: 1.5, w: 4.4, h: 0.3, fontSize: 10, bold: true, color: '767676', fontFace: fonte(grupo), margin: 0 });
-  s.addText(alertas.length ? alertas.map(a => ({ text: `${a.marca} · ${a.tipo}: ${a.nome} (NPS ${a.nps}, meta ${a.meta})`, options: { bullet: true, breakLine: true, paraSpaceAfter: 4 } }))
-    : [{ text: 'Sem alertas: tudo acima da meta.' }],
-  { x: 8.4, y: 1.85, w: 4.4, h: 5, fontSize: 11, color: '333333', fontFace: fonte(grupo), valign: 'top', margin: 0 });
+  ], { ...baseGrafico(grupo), barDir: 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: ['22A03B', 'D6DDE3'], showValue: true, valAxisMinVal: -100, valAxisMaxVal: 100, valAxisMajorUnit: 20 });
   await p.writeFile({ fileName: nomeFicheiro(['Overview']) });
 }
 

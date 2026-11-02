@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1112';
-import { icon } from './icons.js?v=20261102-1112';
-import { logo } from './logos.js?v=20261102-1112';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1112';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1112';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1112';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1112';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1112';
-import * as vNps from './views/nps.js?v=20261102-1112';
-import * as vCausas from './views/causas.js?v=20261102-1112';
-import * as vMolho from './views/molho.js?v=20261102-1112';
-import { exemplos } from './exemplo.js?v=20261102-1112';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1407';
+import { icon } from './icons.js?v=20261102-1407';
+import { logo } from './logos.js?v=20261102-1407';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1407';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1407';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1407';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1407';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1407';
+import * as vNps from './views/nps.js?v=20261102-1407';
+import * as vCausas from './views/causas.js?v=20261102-1407';
+import * as vMolho from './views/molho.js?v=20261102-1407';
+import { exemplos } from './exemplo.js?v=20261102-1407';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -75,12 +75,11 @@ function sidebar({ brand, tab }) {
   const itens = BRANDS.map(b => {
     const atual = brand?.id === b.id;
     const aberta = abertas.has(b.id);
-    const nAl = alertasDe(b).length;
     const sub = aberta ? `<div class="sb-sub-nav" id="tabs-${b.id}">${b.tabs.map(t => `
         <a class="sb-tab" href="#/${b.id}/${t.id}" ${atual && tab?.id === t.id ? 'aria-current="page"' : ''}>${icon(t.icon)}<span class="lbl" title="${esc(t.name)}">${esc(t.name)}</span>${store.get(b.id, t.id) ? '<span class="dot" title="Com dados"></span>' : ''}</a>`).join('')}</div>` : '';
     return `<div class="sb-row" style="${tileVars(b)}">
         <a class="sb-item${atual ? ' is-open' : ''}" href="#/${b.id}/${b.tabs[0].id}">
-        <span class="tile mark">${logo(b.icon)}${nAl ? `<span class="al-dot" title="${nAl} ${nAl === 1 ? 'alerta' : 'alertas'} abaixo da meta"></span>` : ''}</span><span class="nm" title="${esc(b.name)}">${esc(b.name)}</span><span class="count" title="${b.tabs.length} tabs">${b.tabs.length}</span></a>
+        <span class="tile mark">${logo(b.icon)}</span><span class="nm" title="${esc(b.name)}">${esc(b.name)}</span><span class="count" title="${b.tabs.length} tabs">${b.tabs.length}</span></a>
         <button class="sb-toggle" data-toggle="${b.id}" aria-expanded="${aberta}" aria-controls="tabs-${b.id}" aria-label="${aberta ? 'Fechar' : 'Abrir'} tabs de ${esc(b.name)}">${icon('chevron')}</button>
       </div>${sub}`;
   }).join('');
@@ -312,14 +311,10 @@ function overview() {
           <dl class="ov-mais">
             <div><dt>Média</dt><dd class="num">${fmt(r.media, 1)}</dd></div>
             <div><dt>Período</dt><dd>${esc(formatarPeriodo(rec.data.periodo))}</dd></div>
-            ${vivas > 1 ? `<div><dt>Tabs com dados</dt><dd class="num">${n} de ${vivas}</dd></div>` : ''}
-            ${pior ? `<div class="larga"><dt>Pior causa raiz</dt><dd><span class="badge ${pior.nps < m ? 'bad' : 'good'} num">${fmt(pior.nps)}</span> ${esc(pior.nome)}</dd></div>` : ''}
           </dl>
           ${r.total < LIMITES.poucasRespostas ? `<div class="badge mid">Poucas respostas ${def('amostra')}</div>` : ''}
           ${rec.exemplo ? '<div class="muted">Dados de exemplo</div>' : ''}`
         : `<div class="wait">${vivas ? 'A aguardar dados da tab NPS' : 'NPS ainda sem acesso'}</div>`}
-        <div class="meta">${icon('target')} Meta <b>${m}</b>
-</div>
       </div>`).join('')}
     </div>
     <section class="card" style="background:#fff" aria-labelledby="h-ov">
@@ -373,7 +368,7 @@ function montarOverview() {
   // Duas barras por marca: NPS (cor da marca) e meta (cinzento claro), lado a lado
   desenhar(document.getElementById('ch-ov'), junta(base(GROUP), {
     // Os nomes saem do eixo e vão para a linha HTML #ov-eixo, com o logótipo antes do nome
-    chart: { type: 'bar', height: 300, events: { mounted: alinharEixo, updated: alinharEixo, animationEnd: alinharEixo } },
+    chart: { type: 'bar', height: 400, events: { mounted: alinharEixo, updated: alinharEixo, animationEnd: alinharEixo } },
     series: [
       { name: 'NPS', data: dados.map(d => ({ x: d.b.name, y: d.r ? d.r.nps : null, fillColor: d.r ? corMeta(d.r.nps, d.m) : CORES.meta })) },
       { name: 'Meta', data: dados.map(d => ({ x: d.b.name, y: d.m, fillColor: '#d6dde3' })) },
@@ -385,7 +380,8 @@ function montarOverview() {
       enabled: true, offsetY: -20, formatter: v => (v == null ? '' : fmt(v)),
       style: { fontSize: '12px', fontWeight: 700, colors: ['#1a1a1a', '#767676'] },
     },
-    yaxis: { min: -20, max: 100, tickAmount: 4 },
+    yaxis: { min: -100, max: 100, tickAmount: 10 },
+    annotations: { yaxis: [{ y: 0, borderColor: '#9a9a9a', strokeDashArray: 0, borderWidth: 1 }] },
     xaxis: { axisBorder: { show: false }, axisTicks: { show: false }, labels: { show: false } },
     // Tooltip próprio: a bolinha do NPS tem a cor da marca, como a barra
     tooltip: { shared: true, intersect: false, custom: ({ dataPointIndex: i }) => { const d = dados[i]; if (!d) return '';
