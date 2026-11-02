@@ -496,7 +496,7 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Overview: cartões "ticker" por marca */
 .ov-card { border: 0; box-shadow: var(--halo); border-radius: 20px; padding: 18px 18px 14px; position: relative; overflow: hidden; isolation: isolate; }
 .ov-card::after { content: ""; position: absolute; z-index: -1; right: -60px; top: -60px; width: 180px; height: 180px; border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--tile-bg) 22%, transparent) 0%, transparent 70%); opacity: .9; transition: opacity .2s, transform .2s; }
+  background: radial-gradient(circle, color-mix(in srgb, var(--tile-bg) 38%, transparent) 0%, transparent 70%); opacity: 1; transition: opacity .2s, transform .2s; }
 .ov-card:hover { box-shadow: var(--halo-hover); transform: translateY(-2px); }
 .ov-card:hover::after { transform: scale(1.15); }
 .ov-card .top b { font-size: 14px; font-weight: 600; }

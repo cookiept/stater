@@ -1,12 +1,12 @@
 // Tab "Todos ao molho" (Tabela única de causas): junta as causas raiz de todos os drivers numa só tabela.
 // Cada driver é um Excel "Relate" de Group NPS com a causa raiz desse driver; carregam-se vários de uma vez.
-import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261102-1409';
-import { base, junta, desenhar } from '../charts.js?v=20261102-1409';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261102-1409';
-import { icon } from '../icons.js?v=20261102-1409';
-import { formatarPeriodo } from '../excel.js?v=20261102-1409';
-import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261102-1409';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1409';
+import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261102-1410';
+import { base, junta, desenhar } from '../charts.js?v=20261102-1410';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261102-1410';
+import { icon } from '../icons.js?v=20261102-1410';
+import { formatarPeriodo } from '../excel.js?v=20261102-1410';
+import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261102-1410';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261102-1410';
 
 export const multi = true;
 
