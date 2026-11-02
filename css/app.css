@@ -707,3 +707,8 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
   .chips .chip { white-space: normal; max-width: 100%; }
 }
 .ov-info { flex-direction: column; gap: 8px; }
+
+/* Editar metas: só a caixa do número, sem as setas */
+.meta-linha input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.meta-linha input[type="number"]::-webkit-outer-spin-button,
+.meta-linha input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
