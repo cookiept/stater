@@ -687,10 +687,10 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .compo .p, .minibar .p, .ov-dnp i.p { background: var(--promoter); color: #fff; }
 
 /* Símbolo do Stater (S com duas linhas) na barra lateral */
-.sb-mark { width: 36px; height: 36px; display: block; flex: none; }
+.sb-mark { width: 29px; height: 32px; display: block; flex: none; }
 
 /* Título Stater: IBM Plex Sans, a letra do Grupo Brisa no protótipo */
-.sb-title { font-family: 'IBM Plex Sans', var(--font-ui), sans-serif; font-weight: 700; font-size: 22px; line-height: 28px; letter-spacing: -.4px; color: #10152a; }
+.sb-title { font-family: 'IBM Plex Sans', var(--font-ui), sans-serif; font-weight: 700; font-size: 22px; line-height: 28px; letter-spacing: -.4px; color: #1f4bff; }
 
 /* Overview: período e nota média numa linha, com ícones */
 .ov-info { display: flex; flex-wrap: wrap; gap: 8px 18px; border-top: 1px solid var(--hair); padding-top: 12px; margin-top: auto; font-size: 14px; color: var(--text-secondary); }
