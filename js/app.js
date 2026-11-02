@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1459';
-import { icon } from './icons.js?v=20261102-1459';
-import { logo } from './logos.js?v=20261102-1459';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1459';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1459';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1459';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1459';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1459';
-import * as vNps from './views/nps.js?v=20261102-1459';
-import * as vCausas from './views/causas.js?v=20261102-1459';
-import * as vMolho from './views/molho.js?v=20261102-1459';
-import { exemplos } from './exemplo.js?v=20261102-1459';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1503';
+import { icon } from './icons.js?v=20261102-1503';
+import { logo } from './logos.js?v=20261102-1503';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1503';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1503';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1503';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1503';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1503';
+import * as vNps from './views/nps.js?v=20261102-1503';
+import * as vCausas from './views/causas.js?v=20261102-1503';
+import * as vMolho from './views/molho.js?v=20261102-1503';
+import { exemplos } from './exemplo.js?v=20261102-1503';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -298,7 +298,7 @@ function overview() {
       <span class="muted">${comDados.length} de ${BRANDS.length} com dados${totalResp ? ` · ${fmt(totalResp)} respostas` : ''}</span>
       <span class="sep"></span>
       ${dataMetas() ? `<span class="muted">Metas atualizadas a ${formatarData(dataMetas())}</span>` : ''}
-      <button class="btn btn-secondary btn-sm" data-act="metas">${icon('target')} Editar metas</button>
+      <button class="btn btn-secondary btn-sm" data-act="metas">${icon('pencil')} Editar metas</button>
       ${menuExportar()}
     </div>
     <div class="ov-grid">${dados.map(({ b, rec, r, m, pior, comDados: n, vivas, alertas: al }) => `
