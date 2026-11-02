@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1445';
-import { icon } from './icons.js?v=20261102-1445';
-import { logo } from './logos.js?v=20261102-1445';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1445';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1445';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1445';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1445';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1445';
-import * as vNps from './views/nps.js?v=20261102-1445';
-import * as vCausas from './views/causas.js?v=20261102-1445';
-import * as vMolho from './views/molho.js?v=20261102-1445';
-import { exemplos } from './exemplo.js?v=20261102-1445';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261102-1447';
+import { icon } from './icons.js?v=20261102-1447';
+import { logo } from './logos.js?v=20261102-1447';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261102-1447';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261102-1447';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261102-1447';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261102-1447';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261102-1447';
+import * as vNps from './views/nps.js?v=20261102-1447';
+import * as vCausas from './views/causas.js?v=20261102-1447';
+import * as vMolho from './views/molho.js?v=20261102-1447';
+import { exemplos } from './exemplo.js?v=20261102-1447';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -84,7 +84,7 @@ function sidebar({ brand, tab }) {
       </div>${sub}`;
   }).join('');
   return `
-    <div class="sb-head"><img class="sb-mark" src="assets/stater-mark.png?v=20261102-1444" alt="" width="36" height="36"><div class="sb-title">Stater</div></div>
+    <div class="sb-head"><div class="sb-title">Stater</div></div>
     <div>
       <div class="sb-label">Marcas</div>
       <nav class="sb-nav" aria-label="Marcas">
