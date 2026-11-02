@@ -687,10 +687,10 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .compo .p, .minibar .p, .ov-dnp i.p { background: var(--promoter); color: #fff; }
 
 /* Símbolo do Stater (megafone) na barra lateral */
-.sb-mark { width: 36px; height: 36px; display: block; flex: none; }
+.sb-mark { width: 40px; height: 40px; display: block; flex: none; }
 
 /* Título Stater em maiúsculas, letra condensada como a do logo (Anton) */
-.sb-title { font-family: 'Anton', var(--font-ui), sans-serif; font-weight: 400; font-size: 24px; line-height: 28px; letter-spacing: .4px; text-transform: uppercase; color: #111; }
+.sb-title { font-family: 'Anton', var(--font-ui), sans-serif; font-weight: 400; font-size: 24px; line-height: 28px; letter-spacing: .4px; text-transform: uppercase; color: #10152a; }
 
 /* Overview: período e nota média numa linha, com ícones */
 .ov-info { display: flex; flex-wrap: wrap; gap: 8px 18px; border-top: 1px solid var(--hair); padding-top: 12px; margin-top: auto; font-size: 14px; color: var(--text-secondary); }
