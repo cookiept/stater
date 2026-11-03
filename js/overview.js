@@ -1,15 +1,15 @@
 // Overview do Grupo Brisa: cartões por marca, gráfico NPS vs objetivo e edição dos objetivos
-import { BRANDS, GROUP } from './brands.js?v=20261103-1622';
-import { icon } from './icons.js?v=20261103-1622';
-import { logo } from './logos.js?v=20261103-1622';
-import { esc, info, def, toast } from './ui.js?v=20261103-1622';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261103-1622';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261103-1622';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1622';
-import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261103-1622';
-import { ativa } from './analises.js?v=20261103-1622';
-import { tileVars } from './layout.js?v=20261103-1622';
-import { menuExportar } from './painel.js?v=20261103-1622';
+import { BRANDS, GROUP } from './brands.js?v=20261103-1642';
+import { icon } from './icons.js?v=20261103-1642';
+import { logo } from './logos.js?v=20261103-1642';
+import { esc, info, def, toast } from './ui.js?v=20261103-1642';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261103-1642';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261103-1642';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1642';
+import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261103-1642';
+import { ativa } from './analises.js?v=20261103-1642';
+import { tileVars } from './layout.js?v=20261103-1642';
+import { menuExportar } from './painel.js?v=20261103-1642';
 
 // Janela "Objetivos de NPS". depois() corre quando se guarda.
 export function editarMetas(depois) {
@@ -25,10 +25,16 @@ export function editarMetas(depois) {
     <div class="row"><button class="btn btn-secondary" value="no" formnovalidate>Cancelar</button><button class="btn btn-primary" value="yes">Guardar objetivos</button></div>
   </form>`;
   document.body.appendChild(d);
+  // Enter num campo guarda (sem isto, o Enter carregava no primeiro botão, que é Cancelar)
+  d.querySelector('form').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    if (d.querySelector('form').reportValidity()) d.close('yes');
+  });
   d.addEventListener('close', () => {
     if (d.returnValue === 'yes') {
       guardarMetas(Object.fromEntries(new FormData(d.querySelector('form'))));
-      toast('Objetivos guardados.');
+      toast('Objetivos atualizados com sucesso.');
       depois?.();
     }
     d.remove();
