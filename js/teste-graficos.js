@@ -1,11 +1,11 @@
 // Página de comparação: os mesmos gráficos do NPS em três bibliotecas.
 // ApexCharts (o que o Stater usava), Apache ECharts (o que o Stater usa agora) e AG Charts Community.
 // Lê os dados que já estão neste browser (nada sai do computador); sem dados, usa o exemplo fictício.
-import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1224';
-import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1224';
-import { exemplos } from './exemplo.js?v=20261103-1224';
-import { junta } from './charts.js?v=20261103-1224';
-import * as vNps from './views/nps.js?v=20261103-1224';
+import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1225';
+import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1225';
+import { exemplos } from './exemplo.js?v=20261103-1225';
+import { junta } from './charts.js?v=20261103-1225';
+import * as vNps from './views/nps.js?v=20261103-1225';
 
 const marcaId = new URLSearchParams(location.search).get('marca') || 'colibri';
 const brand = brandById(marcaId) || BRANDS[0];

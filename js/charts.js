@@ -12,6 +12,9 @@ export function cssVar(nome) {
   return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
 }
 
+// Ao imprimir (PDF) os gráficos ajustam-se à largura da folha
+for (const ev of ['beforeprint', 'afterprint']) addEventListener(ev, () => ativos.forEach(c => { try { c.resize(); } catch { /* removido */ } }));
+
 const semMovimento = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Tooltip escuro, igual em todos os gráficos
