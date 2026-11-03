@@ -128,7 +128,7 @@ function encerramento(p) {
 }
 
 // Overview: capa e um slide com o gráfico NPS vs objetivo
-export async function exportarOverview(grupo, dados, alertas) {
+export async function exportarOverview(grupo, dados) {
   const P = await biblioteca();
   const p = novo(P, grupo);
   capaRelatorio(p, grupo, 'Overview do Grupo Brisa', 'NPS de cada marca face ao objetivo');
