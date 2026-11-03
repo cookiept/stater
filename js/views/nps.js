@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1514';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1514';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1514';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1514';
-import { icon } from '../icons.js?v=20261103-1514';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1537';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1537';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1537';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1537';
+import { icon } from '../icons.js?v=20261103-1537';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -100,6 +100,8 @@ export function mount(rec, brand, meta) {
   const b = base(brand);
 
   // Medidor de -100 a 100: número a contar, triângulo a marcar a meta
+  // Ângulo da meta no arco (200° = -100, 90° = 0 no topo, -20° = 100)
+  const angMeta = 200 - ((Math.max(-100, Math.min(100, meta)) + 100) / 200) * 220;
   const arco = { type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '86%', center: ['50%', '60%'] };
   desenhar(document.getElementById('ch-gauge'), junta(b, {
     tooltip: { show: false },
@@ -112,12 +114,13 @@ export function mount(rec, brand, meta) {
         pointer: { show: false }, anchor: { show: false }, title: { show: false },
         detail: { valueAnimation: true, offsetCenter: [0, '-22%'], fontSize: 48, fontWeight: 500, color: '#1a1a1a', formatter: v => fmt(Math.round(v)) },
         data: [{ value: r.nps }] },
-      // Marca da meta: triângulo laranja por fora do arco, no sítio da meta
-      { ...arco, silent: true, z: 10,
-        axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-        pointer: { show: true, icon: 'triangle', length: 14, width: 16, offsetCenter: [0, '-118%'], itemStyle: { color: '#f07d00' } },
-        anchor: { show: false }, title: { show: false }, detail: { show: false },
-        data: [{ value: meta }] },
+      // Marca da meta: traço laranja a atravessar o arco, com "Meta" escrito por dentro
+      { type: 'gauge', silent: true, z: 10, radius: arco.radius, center: arco.center, min: 0, max: 1, splitNumber: 1,
+        startAngle: angMeta, endAngle: angMeta,
+        axisLine: { show: false }, axisTick: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { show: false }, detail: { show: false },
+        splitLine: { show: true, distance: -26, length: 32, lineStyle: { color: '#f07d00', width: 4, cap: 'round' } },
+        axisLabel: { show: true, distance: 14, color: '#c25e00', fontSize: 12, fontWeight: 700, formatter: v => (v === 0 ? 'Meta' : '') },
+        data: [] },
     ],
   }), 260);
 
