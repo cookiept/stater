@@ -716,3 +716,9 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Linha que separa o nome Stater da lista de marcas, alinhada com a linha da barra de cima */
 .topbar { box-sizing: border-box; min-height: 64px; }
 .sb-head { box-sizing: border-box; height: 64px; margin: -18px -12px 0; padding: 0 20px; border-bottom: 1px solid var(--stroke); flex: none; }
+
+/* Nome Stater e caminho de navegação maiores (Gonçalo, 2026-11-03) */
+.sb-mark { width: 34px; height: 37px; }
+.sb-title { font-size: 26px; line-height: 32px; }
+.crumbs { font-size: 15px; gap: 8px; }
+.crumbs .ico { width: 15px; height: 15px; }
