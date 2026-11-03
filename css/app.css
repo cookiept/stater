@@ -716,3 +716,23 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Linha que separa o nome Stater da lista de marcas, alinhada com a linha da barra de cima */
 .topbar { box-sizing: border-box; min-height: 64px; }
 .sb-head { box-sizing: border-box; height: 64px; margin: -18px -12px 0; padding: 0 20px; border-bottom: 1px solid var(--stroke); flex: none; }
+
+/* Barra lateral como cartão branco solto (estilo pedido por Gonçalo, 2026-11-03) */
+.app { grid-template-columns: 284px minmax(0, 1fr); }
+.sidebar {
+  top: 12px; height: calc(100vh - 24px); margin: 12px 0 12px 12px;
+  background: #fff; border: 1px solid var(--stroke); border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(16, 21, 42, .04), 0 10px 30px rgba(16, 21, 42, .05);
+}
+/* A linha por baixo do nome fica à mesma altura da linha da barra de cima (12px + 52px = 64px) */
+.sb-head { height: 52px; }
+.sb-item { font-weight: 500; }
+.sb-item:hover, .sb-tab:hover { background: #f5f5f4; }
+.sb-item[aria-current="page"], .sb-item.is-open { background: #f1f1f0; box-shadow: none; }
+.sb-item .count { background: #f1f1f0; }
+.sb-item[aria-current="page"] .count, .sb-item.is-open .count { background: #fff; color: var(--text-secondary); }
+.al-dot { box-shadow: 0 0 0 2px #fff; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { margin: 12px; height: auto; }
+}
