@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1541';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1541';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1541';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1541';
-import { icon } from '../icons.js?v=20261103-1541';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1551';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1551';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1551';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1551';
+import { icon } from '../icons.js?v=20261103-1551';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -36,8 +36,8 @@ export function resumo(rec, meta) {
     texto: `Com base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.`,
     factos: [
       { valor: `${sinal(r.nps - meta)}`, rot: 'vs objetivo', tom: r.nps >= meta ? 'good' : 'bad', tip: 'Diferença entre o NPS e o objetivo definido na Overview.' },
-      { valor: `${fmt(p6D)}%`, rot: 'detratores com 6', tip: `Quem deu 6 está a um ponto de ser neutro. Se passassem a neutros, o NPS subia ${sinal(Math.round(p6T))} pontos. Margem boa a partir de 40% (ou 15% do total).` },
-      { valor: `${fmt(p8N)}%`, rot: 'neutros com 8', tip: `Quem deu 8 está a um ponto de ser promotor. Se passassem a promotores, o NPS subia ${sinal(Math.round(p8T))} pontos. Margem boa a partir de 50% (ou 15% do total).` },
+      { valor: `${fmt(p6D)}%`, rot: 'dos detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${sinal(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
+      { valor: `${fmt(p8N)}%`, rot: 'dos neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${sinal(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
     ],
   };
 }
@@ -53,7 +53,7 @@ export function html(rec, meta) {
   return `
     ${avisos.join('')}
     <div class="kpis">
-      ${kpi('NPS', fmt(r.nps), `Meta ${meta}`, 'nps', true)}
+      ${kpi('NPS', fmt(r.nps), `Objetivo ${meta}`, 'nps', true)}
       ${kpi('Respostas', fmt(r.total), r.total < LIMITES.poucasRespostas ? 'poucas respostas' : 'notas de 0 a 10', 'respostas')}
       ${kpi('Promotores', `${fmt(r.pctP, 1)}%`, `${fmt(r.p)} pessoas`, 'promotores')}
       ${kpi('Neutros', `${fmt(r.pctN, 1)}%`, `${fmt(r.n)} pessoas`, 'neutros')}
@@ -62,10 +62,10 @@ export function html(rec, meta) {
     </div>
     <div class="grid-2">
       <section class="card" aria-labelledby="h-gauge">
-        <div class="card-head"><h3 id="h-gauge">NPS face à meta ${def('meta')}</h3>${btnPptx('gauge')}</div>
+        <div class="card-head"><h3 id="h-gauge">NPS face ao objetivo ${def('meta')}</h3>${btnPptx('gauge')}</div>
         <div class="gauge-wrap">
           <div id="ch-gauge" class="chart" role="img" aria-label="NPS ${fmt(r.nps)}, ${estadoMeta(r.nps, meta).toLowerCase()} de ${meta}"></div>
-          <span class="meta-pill ${r.nps >= meta ? 'up' : 'down'}" title="${estadoMeta(r.nps, meta)}">${icon(r.nps >= meta ? 'arrowUp' : 'arrowDown')}<span>Meta <b class="num">${meta}</b></span></span>
+          <span class="meta-pill ${r.nps >= meta ? 'up' : 'down'}" title="${estadoMeta(r.nps, meta)}">${icon(r.nps >= meta ? 'arrowUp' : 'arrowDown')}<span>Objetivo <b class="num">${meta}</b></span></span>
         </div>
         <div style="flex:1"></div><div class="compo" aria-hidden="true">
           <div class="d" style="flex:${r.pctD}">${r.pctD >= 6 ? fmt(r.pctD) + '%' : ''}</div>
@@ -92,7 +92,7 @@ export function html(rec, meta) {
     </section>`;
 }
 
-// Escreve "Meta" em curva, por dentro do arco, centrado no traço da meta (SVG por cima do gráfico)
+// Escreve "Objetivo" em curva, por dentro do arco, centrado no traço da meta (SVG por cima do gráfico)
 function textoMeta(g, ang) {
   const el = g.getDom();
   const pintar = () => {
@@ -107,7 +107,7 @@ function textoMeta(g, ang) {
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('class', 'meta-curva'); svg.setAttribute('width', w); svg.setAttribute('height', h); svg.setAttribute('aria-hidden', 'true');
     svg.innerHTML = `<defs><path id="mc-${el.id}" d="M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}"/></defs>
-      <text font-size="12" font-weight="700" fill="#c25e00" letter-spacing=".04em"><textPath href="#mc-${el.id}" startOffset="50%" text-anchor="middle">Meta</textPath></text>`;
+      <text font-size="12" font-weight="700" fill="#c25e00" letter-spacing=".04em"><textPath href="#mc-${el.id}" startOffset="50%" text-anchor="middle">Objetivo</textPath></text>`;
     el.appendChild(svg);
   };
   g.on('finished', pintar);
@@ -203,7 +203,7 @@ export function exportar(rec, brand, meta) {
     filtros: rec.data.filtros,
     graficos: [
       {
-        id: 'gauge', titulo: 'NPS face à meta',
+        id: 'gauge', titulo: 'NPS face ao objetivo',
         desenhar: (s, p) => {
           s.addChart(p.ChartType.doughnut, [{ name: 'Respostas', labels: ['Detratores 0–6', 'Neutros 7–8', 'Promotores 9–10'], values: [r.d, r.n, r.p] }],
             { ...b, x: 0.5, w: 7, holeSize: 62, chartColors: [hex(CORES.det), hex(CORES.neu), hex(CORES.pro)], showPercent: true, showValue: false, dataLabelColor: 'FFFFFF', legendPos: 'r' });
