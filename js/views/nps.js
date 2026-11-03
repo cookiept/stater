@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1600';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1600';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1600';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1600';
-import { icon } from '../icons.js?v=20261103-1600';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1604';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1604';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1604';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1604';
+import { icon } from '../icons.js?v=20261103-1604';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima do objetivo' : nps === meta ? 'No objetivo' : 'Abaixo do objetivo');
 
@@ -35,9 +35,8 @@ export function resumo(rec, meta) {
     tom: r.nps >= meta ? 'good' : 'bad',
     texto: `Com base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.`,
     factos: [
-      { valor: `${sinal(r.nps - meta)}`, rot: 'vs objetivo', tom: r.nps >= meta ? 'good' : 'bad', barra: (r.nps + 100) / 2, traco: (meta + 100) / 2, cor: r.nps >= meta ? CORES.pro : CORES.det, tip: `NPS (${fmt(r.nps)}) menos o objetivo da marca (${meta}) = ${sinal(r.nps - meta)}. ${r.nps >= meta ? 'Positivo: o NPS está no objetivo ou acima.' : 'Negativo: o NPS está abaixo do objetivo.'} O objetivo define-se na Overview, em Editar objetivos.` },
-      { valor: `${fmt(p6D)}%`, rot: 'dos detratores deram 6', barra: p6D, cor: CORES.det, tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${fmt(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
-      { valor: `${fmt(p8N)}%`, rot: 'dos neutros deram 8', barra: p8N, cor: '#9a9a9a', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${fmt(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
+      { valor: `${fmt(p6D)}%`, rot: 'dos detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${fmt(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
+      { valor: `${fmt(p8N)}%`, rot: 'dos neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${fmt(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
     ],
   };
 }

@@ -765,7 +765,6 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .rs-f b { font-size: 30px; line-height: 34px; font-weight: 400; letter-spacing: -.035em; }
 .rs-f span { font-size: 13px; line-height: 17px; color: var(--text-secondary); }
 .rs-f .rs-i { top: 10px; right: 10px; }
-.rs-bar { position: relative; height: 6px; border-radius: 99px; background: #eef0f2; margin-top: auto; overflow: visible; }
-.rs-f > span:not(.rs-i) { margin-bottom: 10px; }
-.rs-bar i { display: block; height: 100%; border-radius: 99px; }
-.rs-bar s { position: absolute; top: -4px; width: 3px; height: 14px; margin-left: -1.5px; border-radius: 2px; background: #f07d00; text-decoration: none; }
+/* Dois cartões ao lado do Resumo (sem o "vs objetivo") */
+.so-main .resumo { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); }
+.rs-factos { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
