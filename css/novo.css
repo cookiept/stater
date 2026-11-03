@@ -1,0 +1,114 @@
+/* Estilo novo (experiência, referência "Cognify" enviada por Gonçalo, 2026-11-03).
+   Só é carregado quando o estilo novo está ligado (classe .v2 no <html>); o estilo atual fica intacto.
+   Mantém as cores e as letras do Stater; muda a forma: fundo cinzento-azulado, cartões brancos muito redondos sem borda,
+   botões em pílula, números grandes e leves, círculos com brilho para os ícones e barras às riscas. */
+
+:root {
+  --v2-fundo: #eef0f3;
+  --v2-pilula: #f2f3f5;
+  --v2-escuro: #17181b;
+  --v2-raio: 24px;
+  --v2-sombra: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 28px -12px rgba(16, 24, 40, .10);
+  /* Riscas diagonais por cima das barras, como no exemplo */
+  --v2-riscas: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .32) 0 1.5px, transparent 1.5px 6px);
+  /* Brilho dos círculos e das barras */
+  --v2-brilho: linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 55%);
+}
+body { background: var(--v2-fundo); }
+
+/* ---------- Barra lateral e topo ---------- */
+.sidebar { background: var(--v2-fundo); border-right: 0; }
+.sb-head { border-bottom: 0; }
+.sb-item, .sb-tab { border-radius: 999px; }
+.sb-item:hover, .sb-tab:hover { background: rgba(255, 255, 255, .7); }
+.sb-item[aria-current="page"], .sb-item.is-open { background: #fff; box-shadow: var(--v2-sombra); }
+.sb-item .count { background: var(--v2-pilula); }
+.sb-item.is-open .count { background: var(--v2-escuro); color: #fff; }
+.sb-tab[aria-current="page"] { background: var(--v2-escuro); color: #fff; }
+.sb-tab[aria-current="page"] .ico { color: #fff; }
+.sb-tab[aria-current="page"] .dot { background: #fff; }
+.sb-sub-nav { border-left-color: #d9dce1; }
+.sb-estilo { border: 0; background: #fff; border-radius: 999px; box-shadow: var(--v2-sombra); }
+.topbar { background: rgba(238, 240, 243, .86); border-bottom: 0; }
+
+/* ---------- Ícones em círculo com brilho ---------- */
+.tile { border-radius: 50% !important; }
+.panel-head .tile, .tile:not(.mark) {
+  background-image: var(--v2-brilho); background-color: var(--tile-bg, var(--brand));
+  box-shadow: inset 0 -2px 5px rgba(0, 0, 0, .18), inset 0 0 0 1.5px rgba(255, 255, 255, .25), 0 6px 14px -6px var(--tile-bg, var(--brand));
+}
+.tile.mark { background: #fff; box-shadow: 0 0 0 1px #e6e8ec, var(--v2-sombra); }
+
+/* ---------- Títulos ---------- */
+.brand-head h1 { font-weight: 500; letter-spacing: -.03em; }
+.panel-head h2 { font-weight: 500; font-size: 30px; line-height: 36px; letter-spacing: -.03em; }
+
+/* ---------- A tab deixa de ser um painel: cabeçalho solto e cartões brancos ---------- */
+.panel { background: transparent; border: 0; box-shadow: none; border-radius: 0; }
+.panel-head { border-bottom: 0; padding: 4px 2px 18px; }
+.panel-head .tile { width: 48px; height: 48px; }
+.panel-head .tile .ico { width: 24px; height: 24px; }
+.panel-body { gap: 16px; align-items: start; }
+.panel-side { background: #fff; border: 0; border-radius: var(--v2-raio); box-shadow: var(--v2-sombra); padding: 22px; }
+.panel-main { padding: 0; gap: 16px; }
+.card, .ov-card { background: #fff; border: 0; border-radius: var(--v2-raio); box-shadow: var(--v2-sombra); }
+.card { padding: 22px 22px 14px; }
+.card.ficticio { box-shadow: var(--v2-sombra), inset 0 0 0 1.5px #f1c75a; }
+.card-head { margin-bottom: 10px; }
+.card-head h3 { font-size: 17px; line-height: 24px; font-weight: 500; text-transform: none; letter-spacing: -.01em; color: var(--text-primary); }
+.ov-card:hover, a.ov-card:hover { box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 18px 36px -14px rgba(16, 24, 40, .22); }
+
+/* ---------- Números principais: um cartão para cada, número grande e leve ---------- */
+.kpis { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; gap: 16px; }
+.kpi { background: #fff; border: 0; border-radius: 22px; box-shadow: var(--v2-sombra); padding: 18px 20px; gap: 6px; }
+.kpi + .kpi::before { display: none; }
+.kpi .kl { font: 400 14px/20px var(--font-ui); text-transform: none; letter-spacing: 0; color: var(--text-secondary); }
+.kpi .kv { font-size: 36px; line-height: 40px; font-weight: 400; letter-spacing: -.035em; }
+.kpi .kd { font-size: 13px; }
+.kpi.hero { background: #fff; color: var(--text-primary); }
+.kpi.hero .kv { font-size: 36px; line-height: 40px; text-shadow: none; }
+.kpi.hero .kl, .kpi.hero .kd, .kpi.hero .info { color: var(--text-secondary); }
+/* O NPS ganha um círculo com brilho na cor da marca, como os ícones do exemplo */
+.kpi.hero .kl::before { content: ""; width: 14px; height: 14px; border-radius: 50%; flex: none; margin-right: 4px;
+  background: var(--v2-brilho), var(--brand); box-shadow: inset 0 -1px 2px rgba(0, 0, 0, .2); }
+.ov-card .val b { font-weight: 400; letter-spacing: -.045em; }
+
+/* ---------- Botões em pílula ---------- */
+.btn { border-radius: 999px; }
+.btn-secondary { background: var(--v2-pilula); border: 0; box-shadow: none; }
+.btn-secondary:hover { background: #e7e9ec; }
+.menu-exp > summary.btn, .btn-primary { background: var(--v2-escuro); color: #fff; border: 0; }
+.menu-exp > summary.btn:hover, .btn-primary:hover { background: #2a2c31; }
+.exp.btn-ghost { background: var(--v2-pilula); border-radius: 999px; padding: 0 12px; }
+.chip { background: #fff; box-shadow: var(--v2-sombra); }
+.seg-toggle { background: var(--v2-pilula); border-radius: 999px; }
+.search { border: 0; background: var(--v2-pilula); }
+.menu-lista { border-radius: 18px; border: 0; box-shadow: 0 18px 40px -14px rgba(16, 24, 40, .28); }
+dialog { border-radius: 28px; }
+.toast { border-radius: 999px; background: var(--v2-escuro); }
+.drop { border-radius: 22px; }
+
+/* ---------- Barras às riscas e com brilho ---------- */
+.compo { gap: 4px !important; background: transparent; }
+.compo > div, .minibar > *, .ov-dnp i { border-radius: 999px; }
+.compo > div { background-image: var(--v2-riscas), var(--v2-brilho); }
+.minibar > * { background-image: var(--v2-riscas); }
+
+/* ---------- Tabela suave ---------- */
+.tbl th { background: var(--v2-pilula); color: var(--text-secondary); font-weight: 500; }
+.tbl th:first-child { border-radius: 12px 0 0 12px; }
+.tbl th:last-child { border-radius: 0 12px 12px 0; }
+.tbl th button:focus-visible { outline-color: var(--text-primary); }
+
+/* ---------- Overview ---------- */
+.ov-hero { border-radius: 28px; }
+
+/* ---------- Gráficos: tooltip escuro em pílula ---------- */
+.apexcharts-tooltip { background: var(--v2-escuro) !important; color: #fff !important; border: 0 !important; border-radius: 12px !important; }
+.apexcharts-tooltip-title { background: transparent !important; border-bottom-color: rgba(255, 255, 255, .15) !important; }
+.apexcharts-xaxistooltip { display: none; }
+
+/* Ajustes: números cabem nos cartões estreitos e o botão Download não sai do cartão */
+.kpi .kv, .kpi.hero .kv { font-size: clamp(26px, 2.3vw, 34px); line-height: 1.15; }
+.card-head { flex-wrap: wrap; gap: 8px; }
+.card-head > * { min-width: 0; }

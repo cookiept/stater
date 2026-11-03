@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-112418';
-import { icon } from './icons.js?v=20261103-112418';
-import { logo } from './logos.js?v=20261103-112418';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-112418';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-112418';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-112418';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-112418';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-112418';
-import * as vNps from './views/nps.js?v=20261103-112418';
-import * as vCausas from './views/causas.js?v=20261103-112418';
-import * as vMolho from './views/molho.js?v=20261103-112418';
-import { exemplos } from './exemplo.js?v=20261103-112418';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1140';
+import { icon } from './icons.js?v=20261103-1140';
+import { logo } from './logos.js?v=20261103-1140';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1140';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1140';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1140';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1140';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1140';
+import * as vNps from './views/nps.js?v=20261103-1140';
+import * as vCausas from './views/causas.js?v=20261103-1140';
+import * as vMolho from './views/molho.js?v=20261103-1140';
+import { exemplos } from './exemplo.js?v=20261103-1140';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -93,6 +93,7 @@ function sidebar({ brand, tab }) {
       </nav>
     </div>
     <div class="sb-foot">
+      <button type="button" class="sb-estilo" data-act="estilo" aria-pressed="${document.documentElement.classList.contains('v2')}">${icon('sparkle')}<span>Estilo novo</span><i aria-hidden="true"></i></button>
       <div class="sb-note">${icon('lock')} Os dados ficam só neste browser.</div>
     </div>`;
 }
@@ -515,6 +516,11 @@ document.addEventListener('click', async e => {
   }
   if (b.dataset.act === 'upload') $('#file').click();
   if (b.dataset.act === 'metas') editarMetas();
+  // Troca entre o estilo atual e o estilo novo (experiência); fica guardado neste browser
+  if (b.dataset.act === 'estilo') {
+    try { localStorage.setItem('stater:v1:ui:estilo', document.documentElement.classList.contains('v2') ? 'atual' : 'novo'); } catch { /* sem localStorage */ }
+    location.reload();
+  }
   if (b.dataset.act === 'sample' && r.brand) {
     const ex = exemplos[r.tab.id];
     store.set(r.brand.id, r.tab.id, { ...ex, savedAt: new Date().toISOString(), exemplo: true });
