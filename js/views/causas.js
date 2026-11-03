@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1117';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1117';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1117';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1117';
-import { icon } from '../icons.js?v=20261103-1117';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-112418';
+import { base, junta, desenhar } from '../charts.js?v=20261103-112418';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-112418';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-112418';
+import { icon } from '../icons.js?v=20261103-112418';
 
 export const npsGlobal = data => {
   const a = data.amostraGrupo;
@@ -219,8 +219,10 @@ export const tabelaPptx = (b, brand, cs, meta, comDriver = false) => (s) => {
     { text: `${fmt(c.pctD)}%`, options: { ...st, align: 'right' } }, { text: `${fmt(c.pctN)}%`, options: { ...st, align: 'right' } }, { text: `${fmt(c.pctP)}%`, options: { ...st, align: 'right' } },
     { text: `${fmt(c.quota, 1)}%`, options: { ...st, align: 'right' } },
   ]);
-  s.addTable([cab.map(t => ({ text: t, options: { ...st, bold: true, color: 'FFFFFF', fill: { color: '323232' } } })), ...linhasT],
-    { x: b.x, y: b.y, w: b.w, h: 5.3, colW: comDriver ? [3.6, 1.8, 0.9, 1.1, 1.2, 1.2, 1.2, 1.33] : [4.4, 1.1, 1.3, 1.4, 1.4, 1.4, 1.33], fontFace: b.fontFace, border: { type: 'solid', pt: 0.5, color: 'E4E4E4' }, rowH: 0.3, autoPage: true, autoPageRepeatHeader: true, autoPageSlideStartY: 1.45 });
+  // Estilo do template claro do Grupo Brisa: cabeçalho verde sem fundo, linhas alternadas em verde-lima claro
+  const zebra = linhasT.map((l, i) => (i % 2 ? l : l.map(c => ({ ...c, options: { ...c.options, fill: { color: TPL.limaClaro } } }))));
+  s.addTable([cab.map(t => ({ text: t, options: { ...st, bold: true, color: TPL.verde, border: [{ type: 'solid', pt: 1, color: TPL.lima }, { type: 'none' }, { type: 'solid', pt: 1, color: TPL.lima }, { type: 'none' }] } })), ...zebra],
+    { x: b.x, y: b.y, w: b.w, h: 5.3, colW: comDriver ? [3.6, 1.8, 0.9, 1.1, 1.2, 1.2, 1.2, 1.33] : [4.4, 1.1, 1.3, 1.4, 1.4, 1.4, 1.33], fontFace: b.fontFace, border: { type: 'none' }, rowH: 0.28, autoPage: linhasT.length > 16, autoPageRepeatHeader: true, autoPageSlideStartY: 1.45 });
 };
 
 export function exportar(rec, brand, meta) {
