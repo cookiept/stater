@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1203';
-import { icon } from './icons.js?v=20261103-1203';
-import { logo } from './logos.js?v=20261103-1203';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1203';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1203';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1203';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1203';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1203';
-import * as vNps from './views/nps.js?v=20261103-1203';
-import * as vCausas from './views/causas.js?v=20261103-1203';
-import * as vMolho from './views/molho.js?v=20261103-1203';
-import { exemplos } from './exemplo.js?v=20261103-1203';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1206';
+import { icon } from './icons.js?v=20261103-1206';
+import { logo } from './logos.js?v=20261103-1206';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1206';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1206';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1206';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1206';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1206';
+import * as vNps from './views/nps.js?v=20261103-1206';
+import * as vCausas from './views/causas.js?v=20261103-1206';
+import * as vMolho from './views/molho.js?v=20261103-1206';
+import { exemplos } from './exemplo.js?v=20261103-1206';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -172,25 +172,6 @@ function menuExportar() {
   </details>`;
 }
 
-// Menu "Ficheiro": o Excel desta tab, Substituir/Apagar e como importar (antes na coluna da esquerda)
-function menuFicheiro(rec, A, m) {
-  return `<details class="menu-exp menu-fich">
-    <summary class="btn btn-secondary btn-sm" role="button" aria-haspopup="true">${icon('file')} Ficheiro</summary>
-    <div class="menu-lista menu-painel">
-      ${A.view.lado ? A.view.lado(rec, m) : `
-        <div class="filecard">${icon('file')}<div><div class="fn">${esc(rec.fileName)}</div><div class="fm">Carregado a ${formatarData(rec.savedAt)} · ${esc(formatarPeriodo(rec.data.periodo))}</div></div></div>
-        <div class="file-actions">
-          <button class="btn btn-secondary btn-sm" data-act="upload">${icon('upload')} Substituir</button>
-          <button class="btn btn-danger-ghost btn-sm" data-act="clear" title="Apaga só o ficheiro desta tab">${icon('trash')} Apagar</button>
-        </div>`}
-      <details class="fold">
-        <summary>${icon('chevron')} ${esc(A.view.importar.titulo)}</summary>
-        <div class="fold-body"><p class="import-txt">${esc(A.view.importar.texto)}</p></div>
-      </details>
-    </div>
-  </details>`;
-}
-
 const TIP_REGRAS = 'O texto sai de regras fixas aplicadas aos números do Excel, as mesmas do Stater atual. Não há opinião nem IA: as mesmas contas dão sempre as mesmas frases.';
 
 function resumoHtml(r) {
@@ -221,19 +202,27 @@ function painel(brand, tab) {
     ${rec.exemplo ? `<span class="chip" style="background:#ece7fb;color:#4b2a9c">${icon('sparkle')} Dados de exemplo</span>` : ''}
     <span class="chip">${icon('calendar')} Período em análise <b class="chip brand" style="padding:2px 8px">${esc(formatarPeriodo(rec.data.periodo))}</b> ${def('periodo')}</span>
     <span class="chip">${icon('users')} ${ch.rotulo || 'Respostas'} <b class="num">${fmt(ch.respostas)}</b></span>
-    ${menuFicheiro(rec, A, m)}
     ${menuExportar()}`;
   return `<section class="panel">
     ${head(chipsHtml)}
     ${avisoErro(' Os dados anteriores continuam.')}
-    <div class="panel-body so-main">
-      <div class="panel-main">
-        ${(() => {
-          // Resumo como cartão: cada análise decide onde o põe; as outras levam-no no topo
-          const rs = `<section class="card card-resumo">${resumoHtml(A.view.resumo(rec, m))}</section>`;
-          return A.view.comResumo ? A.view.html(rec, m, rs) : rs + A.view.html(rec, m);
-        })()}
-      </div>
+    <div class="panel-body">
+      <aside class="panel-side">
+        ${resumoHtml(A.view.resumo(rec, m))}
+        ${A.view.lado ? A.view.lado(rec, m) : `<div class="side-block">
+          <h3 class="sec-title">Ficheiro desta tab</h3>
+          <div class="filecard">${icon('file')}<div><div class="fn">${esc(rec.fileName)}</div><div class="fm">Carregado a ${formatarData(rec.savedAt)} · ${esc(formatarPeriodo(rec.data.periodo))}</div></div></div>
+          <div class="file-actions">
+            <button class="btn btn-secondary btn-sm" data-act="upload">${icon('upload')} Substituir</button>
+            <button class="btn btn-danger-ghost btn-sm" data-act="clear" title="Apaga só o ficheiro desta tab">${icon('trash')} Apagar</button>
+          </div>
+        </div>`}
+        <details class="fold">
+          <summary>${icon('chevron')} ${esc(A.view.importar.titulo)}</summary>
+          <div class="fold-body"><p class="import-txt">${esc(A.view.importar.texto)}</p></div>
+        </details>
+      </aside>
+      <div class="panel-main">${A.view.html(rec, m)}</div>
     </div>
   </section>`;
 }

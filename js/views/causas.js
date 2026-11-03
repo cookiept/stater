@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1203';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1203';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1203';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1203';
-import { icon } from '../icons.js?v=20261103-1203';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1206';
+import { base, junta, desenhar } from '../charts.js?v=20261103-1206';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1206';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1206';
+import { icon } from '../icons.js?v=20261103-1206';
 
 export const npsGlobal = data => {
   const a = data.amostraGrupo;
@@ -50,10 +50,7 @@ export function resumo(rec, meta) {
   };
 }
 
-// O Resumo entra como cartão ao lado dos números principais
-export const comResumo = true;
-
-export function html(rec, meta, rs = '') {
+export function html(rec, meta) {
   const cs = todasCausas(rec.data);
   const nMenc = cs.filter(c => !c.zero).length;
   const g = npsGlobal(rec.data);
@@ -63,14 +60,11 @@ export function html(rec, meta, rs = '') {
   const abaixo = causasFiaveis(cs).filter(c => c.nps < meta);
   const dz = destaques(cs);
   return `
-    <div class="g-resumo-kpis">
-    ${rs}
-    <div class="kpis kpis-2x2">
+    <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · meta ${meta}`, info('NPS de quem respondeu', 'NPS de todas as pessoas que viram esta pergunta, calculado a partir do tamanho de cada grupo (Sample Size) no Excel.'), true) : ''}
       ${kpi('Causas com menções', fmt(nMenc), `de ${fmt(cs.length)} opções`, def('causa'))}
       ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', def('mencoes'))}
       ${kpi('Abaixo da meta', fmt(abaixo.length), abaixo.length ? 'causas com NPS abaixo da meta' : 'nenhuma causa', def('meta'))}
-    </div>
     </div>
     <section class="card" aria-labelledby="h-comp">
       <div class="card-head">

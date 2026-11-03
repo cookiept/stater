@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1203';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1203';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1203';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1203';
-import { icon } from '../icons.js?v=20261103-1203';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1206';
+import { base, junta, desenhar } from '../charts.js?v=20261103-1206';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1206';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1206';
+import { icon } from '../icons.js?v=20261103-1206';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -42,10 +42,7 @@ export function resumo(rec, meta) {
   };
 }
 
-// O Resumo entra como cartão ao lado do medidor do NPS
-export const comResumo = true;
-
-export function html(rec, meta, rs = '') {
+export function html(rec, meta) {
   const r = resumoNps(rec.data.contagens);
   const kpi = (rot, val, det, k, hero = false) => `
     <div class="kpi${hero ? ' hero' : ''}">
@@ -63,8 +60,7 @@ export function html(rec, meta, rs = '') {
       ${kpi('Detratores', `${fmt(r.pctD, 1)}%`, `${fmt(r.d)} pessoas`, 'detratores')}
       ${kpi('Média', fmt(r.media, 2), `Desvio padrão ${fmt(r.dp, 2)}`, 'media')}
     </div>
-    <div class="grid-2 g-resumo">
-      ${rs}
+    <div class="grid-2">
       <section class="card" aria-labelledby="h-gauge">
         <div class="card-head"><h3 id="h-gauge">NPS face à meta ${def('meta')}</h3>${btnPptx('gauge')}</div>
         <div class="gauge-wrap">
@@ -79,14 +75,14 @@ export function html(rec, meta, rs = '') {
         <div class="legend"><span><i style="background:var(--detractor)"></i>Detratores 0–6</span><span><i style="background:var(--passive)"></i>Neutros 7–8</span><span><i style="background:var(--promoter)"></i>Promotores 9–10</span></div>
         <div style="height:10px"></div>
       </section>
-    </div>
-    <section class="card" aria-labelledby="h-dist">
+      <section class="card" aria-labelledby="h-dist">
         <div class="card-head">
           <h3 id="h-dist">Notas dadas ${info('Notas dadas', 'Quantas pessoas deram cada nota. Por cima de cada barra está a percentagem do total.')}</h3>
           ${btnPptx('dist')}
         </div>
         <div id="ch-dist" class="chart" role="img" aria-label="Distribuição das notas de 0 a 10"></div>
       </section>
+    </div>
     <section class="card ficticio" aria-labelledby="h-mes">
       <div class="card-head">
         <h3 id="h-mes">NPS por mês</h3>
