@@ -13,7 +13,7 @@ export function cssVar(nome) {
 export function base(brand) {
   return {
     chart: {
-      fontFamily: `Geist, ${brand.font}, "Noto Sans", system-ui, sans-serif`,
+      fontFamily: `${brand.font}, "Noto Sans", system-ui, sans-serif`,
       toolbar: { show: false }, zoom: { enabled: false },
       animations: { enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches, speed: 450 },
       foreColor: '#5c5c5c', parentHeightOffset: 0,
