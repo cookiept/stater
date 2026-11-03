@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1537';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1537';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1537';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1537';
-import { icon } from '../icons.js?v=20261103-1537';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1541';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1541';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1541';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1541';
+import { icon } from '../icons.js?v=20261103-1541';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -92,6 +92,28 @@ export function html(rec, meta) {
     </section>`;
 }
 
+// Escreve "Meta" em curva, por dentro do arco, centrado no traço da meta (SVG por cima do gráfico)
+function textoMeta(g, ang) {
+  const el = g.getDom();
+  const pintar = () => {
+    if (g.isDisposed() || !el.isConnected) return;
+    el.querySelector('.meta-curva')?.remove();
+    const w = el.clientWidth, h = el.clientHeight;
+    const cx = w * 0.5, cy = h * 0.6, R = Math.min(w, h) / 2 * 0.86;
+    const r = R - 20 - 26; // por dentro da faixa do arco, abaixo da ponta do traço
+    const pt = a => [cx + r * Math.cos(a * Math.PI / 180), cy - r * Math.sin(a * Math.PI / 180)];
+    const [x1, y1] = pt(ang + 25), [x2, y2] = pt(ang - 25);
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('class', 'meta-curva'); svg.setAttribute('width', w); svg.setAttribute('height', h); svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = `<defs><path id="mc-${el.id}" d="M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}"/></defs>
+      <text font-size="12" font-weight="700" fill="#c25e00" letter-spacing=".04em"><textPath href="#mc-${el.id}" startOffset="50%" text-anchor="middle">Meta</textPath></text>`;
+    el.appendChild(svg);
+  };
+  g.on('finished', pintar);
+  new ResizeObserver(() => requestAnimationFrame(pintar)).observe(el);
+}
+
 export function mount(rec, brand, meta) {
   const c = rec.data.contagens;
   const r = resumoNps(c);
@@ -103,7 +125,7 @@ export function mount(rec, brand, meta) {
   // Ângulo da meta no arco (200° = -100, 90° = 0 no topo, -20° = 100)
   const angMeta = 200 - ((Math.max(-100, Math.min(100, meta)) + 100) / 200) * 220;
   const arco = { type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '86%', center: ['50%', '60%'] };
-  desenhar(document.getElementById('ch-gauge'), junta(b, {
+  const gGauge = desenhar(document.getElementById('ch-gauge'), junta(b, {
     tooltip: { show: false },
     series: [
       { ...arco,
@@ -114,15 +136,16 @@ export function mount(rec, brand, meta) {
         pointer: { show: false }, anchor: { show: false }, title: { show: false },
         detail: { valueAnimation: true, offsetCenter: [0, '-22%'], fontSize: 48, fontWeight: 500, color: '#1a1a1a', formatter: v => fmt(Math.round(v)) },
         data: [{ value: r.nps }] },
-      // Marca da meta: traço laranja a atravessar o arco, com "Meta" escrito por dentro
+      // Marca da meta: traço laranja centrado no arco, a sair dos dois lados; o texto curvo vem de textoMeta()
       { type: 'gauge', silent: true, z: 10, radius: arco.radius, center: arco.center, min: 0, max: 1, splitNumber: 1,
         startAngle: angMeta, endAngle: angMeta,
         axisLine: { show: false }, axisTick: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { show: false }, detail: { show: false },
-        splitLine: { show: true, distance: -26, length: 32, lineStyle: { color: '#f07d00', width: 4, cap: 'round' } },
-        axisLabel: { show: true, distance: 14, color: '#c25e00', fontSize: 12, fontWeight: 700, formatter: v => (v === 0 ? 'Meta' : '') },
+        splitLine: { show: true, distance: -16, length: 36, lineStyle: { color: '#f07d00', width: 4, cap: 'round' } },
+        axisLabel: { show: false },
         data: [] },
     ],
   }), 260);
+  if (gGauge) textoMeta(gGauge, angMeta);
 
   // Notas dadas: barras com fundo suave, gradiente e % por cima
   desenhar(document.getElementById('ch-dist'), junta(b, {

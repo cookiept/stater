@@ -755,3 +755,5 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 #ch-ov { position: relative; }
 .ov-tt { color: #fff; }
 .gauge-wrap .meta-pill { top: 64%; }
+#ch-gauge { position: relative; }
+.meta-curva { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 2; font-family: var(--font-brand); }
