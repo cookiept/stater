@@ -712,3 +712,7 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .meta-linha input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 .meta-linha input[type="number"]::-webkit-outer-spin-button,
 .meta-linha input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Linha que separa o nome Stater da lista de marcas, alinhada com a linha da barra de cima */
+.topbar { box-sizing: border-box; min-height: 64px; }
+.sb-head { box-sizing: border-box; height: 64px; margin: -18px -12px 0; padding: 0 20px; border-bottom: 1px solid var(--stroke); flex: none; }
