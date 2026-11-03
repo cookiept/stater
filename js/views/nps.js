@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1225';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1225';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1225';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1225';
-import { icon } from '../icons.js?v=20261103-1225';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1509';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1509';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1509';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1509';
+import { icon } from '../icons.js?v=20261103-1509';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -92,6 +92,9 @@ export function html(rec, meta) {
     </section>`;
 }
 
+// Bandeira de meta (ícone do medidor do NPS)
+const BANDEIRA = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 22V3" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/><path d="M5 4h13l-3 4 3 4H5z" fill="#e0a400" stroke="#1a1a1a" stroke-width="1.6" stroke-linejoin="round"/></svg>');
+
 export function mount(rec, brand, meta) {
   const c = rec.data.contagens;
   const r = resumoNps(c);
@@ -100,6 +103,8 @@ export function mount(rec, brand, meta) {
   const b = base(brand);
 
   // Medidor de -100 a 100: número a contar, triângulo a marcar a meta
+  // Ângulo da meta no arco (200° = -100, 90° = 0 no topo, -20° = 100)
+  const angMeta = 200 - ((Math.max(-100, Math.min(100, meta)) + 100) / 200) * 220;
   const arco = { type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '86%', center: ['50%', '60%'] };
   desenhar(document.getElementById('ch-gauge'), junta(b, {
     tooltip: { show: false },
@@ -108,15 +113,18 @@ export function mount(rec, brand, meta) {
         progress: { show: true, roundCap: true, width: 20, itemStyle: { color: grad(corNpsClaro(r.nps), corG, true) } },
         axisLine: { roundCap: true, lineStyle: { width: 20, color: [[1, '#f0f1f3']] } },
         axisTick: { show: false }, splitLine: { show: false },
-        axisLabel: { distance: -44, color: '#6b6b6b', fontSize: 12, formatter: v => (v === -100 || v === 100 ? v : '') },
+        axisLabel: { distance: -44, color: '#6b6b6b', fontSize: 12, formatter: v => (v === -100 || v === 0 || v === 100 ? v : '') },
         pointer: { show: false }, anchor: { show: false }, title: { show: false },
         detail: { valueAnimation: true, offsetCenter: [0, '-22%'], fontSize: 48, fontWeight: 500, color: '#1a1a1a', formatter: v => fmt(Math.round(v)) },
         data: [{ value: r.nps }] },
-      { ...arco, silent: true,
-        axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-        pointer: { show: true, icon: 'triangle', length: 12, width: 14, offsetCenter: [0, '-118%'], itemStyle: { color: '#1a1a1a' } },
-        anchor: { show: false }, title: { show: false }, detail: { show: false },
-        data: [{ value: meta }] },
+      // Marca da meta: um traço no arco, no sítio da meta, com uma bandeira e "Meta X" ao lado
+      { type: 'gauge', silent: true, z: 10, radius: arco.radius, center: arco.center, min: 0, max: 1, splitNumber: 1,
+        startAngle: angMeta, endAngle: angMeta,
+        axisLine: { show: false }, axisTick: { show: false }, pointer: { show: false }, anchor: { show: false }, title: { show: false }, detail: { show: false },
+        splitLine: { show: true, distance: -26, length: 32, lineStyle: { color: '#1a1a1a', width: 2, cap: 'round' } },
+        axisLabel: { show: true, distance: -50, color: '#1a1a1a', fontSize: 12, fontWeight: 600, formatter: v => (v === 0 ? `{f| }{t|Meta ${meta}}` : ''),
+          rich: { f: { width: 16, height: 16, backgroundColor: { image: BANDEIRA } }, t: { color: '#1a1a1a', fontSize: 12, fontWeight: 600, padding: [0, 0, 0, 4] } } },
+        data: [] },
     ],
   }), 260);
 

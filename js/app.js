@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1225';
-import { icon } from './icons.js?v=20261103-1225';
-import { logo } from './logos.js?v=20261103-1225';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1225';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1225';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1225';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1225';
-import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1225';
-import * as vNps from './views/nps.js?v=20261103-1225';
-import * as vCausas from './views/causas.js?v=20261103-1225';
-import * as vMolho from './views/molho.js?v=20261103-1225';
-import { exemplos } from './exemplo.js?v=20261103-1225';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1509';
+import { icon } from './icons.js?v=20261103-1509';
+import { logo } from './logos.js?v=20261103-1509';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1509';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1509';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1509';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1509';
+import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1509';
+import * as vNps from './views/nps.js?v=20261103-1509';
+import * as vCausas from './views/causas.js?v=20261103-1509';
+import * as vMolho from './views/molho.js?v=20261103-1509';
+import { exemplos } from './exemplo.js?v=20261103-1509';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
