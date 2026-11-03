@@ -127,16 +127,16 @@ function encerramento(p) {
   s.addText('Relatório gerado no Stater', { x: 3.67, y: 4.2, w: 6, h: 0.4, fontSize: 16, color: 'FF9E0E', fontFace: TPL.titulo, align: 'center', margin: 0 });
 }
 
-// Overview: capa e um slide com o gráfico NPS vs meta
+// Overview: capa e um slide com o gráfico NPS vs objetivo
 export async function exportarOverview(grupo, dados, alertas) {
   const P = await biblioteca();
   const p = novo(P, grupo);
-  capaRelatorio(p, grupo, 'Overview do Grupo Brisa', 'NPS de cada marca face à meta');
-  const s = slide(p, grupo, 'NPS vs meta por marca', `Overview do Grupo Brisa · ${new Date().toLocaleDateString('pt-PT')}`);
+  capaRelatorio(p, grupo, 'Overview do Grupo Brisa', 'NPS de cada marca face ao objetivo');
+  const s = slide(p, grupo, 'NPS vs objetivo por marca', `Overview do Grupo Brisa · ${new Date().toLocaleDateString('pt-PT')}`);
   const com = dados.filter(d => d.r);
   s.addChart(p.ChartType.bar, [
     { name: 'NPS', labels: com.map(d => d.b.name), values: com.map(d => d.r.nps) },
-    { name: 'Meta', labels: com.map(d => d.b.name), values: com.map(d => d.m) },
+    { name: 'Objetivo', labels: com.map(d => d.b.name), values: com.map(d => d.m) },
   ], { ...baseGrafico(grupo), barDir: 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: ['22A03B', 'D6DDE3'], showValue: true, valAxisMinVal: -100, valAxisMaxVal: 100, valAxisMajorUnit: 20 });
   encerramento(p);
   await p.writeFile({ fileName: nomeFicheiro(['Overview']) });

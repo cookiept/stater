@@ -1,5 +1,5 @@
 // Pequenas peças de interface partilhadas.
-import { icon } from './icons.js?v=20261103-1551';
+import { icon } from './icons.js?v=20261103-1555';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -15,7 +15,7 @@ export const GLOSSARIO = {
   promotores: ['Promotores', 'Quem deu 9 ou 10. São os clientes que nos recomendam.'],
   neutros: ['Neutros', 'Quem deu 7 ou 8. Estão satisfeitos mas não entusiasmados. Não entram na conta do NPS.'],
   detratores: ['Detratores', 'Quem deu de 0 a 6. São os clientes que não nos recomendam.'],
-  meta: ['Meta', 'O NPS que a marca quer atingir. Define-se na Overview, em Editar metas. Abaixo dela aparece um alerta.'],
+  meta: ['Objetivo', 'O NPS que a marca quer atingir, de −100 a 100. Define-se na Overview, em Editar objetivos.'],
   driver: ['Driver', 'Uma parte da experiência que ajuda a explicar a nota, como a chegada, o atendimento ou o preço. Cada driver tem as suas causas raiz.'],
   causa: ['Causa raiz', 'O motivo concreto que o cliente escolheu para explicar a nota, dentro de um driver.'],
   mencoes: ['Menções', 'Quantas vezes uma causa foi escolhida. Uma pessoa pode escolher várias causas, por isso não é o número de pessoas.'],

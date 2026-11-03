@@ -1,11 +1,11 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1551';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1551';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1551';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1551';
-import { icon } from '../icons.js?v=20261103-1551';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1555';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1555';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1555';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1555';
+import { icon } from '../icons.js?v=20261103-1555';
 
-const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
+const estadoMeta = (nps, meta) => (nps > meta ? 'Acima do objetivo' : nps === meta ? 'No objetivo' : 'Abaixo do objetivo');
 
 export function chips(rec) {
   return { respostas: resumoNps(rec.data.contagens).total };
@@ -35,34 +35,47 @@ export function resumo(rec, meta) {
     tom: r.nps >= meta ? 'good' : 'bad',
     texto: `Com base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.`,
     factos: [
-      { valor: `${sinal(r.nps - meta)}`, rot: 'vs objetivo', tom: r.nps >= meta ? 'good' : 'bad', tip: 'Diferença entre o NPS e o objetivo definido na Overview.' },
-      { valor: `${fmt(p6D)}%`, rot: 'dos detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${sinal(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
-      { valor: `${fmt(p8N)}%`, rot: 'dos neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${sinal(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
+      { valor: `${sinal(r.nps - meta)}`, rot: 'vs objetivo', tom: r.nps >= meta ? 'good' : 'bad', tip: `NPS (${fmt(r.nps)}) menos o objetivo da marca (${meta}) = ${sinal(r.nps - meta)}. ${r.nps >= meta ? 'Positivo: o NPS está no objetivo ou acima.' : 'Negativo: o NPS está abaixo do objetivo.'} O objetivo define-se na Overview, em Editar objetivos.` },
+      { valor: `${fmt(p6D)}%`, rot: 'dos detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${fmt(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
+      { valor: `${fmt(p8N)}%`, rot: 'dos neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${fmt(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
     ],
   };
 }
 
 export function html(rec, meta) {
-  const r = resumoNps(rec.data.contagens);
-  const kpi = (rot, val, det, k, hero = false) => `
+  const c = rec.data.contagens;
+  const r = resumoNps(c);
+  const pct = v => `${fmt(v, 1)}%`;
+  const ficheiro = rec.fileName ? ` do Excel "${rec.fileName}"` : '';
+  const kpi = (rot, val, det, tip, hero = false) => `
     <div class="kpi${hero ? ' hero' : ''}">
-      <span class="kl">${rot} ${k ? def(k, rot) : ''}</span>
+      <span class="kl">${rot} ${info(rot, tip)}</span>
       <span class="kv num">${val}</span><span class="kd">${det}</span>
     </div>`;
+  // Tooltips com as contas feitas com os números deste Excel
+  const dif = r.nps - meta;
+  const tips = {
+    nps: `NPS = % de promotores − % de detratores. Aqui: ${pct(r.pctP)} − ${pct(r.pctD)} = ${fmt(r.pctP - r.pctD, 1)}, arredondado a ${fmt(r.nps)}. Os neutros (${pct(r.pctN)}) não entram na conta. O NPS vai de −100 a 100. O objetivo da marca é ${meta} (define-se na Overview, em Editar objetivos): ${dif > 0 ? `está ${fmt(dif)} pontos acima` : dif < 0 ? `está ${fmt(-dif)} pontos abaixo` : 'está em linha'}.`,
+    respostas: `Pessoas que deram uma nota de 0 a 10 no período em análise, segundo${ficheiro ? ficheiro.replace(' do Excel', ' o Excel') : ' o Excel'}. Cada pessoa conta uma vez. É o total usado para calcular todas as percentagens desta tab.${r.total < LIMITES.poucasRespostas ? ` Com menos de ${LIMITES.poucasRespostas} respostas os números servem só como indicação.` : ''}`,
+    promotores: `Quem deu 9 ou 10: ${fmt(c[9])} pessoas deram 9 e ${fmt(c[10])} deram 10, num total de ${fmt(r.p)}. ${fmt(r.p)} a dividir pelas ${fmt(r.total)} respostas dá ${pct(r.pctP)}. São os clientes que nos recomendam.`,
+    neutros: `Quem deu 7 ou 8: ${fmt(c[7])} pessoas deram 7 e ${fmt(c[8])} deram 8, num total de ${fmt(r.n)}. ${fmt(r.n)} a dividir pelas ${fmt(r.total)} respostas dá ${pct(r.pctN)}. Estão satisfeitos mas não entusiasmados e não entram na conta do NPS.`,
+    detratores: `Quem deu de 0 a 6: ${fmt(r.d)} pessoas. ${fmt(r.d)} a dividir pelas ${fmt(r.total)} respostas dá ${pct(r.pctD)}. Por nota: ${[0, 1, 2, 3, 4, 5, 6].map(i => `${i}: ${fmt(c[i])}`).join(' · ')}. São os clientes que não nos recomendam.`,
+    media: `Soma de todas as notas a dividir pelas ${fmt(r.total)} respostas: ${fmt(r.media, 2)} em 10. A nota mais dada foi ${r.moda} (${fmt(c[r.moda])} pessoas). O desvio padrão (${fmt(r.dp, 2)}) mostra quanto as notas se afastam da média: quanto maior, mais divididas estão as opiniões.`,
+  };
   const avisos = [];
   return `
     ${avisos.join('')}
     <div class="kpis">
-      ${kpi('NPS', fmt(r.nps), `Objetivo ${meta}`, 'nps', true)}
-      ${kpi('Respostas', fmt(r.total), r.total < LIMITES.poucasRespostas ? 'poucas respostas' : 'notas de 0 a 10', 'respostas')}
-      ${kpi('Promotores', `${fmt(r.pctP, 1)}%`, `${fmt(r.p)} pessoas`, 'promotores')}
-      ${kpi('Neutros', `${fmt(r.pctN, 1)}%`, `${fmt(r.n)} pessoas`, 'neutros')}
-      ${kpi('Detratores', `${fmt(r.pctD, 1)}%`, `${fmt(r.d)} pessoas`, 'detratores')}
-      ${kpi('Média', fmt(r.media, 2), `Desvio padrão ${fmt(r.dp, 2)}`, 'media')}
+      ${kpi('NPS', fmt(r.nps), `Objetivo ${meta}`, tips.nps, true)}
+      ${kpi('Respostas', fmt(r.total), r.total < LIMITES.poucasRespostas ? 'poucas respostas' : 'notas de 0 a 10', tips.respostas)}
+      ${kpi('Promotores', pct(r.pctP), `${fmt(r.p)} pessoas deram 9 ou 10`, tips.promotores)}
+      ${kpi('Neutros', pct(r.pctN), `${fmt(r.n)} pessoas deram 7 ou 8`, tips.neutros)}
+      ${kpi('Detratores', pct(r.pctD), `${fmt(r.d)} pessoas deram 0 a 6`, tips.detratores)}
+      ${kpi('Média', fmt(r.media, 2), `Desvio padrão ${fmt(r.dp, 2)}`, tips.media)}
     </div>
     <div class="grid-2">
       <section class="card" aria-labelledby="h-gauge">
-        <div class="card-head"><h3 id="h-gauge">NPS face ao objetivo ${def('meta')}</h3>${btnPptx('gauge')}</div>
+        <div class="card-head"><h3 id="h-gauge">NPS face ao objetivo ${info('NPS face ao objetivo', `O arco vai de −100 a 100 e a parte colorida chega ao NPS (${fmt(r.nps)}). A cor do arco é verde a partir de 30, amarela de 0 a 29 e vermelha abaixo de 0. O traço laranja marca o objetivo da marca (${meta}). A barra por baixo divide as ${fmt(r.total)} respostas: ${fmt(r.pctD)}% detratores (0 a 6), ${fmt(r.pctN)}% neutros (7 e 8) e ${fmt(r.pctP)}% promotores (9 e 10).`)}</h3>${btnPptx('gauge')}</div>
         <div class="gauge-wrap">
           <div id="ch-gauge" class="chart" role="img" aria-label="NPS ${fmt(r.nps)}, ${estadoMeta(r.nps, meta).toLowerCase()} de ${meta}"></div>
           <span class="meta-pill ${r.nps >= meta ? 'up' : 'down'}" title="${estadoMeta(r.nps, meta)}">${icon(r.nps >= meta ? 'arrowUp' : 'arrowDown')}<span>Objetivo <b class="num">${meta}</b></span></span>
@@ -77,7 +90,7 @@ export function html(rec, meta) {
       </section>
       <section class="card" aria-labelledby="h-dist">
         <div class="card-head">
-          <h3 id="h-dist">Notas dadas ${info('Notas dadas', 'Quantas pessoas deram cada nota. Por cima de cada barra está a percentagem do total.')}</h3>
+          <h3 id="h-dist">Notas dadas ${info('Notas dadas', `Quantas pessoas deram cada nota, de 0 a 10. A percentagem por cima de cada barra é em relação a todas as ${fmt(r.total)} respostas (por exemplo, a nota 6 tem ${fmt(c[6])} pessoas, ${fmt((c[6] / r.total) * 100)}% do total). Vermelho: detratores (0 a 6). Cinzento: neutros (7 e 8). Verde: promotores (9 e 10). Passa o rato por uma barra para ver o número exato.`)}</h3>
           ${btnPptx('dist')}
         </div>
         <div id="ch-dist" class="chart" role="img" aria-label="Distribuição das notas de 0 a 10"></div>
@@ -85,7 +98,7 @@ export function html(rec, meta) {
     </div>
     <section class="card ficticio" aria-labelledby="h-mes">
       <div class="card-head">
-        <h3 id="h-mes">NPS por mês</h3>
+        <h3 id="h-mes">NPS por mês ${info('NPS por mês', `Dados fictícios. O Excel atual não traz o mês de cada resposta, por isso os valores foram inventados à volta do NPS real (${fmt(r.nps)}) só para mostrar como o gráfico vai ficar. A linha amarela é o objetivo (${meta}). Quando o Excel trouxer meses, cada ponto passa a ser o NPS desse mês.`)}</h3>
       </div>
       <div class="aviso-ficticio">${icon('info')}<div><b>Dados fictícios</b> O Excel atual não traz meses. Este gráfico só mostra como vai ficar.</div></div>
       <div class="chart-ficticio"><div id="ch-mes" class="chart" role="img" aria-label="NPS por mês com dados fictícios"></div><span class="marca-agua" aria-hidden="true">Dados fictícios</span></div>
@@ -179,7 +192,7 @@ export function mount(rec, brand, meta) {
       areaStyle: { color: grad('rgba(34,160,59,.26)', 'rgba(34,160,59,0)') },
       label: { show: true, position: 'top', distance: 8, ...ROTULO },
       markLine: { symbol: 'none', silent: true, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 },
-        label: { formatter: `Meta ${meta}`, position: 'insideStartTop', ...ETIQ_META }, data: [{ yAxis: meta }] },
+        label: { formatter: `Objetivo ${meta}`, position: 'insideStartTop', ...ETIQ_META }, data: [{ yAxis: meta }] },
     }],
   }), 240);
 }
@@ -192,7 +205,7 @@ export function exportar(rec, brand, meta) {
   const pct = v => Math.round((v / r.total) * 1000) / 10;
   return {
     kpis: [
-      { rot: 'NPS', val: fmt(r.nps), det: `Meta ${meta}` },
+      { rot: 'NPS', val: fmt(r.nps), det: `Objetivo ${meta}` },
       { rot: 'Respostas', val: fmt(r.total), det: 'notas de 0 a 10' },
       { rot: 'Promotores', val: `${fmt(r.pctP, 1)}%`, det: `${fmt(r.p)} pessoas` },
       { rot: 'Neutros', val: `${fmt(r.pctN, 1)}%`, det: `${fmt(r.n)} pessoas` },
@@ -210,7 +223,7 @@ export function exportar(rec, brand, meta) {
           s.addText([
             { text: 'NPS', options: { fontSize: 14, color: '767676', breakLine: true } },
             { text: fmt(r.nps), options: { fontSize: 60, bold: true, color: '1A1A1A', breakLine: true } },
-            { text: `${r.nps >= meta ? '▲' : '▼'}  Meta ${meta}`, options: { fontSize: 14, color: r.nps >= meta ? '10641D' : 'AD2C19' } },
+            { text: `${r.nps >= meta ? '▲' : '▼'}  Objetivo ${meta}`, options: { fontSize: 14, color: r.nps >= meta ? '10641D' : 'AD2C19' } },
           ], { x: 8, y: 2.4, w: 4.8, h: 2.6, fontFace: b.fontFace, valign: 'middle' });
         },
       },

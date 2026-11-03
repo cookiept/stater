@@ -1,13 +1,16 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1551';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1551';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1551';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1551';
-import { icon } from '../icons.js?v=20261103-1551';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261103-1555';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1555';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1555';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1555';
+import { icon } from '../icons.js?v=20261103-1555';
+
+const LIM = LIMITES.amostraPequena;
 
 export const npsGlobal = data => {
   const a = data.amostraGrupo;
-  return a ? { nps: npsDe(a.d, a.p, a.d + a.n + a.p), total: a.d + a.n + a.p } : null;
+  const t = a ? a.d + a.n + a.p : 0;
+  return a ? { nps: npsDe(a.d, a.p, t), total: t, pctD: (a.d / t) * 100, pctP: (a.p / t) * 100 } : null;
 };
 
 // Todas as causas do Excel, com as de 0 menções no fim
@@ -30,10 +33,10 @@ export function resumo(rec, meta) {
   const abaixo = fiaveis.filter(c => c.nps < meta);
   const maior = dz.maisReferida, pior = dz.pior;
   const partes = [];
-  partes.push(`Com base em <strong>${fmt(mencoes)}</strong> menções${g ? ` de <strong>${fmt(g.total)}</strong> pessoas` : ''}${g ? `, o NPS de quem respondeu foi <strong>${fmt(g.nps)}</strong>, ${g.nps > meta ? 'acima' : g.nps === meta ? 'em linha com' : 'abaixo'} da meta (${meta})` : ''}.`);
+  partes.push(`Com base em <strong>${fmt(mencoes)}</strong> menções${g ? ` de <strong>${fmt(g.total)}</strong> pessoas` : ''}${g ? `, o NPS de quem respondeu foi <strong>${fmt(g.nps)}</strong>, ${g.nps > meta ? 'acima do' : g.nps === meta ? 'em linha com o' : 'abaixo do'} objetivo (${meta})` : ''}.`);
   if (maior) partes.push(`O motivo mais referido é <strong>${esc(maior.nome)}</strong>, com <strong>${fmt(maior.total)}</strong> menções (${fmt(maior.quota)}% do total) e NPS de <strong>${sinal(maior.nps)}</strong>.`);
   if (melhor && pior && melhor !== pior) partes.push(`A causa mais bem avaliada é <strong>${esc(melhor.nome)}</strong> (NPS ${sinal(melhor.nps)}) e a que mais afasta clientes é <strong>${esc(pior.nome)}</strong> (NPS ${sinal(pior.nps)}, ${fmt(pior.pctD)}% de detratores).`);
-  partes.push(abaixo.length ? `${abaixo.length === 1 ? 'Uma causa está' : `<strong>${abaixo.length}</strong> causas estão`} abaixo da meta, por isso é aí que vale a pena atuar primeiro.` : 'Nenhuma causa com volume suficiente está abaixo da meta.');
+  partes.push(abaixo.length ? `${abaixo.length === 1 ? 'Uma causa está' : `<strong>${abaixo.length}</strong> causas estão`} abaixo do objetivo, por isso é aí que vale a pena atuar primeiro.` : 'Nenhuma causa com volume suficiente está abaixo do objetivo.');
   const notas = [];
   const pequenas = cs.filter(c => c.amostraPequena && !c.semSugestao).length;
   if (pequenas) notas.push(`${pequenas === 1 ? 'Uma causa tem' : `${pequenas} causas têm`} menos de 30 menções e não entra${pequenas === 1 ? '' : 'm'} no melhor e pior.`);
@@ -42,9 +45,9 @@ export function resumo(rec, meta) {
     tom: g && g.nps < meta ? 'bad' : 'good',
     texto: partes.join(' '),
     factos: [
-      ...(g ? [{ valor: sinal(g.nps - meta), rot: 'vs meta', tom: g.nps >= meta ? 'good' : 'bad', tip: 'Diferença entre o NPS de quem respondeu e a meta da marca.' }] : []),
-      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: 'peso da mais referida', tip: `Parte das menções que vai para ${maior.nome}.` }] : []),
-      { valor: fmt(abaixo.length), rot: 'abaixo da meta', tom: abaixo.length ? 'bad' : 'good', tip: 'Causas com 30 ou mais menções e NPS abaixo da meta da marca.' },
+      ...(g ? [{ valor: sinal(g.nps - meta), rot: 'vs objetivo', tom: g.nps >= meta ? 'good' : 'bad', tip: `NPS de quem respondeu (${fmt(g.nps)}) menos o objetivo da marca (${meta}) = ${sinal(g.nps - meta)}. O objetivo define-se na Overview, em Editar objetivos.` }] : []),
+      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: 'peso da mais referida', tip: `${maior.nome} foi escolhida ${fmt(maior.total)} vezes, das ${fmt(mencoes)} menções no total: ${fmt(maior.quota, 1)}%. É a causa mais referida (só contam causas com ${LIM} ou mais menções, sem "Outra" e "Sem sugestões").` }] : []),
+      { valor: fmt(abaixo.length), rot: 'abaixo do objetivo', tom: abaixo.length ? 'bad' : 'good', tip: `Causas com ${LIM} ou mais menções e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhuma neste Excel.'}` },
     ],
     notas,
   };
@@ -61,28 +64,28 @@ export function html(rec, meta) {
   const dz = destaques(cs);
   return `
     <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
-      ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · meta ${meta}`, info('NPS de quem respondeu', 'NPS de todas as pessoas que viram esta pergunta, calculado a partir do tamanho de cada grupo (Sample Size) no Excel.'), true) : ''}
-      ${kpi('Causas com menções', fmt(nMenc), `de ${fmt(cs.length)} opções`, def('causa'))}
-      ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', def('mencoes'))}
-      ${kpi('Abaixo da meta', fmt(abaixo.length), abaixo.length ? 'causas com NPS abaixo da meta' : 'nenhuma causa', def('meta'))}
+      ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · objetivo ${meta}`, info('NPS de quem respondeu', `NPS de todas as ${fmt(g.total)} pessoas que responderam a esta pergunta: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Vem do tamanho de cada grupo (Sample Size) no Excel, por isso conta pessoas e não menções. O objetivo da marca é ${meta}: ${g.nps >= meta ? `está ${fmt(g.nps - meta)} pontos acima` : `está ${fmt(meta - g.nps)} pontos abaixo`}.`), true) : ''}
+      ${kpi('Causas com menções', fmt(nMenc), `de ${fmt(cs.length)} opções`, info('Causas com menções', `${fmt(nMenc)} das ${fmt(cs.length)} causas possíveis foram escolhidas pelo menos uma vez. ${cs.length - nMenc ? `As outras ${fmt(cs.length - nMenc)} tiveram 0 menções e aparecem no fim do gráfico e da tabela, a cinzento claro.` : 'Todas as causas tiveram menções.'}`))}
+      ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', info('Menções', `Soma das vezes que cada causa foi escolhida: ${fmt(mencoes)}. Como uma pessoa pode escolher mais do que uma causa, este número não é o número de pessoas${g ? ` (que é ${fmt(g.total)})` : ''}. O peso de cada causa na tabela é calculado sobre estas ${fmt(mencoes)} menções.`))}
+      ${kpi('Abaixo do objetivo', fmt(abaixo.length), abaixo.length ? 'causas com NPS abaixo do objetivo' : 'nenhuma causa', info('Abaixo do objetivo', `Causas com ${LIM} ou mais menções cujo NPS fica abaixo do objetivo da marca (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} menções)`).join('; ')}.` : 'Neste Excel nenhuma causa está abaixo.'} Não contam "Outra" nem "Sem sugestões", nem causas com menos de ${LIM} menções, porque com tão poucas o NPS muda muito.`))}
     </div>
     <section class="card" aria-labelledby="h-comp">
       <div class="card-head">
-        <h3 id="h-comp">Quem escolheu cada causa ${info('Composição por causa', 'Para cada causa, a parte de detratores, neutros e promotores entre quem a escolheu. Ordenado por número de menções.')}</h3>
+        <h3 id="h-comp">Quem escolheu cada causa ${info('Quem escolheu cada causa', 'Uma barra por causa. Cada barra é 100% das pessoas que escolheram essa causa, dividida em detratores (vermelho, notas 0 a 6), neutros (cinzento, 7 e 8) e promotores (verde, 9 e 10). Por baixo do nome estão as menções e o NPS da causa. As causas vão da mais referida para a menos referida; as que tiveram 0 menções ficam no fim, sem barra.')}</h3>
         <div class="legend" style="margin:0 0 0 auto"><span><i style="background:var(--detractor)"></i>Detratores</span><span><i style="background:var(--passive)"></i>Neutros</span><span><i style="background:var(--promoter)"></i>Promotores</span></div>
         ${btnPptx('comp')}
       </div>
       <div id="ch-comp" class="chart" role="img" aria-label="Composição de detratores, neutros e promotores por causa"></div>
     </section>
     <section class="card" aria-labelledby="h-mat">
-      <div class="card-head"><h3 id="h-mat">Onde atuar primeiro ${info('Menções vs NPS', 'Cada ponto é uma causa. Quanto mais à direita, mais pessoas a referiram; quanto mais abaixo, pior o NPS. As causas no canto inferior direito pesam mais e estão pior.')}</h3>
-        <div class="note">Linha amarela: meta (${meta}). Pontos a vermelho estão abaixo dela.</div>${btnPptx('mat')}</div>
+      <div class="card-head"><h3 id="h-mat">Onde atuar primeiro ${info('Onde atuar primeiro', `Cada ponto é uma causa com menções. Para a direita: mais menções. Para baixo: pior NPS. A linha amarela é o objetivo da marca (${meta})${g ? ` e a linha cinzenta o NPS de quem respondeu (${fmt(g.nps)})` : ''}. Os pontos vermelhos estão abaixo do objetivo. As causas mais à direita e mais abaixo são muito referidas e estão mal avaliadas: é por aí que vale a pena começar.`)}</h3>
+        <div class="note">Linha amarela: objetivo (${meta}). Pontos a vermelho estão abaixo dele.</div>${btnPptx('mat')}</div>
       <div id="ch-mat" class="chart" role="img" aria-label="Menções e NPS por causa"></div>
       <div class="legend" id="lg-mat" style="margin:0 0 10px"></div>
     </section>
     <section class="card" aria-labelledby="h-tab" style="padding-bottom:16px">
       <div class="card-head" style="margin-bottom:10px">
-        <h3 id="h-tab">Tabela ${info('Peso', 'Peso da causa no total de menções: Alto a partir de 15%, Médio a partir de 5%, Baixo abaixo disso.')}</h3>
+        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. Peso: a parte das ${fmt(mencoes)} menções que vai para a causa; Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
@@ -123,7 +126,7 @@ export function linhas(cs, meta, pior, extra = () => '') {
     </tr>` : `
     <tr class="${c.amostraPequena ? 'is-pequena' : ''}">
       <td><span class="name">${esc(c.nome)}</span>${c.amostraPequena ? ` <span class="badge mid">poucas menções ${def('amostra')}</span>` : ''}</td>${extra(c)}
-      <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? 'Abaixo da meta' : 'Na meta ou acima'}">${fmt(c.nps)}</span></td>
+      <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? `Abaixo do objetivo (${meta})` : `No objetivo (${meta}) ou acima`}">${fmt(c.nps)}</span></td>
       <td class="r num">${fmt(c.total)}</td>
       <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>
       <td><span class="badge ${c.impacto === 'Alto' ? 'bad' : c.impacto === 'Médio' ? 'mid' : ''}">${c.impacto}</span> <span class="muted num">${fmt(c.quota, 1)}%</span></td>
@@ -174,7 +177,7 @@ export function mount(rec, brand, meta) {
       data: comM.map(c => ({ value: [c.total, c.nps], itemStyle: { color: comBrilho(c.nps < meta ? CORES.det : CORES.pro), borderColor: '#fff', borderWidth: 3, shadowBlur: 8, shadowColor: 'rgba(0,0,0,.18)' } })),
       emphasis: { scale: 1.3 },
       markLine: { symbol: 'none', silent: true, data: [
-        { yAxis: meta, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: `Meta ${meta}`, position: 'insideEndTop', ...ETIQ_META } },
+        { yAxis: meta, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: `Objetivo ${meta}`, position: 'insideEndTop', ...ETIQ_META } },
         ...(g ? [{ yAxis: g.nps, lineStyle: { color: '#b4b4b4', type: [2, 3], width: 1 }, label: { formatter: `NPS geral ${fmt(g.nps)}`, position: 'insideStartTop', color: '#494949', backgroundColor: '#f0f0f0', padding: [3, 6], borderRadius: 6, fontSize: 12 } }] : []),
       ] },
     }],
@@ -244,7 +247,7 @@ export function exportar(rec, brand, meta) {
       ...(g ? [{ rot: 'NPS de quem respondeu', val: fmt(g.nps), det: `${fmt(g.total)} pessoas · meta ${meta}` }] : []),
       { rot: 'Causas com menções', val: fmt(cs.filter(c => !c.zero).length), det: `de ${fmt(cs.length)} opções` },
       { rot: 'Menções', val: fmt(cs.reduce((a, c) => a + c.total, 0)), det: 'uma pessoa pode escolher várias' },
-      { rot: 'Abaixo da meta', val: fmt(abaixo.length), det: abaixo.map(c => c.nome).join(', ') || 'nenhuma causa' },
+      { rot: 'Abaixo do objetivo', val: fmt(abaixo.length), det: abaixo.map(c => c.nome).join(', ') || 'nenhuma causa' },
     ],
     resumo: [textoDe(resumo(rec, meta).texto)],
     filtros: rec.data.filtros,

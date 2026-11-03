@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1551';
-import { icon } from './icons.js?v=20261103-1551';
-import { logo } from './logos.js?v=20261103-1551';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1551';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1551';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1551';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1551';
-import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1551';
-import * as vNps from './views/nps.js?v=20261103-1551';
-import * as vCausas from './views/causas.js?v=20261103-1551';
-import * as vMolho from './views/molho.js?v=20261103-1551';
-import { exemplos } from './exemplo.js?v=20261103-1551';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1555';
+import { icon } from './icons.js?v=20261103-1555';
+import { logo } from './logos.js?v=20261103-1555';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1555';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1555';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1555';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1555';
+import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1555';
+import * as vNps from './views/nps.js?v=20261103-1555';
+import * as vCausas from './views/causas.js?v=20261103-1555';
+import * as vMolho from './views/molho.js?v=20261103-1555';
+import { exemplos } from './exemplo.js?v=20261103-1555';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -219,7 +219,7 @@ function painel(brand, tab) {
   const ch = A.view.chips(rec);
   const chipsHtml = `
     ${rec.exemplo ? `<span class="chip" style="background:#ece7fb;color:#4b2a9c">${icon('sparkle')} Dados de exemplo</span>` : ''}
-    <span class="chip">${icon('calendar')} Período em análise <b class="chip brand" style="padding:2px 8px">${esc(formatarPeriodo(rec.data.periodo))}</b> ${def('periodo')}</span>
+    <span class="chip">${icon('calendar')} Período em análise <b class="chip brand" style="padding:2px 8px">${esc(formatarPeriodo(rec.data.periodo))}</b> ${info('Período em análise', `De ${formatarPeriodo(rec.data.periodo).replace(' – ', ' a ')}. São as datas do filtro usado no Qualtrics ao exportar o Excel "${rec.fileName}", não a data em que o ficheiro foi carregado (${formatarData(rec.savedAt)}).`)}</span>
     <span class="chip">${icon('users')} ${ch.rotulo || 'Respostas'} <b class="num">${fmt(ch.respostas)}</b></span>
     ${menuFicheiro(rec, A, m)}
     ${menuExportar()}`;
@@ -242,13 +242,13 @@ function editarMetas() {
   const d = document.createElement('dialog');
   d.className = 'dlg-metas';
   d.innerHTML = `<form method="dialog">
-    <h3>Metas de NPS</h3>
-    <p>Valor de −100 a 100 para cada marca. Usado na Overview e no resumo da tab NPS.</p>
+    <h3>Objetivos de NPS</h3>
+    <p>NPS que cada marca quer atingir, de −100 a 100. É usado na Overview, no medidor e no resumo da tab NPS e na tab Causa Raiz.</p>
     <div class="metas-lista">${BRANDS.map(b => `
       <label class="meta-linha"><span class="tile mark">${logo(b.icon)}</span><span>${esc(b.name)}</span>
         <input name="${b.id}" type="number" min="-100" max="100" step="1" required value="${meta(b.id)}"></label>`).join('')}
     </div>
-    <div class="row"><button class="btn btn-secondary" value="no" formnovalidate>Cancelar</button><button class="btn btn-primary" value="yes">Guardar metas</button></div>
+    <div class="row"><button class="btn btn-secondary" value="no" formnovalidate>Cancelar</button><button class="btn btn-primary" value="yes">Guardar objetivos</button></div>
   </form>`;
   document.body.appendChild(d);
   d.addEventListener('close', () => {
@@ -258,7 +258,7 @@ function editarMetas() {
         if (Number.isFinite(n)) localStorage.setItem(`stater:v1:meta:${id}`, String(n));
       });
       localStorage.setItem('stater:v1:meta-data', new Date().toISOString());
-      toast('Metas guardadas.');
+      toast('Objetivos guardados.');
       render();
     }
     d.remove();
@@ -296,7 +296,7 @@ function overview() {
       <span class="ov-blob o" aria-hidden="true"></span><span class="ov-blob l" aria-hidden="true"></span><span class="ov-blob g" aria-hidden="true"></span><span class="ov-blob c" aria-hidden="true"></span>
       <div class="ov-txt">
         <h1>Overview do Grupo Brisa</h1>
-        <p>O NPS de cada marca face à sua meta. Os números vêm da tab NPS de cada marca; as metas definem-se aqui.</p>
+        <p>O NPS de cada marca face ao seu objetivo. Os números vêm da tab NPS de cada marca; os objetivos definem-se aqui.</p>
       </div>
       <img class="ov-logo" src="assets/grupo-brisa-branco.png" alt="Grupo Brisa" width="640" height="498">
       <span class="ov-faixa" aria-hidden="true"></span>
@@ -305,15 +305,15 @@ function overview() {
       <h2>Marcas</h2>
       <span class="muted">${comDados.length} de ${BRANDS.length} com dados${totalResp ? ` · ${fmt(totalResp)} respostas` : ''}</span>
       <span class="sep"></span>
-      ${dataMetas() ? `<span class="muted">Metas atualizadas a ${formatarData(dataMetas())}</span>` : ''}
-      <button class="btn btn-secondary btn-sm" data-act="metas">${icon('pencil')} Editar metas</button>
+      ${dataMetas() ? `<span class="muted">Objetivos atualizados a ${formatarData(dataMetas())}</span>` : ''}
+      <button class="btn btn-secondary btn-sm" data-act="metas">${icon('pencil')} Editar objetivos</button>
       ${menuExportar()}
     </div>
     <div class="ov-grid">${dados.map(({ b, rec, r, m, pior, comDados: n, vivas, alertas: al }) => `
       <div class="ov-card" style="${tileVars(b)};--font-b:${b.font}, 'Noto Sans', sans-serif">
         <div class="top"><span class="tile mark">${logo(b.icon)}</span><b>${esc(b.name)}</b>
-          ${r ? `<span class="badge ${r.nps >= m ? 'good' : 'bad'}" title="${r.nps >= m ? 'Meta atingida' : 'Abaixo da meta'}">${sinal(r.nps - m)} vs meta</span>` : '<span class="badge">Sem dados</span>'}</div>
-        ${r ? `<div class="val"><b class="num">${fmt(r.nps)}</b><span class="muted">NPS · ${fmt(r.total)} respostas</span></div>
+          ${r ? `<span class="badge ${r.nps >= m ? 'good' : 'bad'}" title="NPS ${fmt(r.nps)} menos o objetivo ${m} = ${sinal(r.nps - m)}">${sinal(r.nps - m)} vs objetivo</span>` : '<span class="badge">Sem dados</span>'}</div>
+        ${r ? `<div class="val"><b class="num">${fmt(r.nps)}</b><span class="muted">NPS · ${fmt(r.total)} respostas</span>${info(`NPS da ${b.name}`, `NPS = ${fmt(r.pctP, 1)}% promotores − ${fmt(r.pctD, 1)}% detratores = ${fmt(r.nps)}. Das ${fmt(r.total)} respostas: ${fmt(r.d)} detratores (0 a 6), ${fmt(r.n)} neutros (7 e 8) e ${fmt(r.p)} promotores (9 e 10). Nota média ${fmt(r.media, 1)} em 10. Objetivo ${m}: ${r.nps >= m ? `${fmt(r.nps - m)} pontos acima` : `${fmt(m - r.nps)} pontos abaixo`}. Período do Excel: ${formatarPeriodo(rec.data.periodo)}. Vem da tab NPS da marca.`)}</div>
           <div class="compo" style="height:10px" aria-hidden="true"><div class="d" style="flex:${r.pctD}"></div><div class="n" style="flex:${r.pctN}"></div><div class="p" style="flex:${r.pctP}"></div></div>
           <div class="ov-dnp num"><span><i class="d"></i>Detratores ${fmt(r.pctD)}%</span><span><i class="n"></i>Neutros ${fmt(r.pctN)}%</span><span><i class="p"></i>Promotores ${fmt(r.pctP)}%</span></div>
           <div class="ov-info">
@@ -326,8 +326,8 @@ function overview() {
       </div>`).join('')}
     </div>
     <section class="card" style="background:#fff" aria-labelledby="h-ov">
-      <div class="card-head"><h3 id="h-ov">NPS vs meta por marca ${info('NPS vs meta', 'Barra verde: NPS na meta ou acima. Barra vermelha: NPS abaixo da meta. Barra cinzenta: meta definida em Editar metas. Marcas sem dados só mostram a meta.')}</h3>
-        <div class="legend" style="margin:0 0 0 auto"><span><i style="background:${CORES.pro}"></i>NPS na meta ou acima</span><span><i style="background:${CORES.det}"></i>NPS abaixo da meta</span><span><i style="background:${CORES.meta}"></i>Meta</span></div></div>
+      <div class="card-head"><h3 id="h-ov">NPS vs objetivo por marca ${info('NPS vs objetivo por marca', `Duas barras por marca. A da esquerda é o NPS da tab NPS da marca: verde se está no objetivo ou acima, vermelha se está abaixo. A da direita, cinzenta, é o objetivo definido em Editar objetivos. O eixo vai de −100 a 100, com a linha do 0 a cheio. ${dados.filter(d => !d.r).length ? `Sem Excel de NPS, só aparece o objetivo: ${dados.filter(d => !d.r).map(d => d.b.name).join(', ')}.` : ''} Passa o rato por uma marca para ver os dois valores.`)}</h3>
+        <div class="legend" style="margin:0 0 0 auto"><span><i style="background:${CORES.pro}"></i>NPS no objetivo ou acima</span><span><i style="background:${CORES.det}"></i>NPS abaixo do objetivo</span><span><i style="background:${CORES.meta}"></i>Objetivo</span></div></div>
       <div id="ch-ov" class="chart"></div>
       <div class="ov-eixo" id="ov-eixo" aria-hidden="true">${BRANDS.map(b => `<span>${esc(b.name)}</span>`).join('')}</div>
     </section>`;
@@ -382,7 +382,7 @@ function montarOverview() {
     grid: { ...OV_GRID },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.035)' } }, formatter: p => { const d = dados[p[0].dataIndex];
       const linha = (cor, rot, v) => `<div class="ov-tt-l"><i style="background:${cor}"></i>${rot}<b>${v == null ? 'sem dados' : fmt(v)}</b></div>`;
-      return `<div class="ov-tt"><div class="ov-tt-t">${esc(d.b.name)}</div>${linha(d.r ? corMeta(d.r.nps, d.m) : CORES.meta, 'NPS', d.r ? d.r.nps : null)}${linha(CORES.meta, 'Meta', d.m)}</div>`; } },
+      return `<div class="ov-tt"><div class="ov-tt-t">${esc(d.b.name)}</div>${linha(d.r ? corMeta(d.r.nps, d.m) : CORES.meta, 'NPS', d.r ? d.r.nps : null)}${linha(CORES.meta, 'Objetivo', d.m)}</div>`; } },
     // Os nomes saem do eixo e vão para a linha HTML #ov-eixo
     xAxis: { type: 'category', data: dados.map(d => d.b.name), ...EIXO_CAT, axisLabel: { show: false } },
     yAxis: { type: 'value', min: -100, max: 100, interval: 20, ...EIXO_VAL },
@@ -391,7 +391,7 @@ function montarOverview() {
         data: dados.map(d => ({ value: d.r ? d.r.nps : null, itemStyle: { color: comBrilho(d.r ? corMeta(d.r.nps, d.m) : CORES.meta), borderRadius: [10, 10, 4, 4] } })),
         label: { show: true, position: 'top', distance: 6, color: '#1a1a1a', fontSize: 12, fontWeight: 700, formatter: p => (p.value == null ? '' : fmt(p.value)) },
         markLine: { symbol: 'none', silent: true, label: { show: false }, lineStyle: { color: '#9a9a9a', type: 'solid', width: 1 }, data: [{ yAxis: 0 }] } },
-      { name: 'Meta', type: 'bar', barWidth: '31%',
+      { name: 'Objetivo', type: 'bar', barWidth: '31%',
         data: dados.map(d => ({ value: d.m, itemStyle: { color: comBrilho(CORES.meta), borderRadius: [10, 10, 4, 4] } })),
         label: { show: true, position: 'top', distance: 6, color: '#5f5f5f', fontSize: 12, fontWeight: 700, formatter: p => fmt(p.value) } },
     ],
