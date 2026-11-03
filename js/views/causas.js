@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261103-1555';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1555';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1555';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1555';
-import { icon } from '../icons.js?v=20261103-1555';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261103-1600';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1600';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1600';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1600';
+import { icon } from '../icons.js?v=20261103-1600';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -45,9 +45,9 @@ export function resumo(rec, meta) {
     tom: g && g.nps < meta ? 'bad' : 'good',
     texto: partes.join(' '),
     factos: [
-      ...(g ? [{ valor: sinal(g.nps - meta), rot: 'vs objetivo', tom: g.nps >= meta ? 'good' : 'bad', tip: `NPS de quem respondeu (${fmt(g.nps)}) menos o objetivo da marca (${meta}) = ${sinal(g.nps - meta)}. O objetivo define-se na Overview, em Editar objetivos.` }] : []),
-      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: 'peso da mais referida', tip: `${maior.nome} foi escolhida ${fmt(maior.total)} vezes, das ${fmt(mencoes)} menções no total: ${fmt(maior.quota, 1)}%. É a causa mais referida (só contam causas com ${LIM} ou mais menções, sem "Outra" e "Sem sugestões").` }] : []),
-      { valor: fmt(abaixo.length), rot: 'abaixo do objetivo', tom: abaixo.length ? 'bad' : 'good', tip: `Causas com ${LIM} ou mais menções e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhuma neste Excel.'}` },
+      ...(g ? [{ valor: sinal(g.nps - meta), rot: 'vs objetivo', tom: g.nps >= meta ? 'good' : 'bad', barra: (g.nps + 100) / 2, traco: (meta + 100) / 2, cor: g.nps >= meta ? CORES.pro : CORES.det, tip: `NPS de quem respondeu (${fmt(g.nps)}) menos o objetivo da marca (${meta}) = ${sinal(g.nps - meta)}. O objetivo define-se na Overview, em Editar objetivos.` }] : []),
+      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: 'peso da mais referida', barra: maior.quota, tip: `${maior.nome} foi escolhida ${fmt(maior.total)} vezes, das ${fmt(mencoes)} menções no total: ${fmt(maior.quota, 1)}%. É a causa mais referida (só contam causas com ${LIM} ou mais menções, sem "Outra" e "Sem sugestões").` }] : []),
+      { valor: fmt(abaixo.length), rot: `de ${fmt(fiaveis.length)} causas abaixo do objetivo`, tom: abaixo.length ? 'bad' : 'good', barra: fiaveis.length ? (abaixo.length / fiaveis.length) * 100 : 0, cor: CORES.det, tip: `Causas com ${LIM} ou mais menções e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhuma neste Excel.'}` },
     ],
     notas,
   };

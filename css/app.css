@@ -757,3 +757,15 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .gauge-wrap .meta-pill { top: 64%; }
 #ch-gauge { position: relative; }
 .meta-curva { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 2; font-family: var(--font-brand); }
+
+/* Cartões ao lado do Resumo: maiores, número leve e uma barrinha que mostra a parte (Gonçalo, 2026-11-03) */
+.so-main .resumo { grid-template-columns: minmax(0, 1fr) minmax(0, 500px); }
+.rs-factos { gap: 10px; }
+.rs-f { padding: 14px 30px 14px 16px; gap: 4px; border-radius: 16px; justify-content: flex-start; }
+.rs-f b { font-size: 30px; line-height: 34px; font-weight: 400; letter-spacing: -.035em; }
+.rs-f span { font-size: 13px; line-height: 17px; color: var(--text-secondary); }
+.rs-f .rs-i { top: 10px; right: 10px; }
+.rs-bar { position: relative; height: 6px; border-radius: 99px; background: #eef0f2; margin-top: auto; overflow: visible; }
+.rs-f > span:not(.rs-i) { margin-bottom: 10px; }
+.rs-bar i { display: block; height: 100%; border-radius: 99px; }
+.rs-bar s { position: absolute; top: -4px; width: 3px; height: 14px; margin-left: -1.5px; border-radius: 2px; background: #f07d00; text-decoration: none; }

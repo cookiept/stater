@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1555';
-import { icon } from './icons.js?v=20261103-1555';
-import { logo } from './logos.js?v=20261103-1555';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1555';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1555';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1555';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1555';
-import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1555';
-import * as vNps from './views/nps.js?v=20261103-1555';
-import * as vCausas from './views/causas.js?v=20261103-1555';
-import * as vMolho from './views/molho.js?v=20261103-1555';
-import { exemplos } from './exemplo.js?v=20261103-1555';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1600';
+import { icon } from './icons.js?v=20261103-1600';
+import { logo } from './logos.js?v=20261103-1600';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1600';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1600';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1600';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1600';
+import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1600';
+import * as vNps from './views/nps.js?v=20261103-1600';
+import * as vCausas from './views/causas.js?v=20261103-1600';
+import * as vMolho from './views/molho.js?v=20261103-1600';
+import { exemplos } from './exemplo.js?v=20261103-1600';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -193,12 +193,20 @@ function menuFicheiro(rec, A, m) {
 
 const TIP_REGRAS = 'O texto sai de regras fixas aplicadas aos números do Excel, as mesmas do Stater atual. Não há opinião nem IA: as mesmas contas dão sempre as mesmas frases.';
 
+// Barrinha de cada cartão do Resumo: parte preenchida (0 a 100) e, se houver, um traço (ex.: o objetivo)
+function barraFacto(f) {
+  if (f.barra == null) return '';
+  const v = Math.max(0, Math.min(100, f.barra));
+  const traco = f.traco == null ? '' : `<s style="left:${Math.max(0, Math.min(100, f.traco))}%"></s>`;
+  return `<div class="rs-bar" aria-hidden="true"><i style="width:${v}%;background:${f.cor || 'var(--brand)'}"></i>${traco}</div>`;
+}
+
 function resumoHtml(r) {
   const blocos = r.blocos || [{ texto: r.texto, tom: r.tom }];
   return `<div class="resumo">
     <h3 class="sec-title">Resumo <span class="badge" data-tip-title="Regras fixas" data-tip="${TIP_REGRAS}" tabindex="0">Regras fixas</span></h3>
     ${blocos.map(b => `<div class="rs-bloco ${b.tom || ''}">${b.titulo ? `<b class="rs-t">${b.titulo}</b>` : ''}<p>${b.texto}</p></div>`).join('')}
-    ${r.factos ? `<div class="rs-factos">${r.factos.map(f => `<div class="rs-f ${f.tom || ''}">${f.tip ? `<span class="rs-i">${info(f.rot, f.tip)}</span>` : ''}<b class="num">${f.valor}</b><span>${f.rot}</span></div>`).join('')}</div>` : ''}
+    ${r.factos ? `<div class="rs-factos">${r.factos.map(f => `<div class="rs-f ${f.tom || ''}">${f.tip ? `<span class="rs-i">${info(f.rot, f.tip)}</span>` : ''}<b class="num">${f.valor}</b><span>${f.rot}</span>${barraFacto(f)}</div>`).join('')}</div>` : ''}
   </div>`;
 }
 
