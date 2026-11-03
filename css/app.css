@@ -727,3 +727,5 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Números principais mais leves (Gonçalo, 2026-11-03): sem bold, como no estilo testado */
 .kpi .kv, .kpi.hero .kv { font-weight: 400; letter-spacing: -.035em; }
 .ov-card .val b { font-weight: 400; letter-spacing: -.045em; }
+/* O número do NPS fica um pouco mais forte que os outros (Gonçalo, 2026-11-03) */
+.kpi.hero .kv, .ov-card .val b { font-weight: 500; }

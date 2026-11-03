@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1147';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1147';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1147';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1147';
-import { icon } from '../icons.js?v=20261103-1147';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1149';
+import { base, junta, desenhar } from '../charts.js?v=20261103-1149';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1149';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1149';
+import { icon } from '../icons.js?v=20261103-1149';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -109,7 +109,7 @@ export function mount(rec, brand, meta) {
         track: { background: '#f0f0f0', strokeWidth: '100%', margin: 0 },
         dataLabels: {
           name: { show: false },
-          value: { offsetY: -6, fontSize: '44px', fontWeight: 400, color: '#1a1a1a', formatter: () => fmt(r.nps) },
+          value: { offsetY: -6, fontSize: '44px', fontWeight: 500, color: '#1a1a1a', formatter: () => fmt(r.nps) },
         },
       },
     },
