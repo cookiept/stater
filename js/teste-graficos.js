@@ -1,9 +1,9 @@
 // Página de teste: os mesmos gráficos do NPS em ApexCharts (atual) e em Apache ECharts, lado a lado.
 // Lê os dados que já estão neste browser (nada sai do computador); sem dados, usa o exemplo fictício.
-import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1213';
-import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1213';
-import { exemplos } from './exemplo.js?v=20261103-1213';
-import * as vNps from './views/nps.js?v=20261103-1213';
+import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1219';
+import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1219';
+import { exemplos } from './exemplo.js?v=20261103-1219';
+import * as vNps from './views/nps.js?v=20261103-1219';
 
 const marcaId = new URLSearchParams(location.search).get('marca') || 'colibri';
 const brand = brandById(marcaId) || BRANDS[0];

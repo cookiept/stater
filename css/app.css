@@ -577,8 +577,8 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .menu-exp > summary { list-style: none; }
 .menu-exp > summary::-webkit-details-marker { display: none; }
 .menu-lista { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; width: 170px; background: #fff; border-radius: 14px; box-shadow: var(--shadow-3), 0 0 0 1px var(--hair); padding: 6px; display: flex; flex-direction: column; }
-.menu-lista button { all: unset; box-sizing: border-box; display: flex; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 10px; cursor: pointer; white-space: normal; }
-.menu-lista button:hover, .menu-lista button:focus-visible { background: var(--surface-mid); }
+.menu-lista button:not(.btn) { all: unset; box-sizing: border-box; display: flex; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 10px; cursor: pointer; white-space: normal; }
+.menu-lista button:not(.btn):hover, .menu-lista button:not(.btn):focus-visible { background: var(--surface-mid); }
 .menu-lista .ico { width: 18px; height: 18px; color: var(--brand-ink); margin-top: 1px; }
 .menu-lista b { display: block; font-size: 13px; color: var(--text-primary); }
 .menu-lista small { display: block; font-size: 12.5px; line-height: 15px; color: var(--text-tertiary); }
@@ -729,3 +729,23 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .ov-card .val b { font-weight: 400; letter-spacing: -.045em; }
 /* O número do NPS fica um pouco mais forte que os outros (Gonçalo, 2026-11-03) */
 .kpi.hero .kv, .ov-card .val b { font-weight: 500; }
+
+/* Resumo numa faixa no topo; ficheiro e ajuda no menu "Ficheiro" do cabeçalho (Gonçalo, 2026-11-03).
+   Para voltar atrás: reverter este commit. */
+.panel-body.so-main { grid-template-columns: minmax(0, 1fr); }
+.so-main .resumo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); grid-template-areas: "t t" "b f"; gap: 10px 20px; align-items: stretch;
+  background: #fff; border-radius: 16px; box-shadow: inset 0 0 0 1px var(--hair); padding: 18px 20px; }
+.so-main .resumo > .sec-title { grid-area: t; }
+.so-main .resumo > .sec-title .badge { margin-left: 4px; }
+.so-main .resumo > .rs-bloco { grid-area: b; box-shadow: none; padding: 0 0 0 16px; border-radius: 0; align-self: center; }
+.so-main .resumo > .rs-bloco::before { top: 2px; bottom: 2px; }
+.so-main .resumo > .rs-bloco p { font-size: 14px; line-height: 22px; }
+.so-main .resumo > .rs-factos { grid-area: f; align-self: center; }
+.so-main .resumo:not(:has(.rs-factos)) { grid-template-areas: "t t" "b b"; }
+.menu-painel { width: 320px; padding: 12px; gap: 10px; }
+.menu-painel details.fold { padding-top: 10px; }
+.menu-painel .import-txt { max-height: 240px; overflow: auto; }
+@media (max-width: 900px) {
+  .so-main .resumo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b" "f"; }
+}
+@media (max-width: 560px) { .menu-painel { position: fixed; left: 16px; right: 16px; top: 120px; width: auto; } }
