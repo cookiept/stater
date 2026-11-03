@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1159';
-import { icon } from './icons.js?v=20261103-1159';
-import { logo } from './logos.js?v=20261103-1159';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1159';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1159';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1159';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1159';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1159';
-import * as vNps from './views/nps.js?v=20261103-1159';
-import * as vCausas from './views/causas.js?v=20261103-1159';
-import * as vMolho from './views/molho.js?v=20261103-1159';
-import { exemplos } from './exemplo.js?v=20261103-1159';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1203';
+import { icon } from './icons.js?v=20261103-1203';
+import { logo } from './logos.js?v=20261103-1203';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1203';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1203';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1203';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1203';
+import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1203';
+import * as vNps from './views/nps.js?v=20261103-1203';
+import * as vCausas from './views/causas.js?v=20261103-1203';
+import * as vMolho from './views/molho.js?v=20261103-1203';
+import { exemplos } from './exemplo.js?v=20261103-1203';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -228,8 +228,11 @@ function painel(brand, tab) {
     ${avisoErro(' Os dados anteriores continuam.')}
     <div class="panel-body so-main">
       <div class="panel-main">
-        ${resumoHtml(A.view.resumo(rec, m))}
-        ${A.view.html(rec, m)}
+        ${(() => {
+          // Resumo como cartão: cada análise decide onde o põe; as outras levam-no no topo
+          const rs = `<section class="card card-resumo">${resumoHtml(A.view.resumo(rec, m))}</section>`;
+          return A.view.comResumo ? A.view.html(rec, m, rs) : rs + A.view.html(rec, m);
+        })()}
       </div>
     </div>
   </section>`;

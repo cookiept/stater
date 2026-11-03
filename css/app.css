@@ -730,18 +730,19 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* O número do NPS fica um pouco mais forte que os outros (Gonçalo, 2026-11-03) */
 .kpi.hero .kv, .ov-card .val b { font-weight: 500; }
 
-/* Resumo numa faixa no topo; ficheiro e ajuda no menu "Ficheiro" do cabeçalho (Gonçalo, 2026-11-03).
-   Para voltar atrás: reverter este commit. */
+/* Resumo como cartão ao lado do medidor (NPS) ou dos números (Causa Raiz); ficheiro e ajuda no menu "Ficheiro" do cabeçalho (Gonçalo, 2026-11-03).
+   Para voltar à faixa no topo: reverter este commit. */
 .panel-body.so-main { grid-template-columns: minmax(0, 1fr); }
-.so-main .resumo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); grid-template-areas: "t t" "b f"; gap: 10px 20px; align-items: stretch;
-  background: #fff; border-radius: 16px; box-shadow: inset 0 0 0 1px var(--hair); padding: 18px 20px; }
-.so-main .resumo > .sec-title { grid-area: t; }
-.so-main .resumo > .sec-title .badge { margin-left: 4px; }
-.so-main .resumo > .rs-bloco { grid-area: b; box-shadow: none; padding: 0 0 0 16px; border-radius: 0; align-self: center; }
-.so-main .resumo > .rs-bloco::before { top: 2px; bottom: 2px; }
-.so-main .resumo > .rs-bloco p { font-size: 14px; line-height: 22px; }
-.so-main .resumo > .rs-factos { grid-area: f; align-self: center; }
-.so-main .resumo:not(:has(.rs-factos)) { grid-template-areas: "t t" "b b"; }
+.card-resumo .resumo { gap: 12px; height: 100%; }
+.card-resumo .rs-bloco { box-shadow: none; padding: 0 0 0 16px; border-radius: 0; }
+.card-resumo .rs-bloco::before { top: 2px; bottom: 2px; }
+.card-resumo .rs-bloco p { font-size: 14px; line-height: 22px; }
+.card-resumo .rs-factos { margin-top: auto; }
+.grid-2.g-resumo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.g-resumo .card-resumo .rs-bloco p { font-size: 16px; line-height: 27px; }
+.g-resumo-kpis { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.kpis.kpis-2x2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+@media (max-width: 1100px) { .grid-2.g-resumo, .g-resumo-kpis { grid-template-columns: minmax(0, 1fr); } }
 .menu-painel { width: 320px; padding: 12px; gap: 10px; }
 .menu-painel details.fold { padding-top: 10px; }
 .menu-painel .import-txt { max-height: 240px; overflow: auto; }
