@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Stater · Teste de gráficos</title>
+  <title>Stater · Comparação de gráficos</title>
   <meta name="robots" content="noindex">
   <link rel="icon" href="assets/favicon.svg?v=2" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="css/app.css?v=20261103-1219">
+  <link rel="stylesheet" href="css/app.css?v=20261103-1224">
   <style>
     body { background: var(--bg, #f6f6f4); }
     .tg { max-width: 1240px; margin: 0 auto; padding: 28px 24px 60px; display: flex; flex-direction: column; gap: 18px; }
@@ -18,20 +18,24 @@
     .tg-top p { margin: 0; color: var(--text-secondary); font-size: 14px; }
     .tg-top a { margin-left: auto; }
     .tg-aviso { padding: 10px 14px; border-radius: 12px; background: #fff7e0; font-size: 13.5px; }
-    .tg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tg-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .tg-col-t { font: 600 13px/16px var(--font-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
     .tg-col-t i { width: 10px; height: 10px; border-radius: 50%; background: #c4c4c4; }
-    .tg-col-t.novo i { background: var(--brand); }
-    .tg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tg-col-t.ch i { background: var(--brand); }
+    .tg-col-t.ag i { background: #3d7bf7; }
+    .tg-col-t span { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text-tertiary); }
+    .tg-nota { margin: 0; font-size: 13px; color: var(--text-secondary); }
+    .tg-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
     .tg-row .card { min-height: 0; }
     .ec { width: 100%; }
-    @media (max-width: 900px) { .tg-cols, .tg-row { grid-template-columns: 1fr; } .tg-cols .novo { display: none; } }
+    @media (max-width: 900px) { .tg-cols, .tg-row { grid-template-columns: 1fr; } .tg-cols { display: none; } .tg-row .card::before { display: none; } }
   </style>
 </head>
 <body>
   <main class="tg" id="tg"></main>
   <script src="vendor/apexcharts-8.5.0.full.min.js"></script>
   <script src="vendor/echarts-5.5.1.min.js"></script>
-  <script type="module" src="js/teste-graficos.js?v=20261103-1219"></script>
+  <script src="vendor/ag-charts-community-10.3.3.min.js"></script>
+  <script type="module" src="js/teste-graficos.js?v=20261103-1224"></script>
 </body>
 </html>

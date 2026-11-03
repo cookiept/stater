@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1219';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1219';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1219';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1219';
-import { icon } from '../icons.js?v=20261103-1219';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261103-1224';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261103-1224';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261103-1224';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1224';
+import { icon } from '../icons.js?v=20261103-1224';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima da meta' : nps === meta ? 'Na meta' : 'Abaixo da meta');
 
@@ -95,57 +95,66 @@ export function html(rec, meta) {
 export function mount(rec, brand, meta) {
   const c = rec.data.contagens;
   const r = resumoNps(c);
-  const cores = c.map((_, i) => (i <= 6 ? CORES.det : i <= 8 ? CORES.neu : CORES.pro));
+  const corNota = i => (i <= 6 ? CORES.det : i <= 8 ? CORES.neu : CORES.pro);
   const corG = corNps(r.nps);
   const b = base(brand);
 
+  // Medidor de -100 a 100: número a contar, triângulo a marcar a meta
+  const arco = { type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '86%', center: ['50%', '60%'] };
   desenhar(document.getElementById('ch-gauge'), junta(b, {
-    chart: { type: 'radialBar', height: 280, sparkline: { enabled: true } },
-    series: [Math.max(0, Math.min(100, (r.nps + 100) / 2))],
-    colors: [corG],
-    plotOptions: {
-      radialBar: {
-        startAngle: -95, endAngle: 95, hollow: { size: '62%' },
-        track: { background: '#f0f0f0', strokeWidth: '100%', margin: 0 },
-        dataLabels: {
-          name: { show: false },
-          value: { offsetY: -6, fontSize: '44px', fontWeight: 500, color: '#1a1a1a', formatter: () => fmt(r.nps) },
-        },
-      },
-    },
-    fill: { type: 'gradient', gradient: { shade: 'light', type: 'horizontal', gradientToColors: [corNpsClaro(r.nps)], stops: [0, 100] } },
-    stroke: { lineCap: 'round' },
-    labels: ['NPS'],
-  }));
+    tooltip: { show: false },
+    series: [
+      { ...arco,
+        progress: { show: true, roundCap: true, width: 20, itemStyle: { color: grad(corNpsClaro(r.nps), corG, true) } },
+        axisLine: { roundCap: true, lineStyle: { width: 20, color: [[1, '#f0f1f3']] } },
+        axisTick: { show: false }, splitLine: { show: false },
+        axisLabel: { distance: -44, color: '#6b6b6b', fontSize: 12, formatter: v => (v === -100 || v === 100 ? v : '') },
+        pointer: { show: false }, anchor: { show: false }, title: { show: false },
+        detail: { valueAnimation: true, offsetCenter: [0, '-22%'], fontSize: 48, fontWeight: 500, color: '#1a1a1a', formatter: v => fmt(Math.round(v)) },
+        data: [{ value: r.nps }] },
+      { ...arco, silent: true,
+        axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
+        pointer: { show: true, icon: 'triangle', length: 12, width: 14, offsetCenter: [0, '-118%'], itemStyle: { color: '#1a1a1a' } },
+        anchor: { show: false }, title: { show: false }, detail: { show: false },
+        data: [{ value: meta }] },
+    ],
+  }), 260);
 
+  // Notas dadas: barras com fundo suave, gradiente e % por cima
   desenhar(document.getElementById('ch-dist'), junta(b, {
-    chart: { type: 'bar', height: 300 },
-    series: [{ name: 'Respostas', data: c }],
-    colors: cores,
-    plotOptions: { bar: { distributed: true, borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '62%', dataLabels: { position: 'top' } } },
-    dataLabels: {
-      enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] },
-      formatter: v => `${fmt((v / r.total) * 100, 0)}%`,
-    },
-    xaxis: { categories: c.map((_, i) => String(i)), axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { fontSize: '12px', fontWeight: 600 } } },
-    yaxis: { labels: { formatter: v => fmt(v) } },
-    tooltip: { y: { formatter: v => `${fmt(v)} respostas (${fmt((v / r.total) * 100, 1)}%)` }, x: { formatter: v => `Nota ${v}` } },
-  }));
+    grid: { left: 4, right: 8, top: 28, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } },
+      formatter: p => `<b>Nota ${p[0].name}</b><br>${fmt(p[0].value)} respostas · ${fmt((p[0].value / r.total) * 100, 1)}%` },
+    xAxis: { type: 'category', data: c.map((_, i) => String(i)), ...EIXO_CAT },
+    yAxis: { type: 'value', splitNumber: 4, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => fmt(v) } },
+    series: [{
+      type: 'bar', barWidth: '58%', showBackground: true, backgroundStyle: { color: '#f8f8f8', borderRadius: [10, 10, 4, 4] },
+      data: c.map((v, i) => ({ value: v, itemStyle: { color: comBrilho(corNota(i)), borderRadius: [10, 10, 4, 4] } })),
+      label: { show: true, position: 'top', distance: 6, ...ROTULO, formatter: p => `${fmt((p.value / r.total) * 100, 0)}%` },
+      emphasis: { focus: 'self' }, blur: { itemStyle: { opacity: 0.4 } },
+      animationDelay: i => i * 40,
+    }],
+  }), 300);
 
-  // Exemplo fictício: meses à volta do valor real
+  // Exemplo fictício: meses à volta do valor real, em linha com área e a meta
   const meses = ['set', 'out', 'nov', 'dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago'];
   const desvios = [-7, -4, -6, -2, -5, -1, 1, -3, 2, 0, 3, 1];
+  const serie = desvios.map(d => r.nps + d);
   desenhar(document.getElementById('ch-mes'), junta(b, {
-    chart: { type: 'bar', height: 220 },
-    series: [{ name: 'NPS (fictício)', data: desvios.map(d => r.nps + d) }],
-    colors: desvios.map((_, i) => (i >= 9 ? CORES.pro : CORES.proClaro)),
-    plotOptions: { bar: { borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '58%', distributed: true, dataLabels: { position: 'top' } } },
-    dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] } },
-    xaxis: { categories: meses, axisBorder: { show: false }, axisTicks: { show: false } },
-    yaxis: { min: Math.min(0, r.nps - 20), max: 100, tickAmount: 4 },
-    annotations: { yaxis: [{ y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', offsetY: -2, borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } }] },
-    tooltip: { y: { formatter: v => `${v} (fictício)` } },
-  }));
+    grid: { left: 4, right: 16, top: 28, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'axis', formatter: p => `<b>${p[0].name}</b><br>NPS ${p[0].value} (fictício)` },
+    xAxis: { type: 'category', boundaryGap: false, data: meses, ...EIXO_CAT, axisLine: { show: true, lineStyle: { color: '#e6e6e6' } } },
+    yAxis: { type: 'value', min: Math.min(0, r.nps - 20), max: 100, interval: 25, ...EIXO_VAL },
+    series: [{
+      type: 'line', smooth: 0.35, data: serie, symbol: 'circle', symbolSize: 8,
+      lineStyle: { width: 3, color: CORES.pro },
+      itemStyle: { color: '#fff', borderColor: CORES.pro, borderWidth: 2 },
+      areaStyle: { color: grad('rgba(34,160,59,.26)', 'rgba(34,160,59,0)') },
+      label: { show: true, position: 'top', distance: 8, ...ROTULO },
+      markLine: { symbol: 'none', silent: true, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 },
+        label: { formatter: `Meta ${meta}`, position: 'insideStartTop', ...ETIQ_META }, data: [{ yAxis: meta }] },
+    }],
+  }), 240);
 }
 
 // Para exportar: números principais, resumo e gráficos nativos do PowerPoint

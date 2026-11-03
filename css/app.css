@@ -749,3 +749,8 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
   .so-main .resumo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "b" "f"; }
 }
 @media (max-width: 560px) { .menu-painel { position: fixed; left: 16px; right: 16px; top: 120px; width: auto; } }
+
+/* Gráficos em ECharts (2026-11-03): os logótipos da Overview ficam por cima do gráfico */
+#ch-ov { position: relative; }
+.ov-tt { color: #fff; }
+.gauge-wrap .meta-pill { top: 64%; }

@@ -1,9 +1,11 @@
-// Página de teste: os mesmos gráficos do NPS em ApexCharts (atual) e em Apache ECharts, lado a lado.
+// Página de comparação: os mesmos gráficos do NPS em três bibliotecas.
+// ApexCharts (o que o Stater usava), Apache ECharts (o que o Stater usa agora) e AG Charts Community.
 // Lê os dados que já estão neste browser (nada sai do computador); sem dados, usa o exemplo fictício.
-import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1219';
-import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1219';
-import { exemplos } from './exemplo.js?v=20261103-1219';
-import * as vNps from './views/nps.js?v=20261103-1219';
+import { BRANDS, brandById, applyTheme } from './brands.js?v=20261103-1224';
+import { resumoNps, fmt, CORES, corNps, corNpsClaro } from './stats.js?v=20261103-1224';
+import { exemplos } from './exemplo.js?v=20261103-1224';
+import { junta } from './charts.js?v=20261103-1224';
+import * as vNps from './views/nps.js?v=20261103-1224';
 
 const marcaId = new URLSearchParams(location.search).get('marca') || 'colibri';
 const brand = brandById(marcaId) || BRANDS[0];
@@ -16,106 +18,136 @@ const exemplo = !rec;
 if (exemplo) rec = exemplos.nps;
 const metaGuardada = parseInt(localStorage.getItem(`stater:v1:meta:${brand.id}`), 10);
 const meta = Number.isFinite(metaGuardada) ? metaGuardada : (brand.target ?? 60);
-
 const c = rec.data.contagens;
 const r = resumoNps(c);
 const FONTE = `${brand.font}, "Noto Sans", system-ui, sans-serif`;
 
-const card = (id, titulo, extra = '') => `<section class="card"><div class="card-head"><h3>${titulo}</h3></div>${extra}<div id="${id}" class="chart"></div></section>`;
+const COLS = [['ax', 'ApexCharts', 'o que o Stater usava'], ['ch', 'Apache ECharts', 'o que o Stater usa agora'], ['ag', 'AG Charts', 'versão grátis']];
+const linha = (id, titulo) => `<div class="tg-row">${COLS.map(([p, n]) => `<section class="card"><div class="card-head"><h3>${titulo}</h3><span class="note">${n}</span></div><div id="${p}-${id}" class="chart"></div></section>`).join('')}</div>`;
 document.getElementById('tg').innerHTML = `
   <div class="tg-top">
-    <div><h1>Teste de gráficos · ${brand.name} NPS</h1>
-    <p>À esquerda o gráfico atual (ApexCharts). À direita o mesmo gráfico em Apache ECharts.</p></div>
+    <div><h1>Comparação de gráficos · ${brand.name} NPS</h1>
+    <p>Os mesmos dados em três bibliotecas de gráficos. Todas funcionam dentro do browser.</p></div>
     <a class="btn btn-secondary btn-sm" href="./#/${brand.id}/nps">Voltar ao Stater</a>
   </div>
   ${exemplo ? '<div class="tg-aviso"><b>Dados de exemplo.</b> Carrega o Excel do NPS desta marca no Stater, neste browser, para ver os teus números aqui.</div>' : ''}
-  <div class="tg-cols"><div class="tg-col-t"><i></i>Atual · ApexCharts</div><div class="tg-col-t novo"><i></i>Novo · Apache ECharts</div></div>
-  <div class="tg-row">${card('ch-gauge', 'NPS face à meta')}${card('ec-gauge', 'NPS face à meta')}</div>
-  <div class="tg-row">${card('ch-dist', 'Notas dadas')}${card('ec-dist', 'Notas dadas')}</div>
-  <div class="tg-row">${card('ch-mes', 'NPS por mês · dados fictícios')}${card('ec-mes', 'NPS por mês · dados fictícios')}</div>`;
+  <div class="tg-cols">${COLS.map(([p, n, d]) => `<div class="tg-col-t ${p}"><i></i>${n}<span>${d}</span></div>`).join('')}</div>
+  ${linha('gauge', 'NPS face à meta')}
+  ${linha('dist', 'Notas dadas')}
+  ${linha('mes', 'NPS por mês · fictício')}
+  <p class="tg-nota">No AG Charts o medidor é pago, por isso aparece um donut com detratores, neutros e promotores.</p>`;
 
-// Lado atual: o código que já existe no Stater
+// ---------- Apache ECharts: o código do Stater ----------
 vNps.mount(rec, brand, meta);
 
-// Lado novo: ECharts
-const E = window.echarts;
-const graficos = [];
-function novo(id, altura, opcoes) {
-  const el = document.getElementById(id);
-  el.classList.add('ec');
-  el.style.height = altura + 'px';
-  const g = E.init(el, null, { renderer: 'svg' });
-  g.setOption({ textStyle: { fontFamily: FONTE }, animationDuration: 900, animationEasing: 'cubicOut', ...opcoes });
-  graficos.push(g);
+// ---------- ApexCharts: o código que o Stater tinha antes ----------
+function apexBase(b) {
+  return {
+    chart: { fontFamily: FONTE, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: true, speed: 450 }, foreColor: '#5c5c5c', parentHeightOffset: 0 },
+    grid: { borderColor: '#efefef', strokeDashArray: 4, xaxis: { lines: { show: false } }, padding: { left: 6, right: 8 } },
+    fill: { type: 'gradient', gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.18, opacityFrom: 1, opacityTo: 0.88, stops: [0, 100] } },
+    xaxis: { labels: { style: { fontSize: '12px' } } }, yaxis: { labels: { style: { fontSize: '12px' } } },
+    dataLabels: { enabled: false }, legend: { show: false }, tooltip: { theme: 'light' },
+  };
 }
-addEventListener('resize', () => graficos.forEach(g => g.resize()));
-const grad = (de, ate, vertical = true) => new E.graphic.LinearGradient(0, vertical ? 0 : 0, vertical ? 0 : 1, vertical ? 1 : 0, [{ offset: 0, color: de }, { offset: 1, color: ate }]);
-const TOOLTIP = { backgroundColor: '#1a1a1a', borderWidth: 0, padding: [8, 12], textStyle: { color: '#fff', fontSize: 13, fontFamily: FONTE }, extraCssText: 'border-radius:10px;box-shadow:0 8px 24px -8px rgba(0,0,0,.35);' };
+function apex(el, o) { const g = new window.ApexCharts(el, o); g.render(); return g; }
+function apexMount(rec, brand, meta) {
+  const c = rec.data.contagens;
+  const r = resumoNps(c);
+  const cores = c.map((_, i) => (i <= 6 ? CORES.det : i <= 8 ? CORES.neu : CORES.pro));
+  const corG = corNps(r.nps);
+  const b = apexBase(brand);
 
-// 1. Medidor: arco de -100 a 100, número a contar, marca da meta no arco
-const cor = corNps(r.nps);
-novo('ec-gauge', 300, {
-  series: [
-    {
-      type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '84%', center: ['50%', '62%'],
-      progress: { show: true, roundCap: true, width: 22, itemStyle: { color: grad(corNpsClaro(r.nps), cor, false) } },
-      axisLine: { roundCap: true, lineStyle: { width: 22, color: [[1, '#f0f1f3']] } },
-      axisTick: { show: false }, splitLine: { show: false },
-      axisLabel: { distance: -46, color: '#8a8a8a', fontSize: 12, formatter: v => (v === -100 || v === 100 ? v : '') },
-      pointer: { show: false }, anchor: { show: false }, title: { show: false },
-      detail: { valueAnimation: true, offsetCenter: [0, '-4%'], fontSize: 52, fontWeight: 500, color: '#1a1a1a', formatter: v => fmt(Math.round(v)) },
-      data: [{ value: r.nps }],
+  apex(document.getElementById('ax-gauge'), junta(b, {
+    chart: { type: 'radialBar', height: 280, sparkline: { enabled: true } },
+    series: [Math.max(0, Math.min(100, (r.nps + 100) / 2))],
+    colors: [corG],
+    plotOptions: {
+      radialBar: {
+        startAngle: -95, endAngle: 95, hollow: { size: '62%' },
+        track: { background: '#f0f0f0', strokeWidth: '100%', margin: 0 },
+        dataLabels: {
+          name: { show: false },
+          value: { offsetY: -6, fontSize: '44px', fontWeight: 500, color: '#1a1a1a', formatter: () => fmt(r.nps) },
+        },
+      },
     },
-    {
-      // Marca da meta: um pequeno traço escuro em cima do arco
-      type: 'gauge', startAngle: 200, endAngle: -20, min: -100, max: 100, radius: '84%', center: ['50%', '62%'],
-      axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { show: false },
-      pointer: { show: true, icon: 'triangle', length: 12, width: 14, offsetCenter: [0, '-118%'], itemStyle: { color: '#1a1a1a' } },
-      anchor: { show: false }, title: { show: false },
-      detail: { offsetCenter: [0, '30%'], fontSize: 14, fontWeight: 600, color: r.nps >= meta ? '#17702b' : '#b3301c', formatter: () => `${r.nps >= meta ? '▲' : '▼'} Meta ${meta}` },
-      data: [{ value: meta }],
+    fill: { type: 'gradient', gradient: { shade: 'light', type: 'horizontal', gradientToColors: [corNpsClaro(r.nps)], stops: [0, 100] } },
+    stroke: { lineCap: 'round' },
+    labels: ['NPS'],
+  }));
+
+  apex(document.getElementById('ax-dist'), junta(b, {
+    chart: { type: 'bar', height: 300 },
+    series: [{ name: 'Respostas', data: c }],
+    colors: cores,
+    plotOptions: { bar: { distributed: true, borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '62%', dataLabels: { position: 'top' } } },
+    dataLabels: {
+      enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] },
+      formatter: v => `${fmt((v / r.total) * 100, 0)}%`,
     },
+    xaxis: { categories: c.map((_, i) => String(i)), axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { fontSize: '12px', fontWeight: 600 } } },
+    yaxis: { labels: { formatter: v => fmt(v) } },
+    tooltip: { y: { formatter: v => `${fmt(v)} respostas (${fmt((v / r.total) * 100, 1)}%)` }, x: { formatter: v => `Nota ${v}` } },
+  }));
+
+  // Exemplo fictício: meses à volta do valor real
+  const meses = ['set', 'out', 'nov', 'dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago'];
+  const desvios = [-7, -4, -6, -2, -5, -1, 1, -3, 2, 0, 3, 1];
+  apex(document.getElementById('ax-mes'), junta(b, {
+    chart: { type: 'bar', height: 220 },
+    series: [{ name: 'NPS (fictício)', data: desvios.map(d => r.nps + d) }],
+    colors: desvios.map((_, i) => (i >= 9 ? CORES.pro : CORES.proClaro)),
+    plotOptions: { bar: { borderRadius: 5, borderRadiusApplication: 'end', columnWidth: '58%', distributed: true, dataLabels: { position: 'top' } } },
+    dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '12px', fontWeight: 600, colors: ['#494949'] } },
+    xaxis: { categories: meses, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { min: Math.min(0, r.nps - 20), max: 100, tickAmount: 4 },
+    annotations: { yaxis: [{ y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', offsetY: -2, borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } }] },
+    tooltip: { y: { formatter: v => `${v} (fictício)` } },
+  }));
+}
+
+apexMount(rec, brand, meta);
+
+// ---------- AG Charts Community ----------
+const AG = window.agCharts.AgCharts;
+const agBase = { background: { visible: false }, padding: { top: 10, right: 10, bottom: 6, left: 6 }, legend: { enabled: false } };
+const fonte = { fontFamily: FONTE };
+const corNota = i => (i <= 6 ? CORES.det : i <= 8 ? CORES.neu : CORES.pro);
+const altura = (id, h) => { const el = document.getElementById(id); el.style.height = h + 'px'; return el; };
+
+AG.create({ ...agBase, container: altura('ag-gauge', 260),
+  data: [{ g: 'Detratores', v: r.d }, { g: 'Neutros', v: r.n }, { g: 'Promotores', v: r.p }],
+  series: [{ type: 'donut', angleKey: 'v', legendItemKey: 'g', innerRadiusRatio: 0.72, fills: [CORES.det, CORES.neu, CORES.pro], strokeWidth: 3, strokes: ['#fff'], cornerRadius: 6,
+    innerLabels: [{ text: fmt(r.nps), fontSize: 44, fontWeight: 500, color: '#1a1a1a', ...fonte }, { text: `Meta ${meta}`, fontSize: 13, fontWeight: 600, color: r.nps >= meta ? '#17702b' : '#b3301c', margin: 4, ...fonte }],
+    tooltip: { renderer: p => ({ title: p.datum.g, content: `${fmt(p.datum.v)} pessoas` }) } }],
+});
+
+AG.create({ ...agBase, container: altura('ag-dist', 300),
+  data: c.map((v, i) => ({ nota: String(i), v })),
+  series: [{ type: 'bar', xKey: 'nota', yKey: 'v', yName: 'Respostas', cornerRadius: 8,
+    itemStyler: p => ({ fill: corNota(+p.datum.nota) }),
+    label: { placement: 'outside-end', fontSize: 12, fontWeight: 600, color: '#3a3a3a', ...fonte, formatter: p => `${fmt((p.value / r.total) * 100, 0)}%` },
+    tooltip: { renderer: p => ({ title: `Nota ${p.datum.nota}`, content: `${fmt(p.datum.v)} respostas · ${fmt((p.datum.v / r.total) * 100, 1)}%` }) } }],
+  axes: [
+    { type: 'category', position: 'bottom', label: { fontSize: 12, fontWeight: 600, ...fonte }, line: { enabled: false } },
+    { type: 'number', position: 'left', label: { fontSize: 12, ...fonte, formatter: p => fmt(p.value) }, gridLine: { style: [{ stroke: '#ececec', lineDash: [4, 4] }] } },
   ],
 });
 
-// 2. Notas dadas: barras com fundo, cantos redondos, gradiente e % por cima
-const corNota = i => (i <= 6 ? CORES.det : i <= 8 ? CORES.neu : CORES.pro);
-const claro = { [CORES.det]: '#f08a7a', [CORES.neu]: '#e2e2e2', [CORES.pro]: '#5fcf76' };
-novo('ec-dist', 320, {
-  grid: { left: 8, right: 8, top: 30, bottom: 4, containLabel: true },
-  tooltip: { ...TOOLTIP, trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } },
-    formatter: p => `<b>Nota ${p[0].name}</b><br>${fmt(p[0].value)} respostas · ${fmt((p[0].value / r.total) * 100, 1)}%` },
-  xAxis: { type: 'category', data: c.map((_, i) => String(i)), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#5c5c5c', fontSize: 12, fontWeight: 600 } },
-  yAxis: { type: 'value', splitNumber: 4, axisLabel: { color: '#8a8a8a', fontSize: 12, formatter: v => fmt(v) }, splitLine: { lineStyle: { color: '#eeeeee', type: [4, 4] } } },
-  series: [{
-    type: 'bar', barWidth: '58%', showBackground: true, backgroundStyle: { color: '#fafafa', borderRadius: [10, 10, 4, 4] },
-    data: c.map((v, i) => ({ value: v, itemStyle: { color: grad(claro[corNota(i)], corNota(i)), borderRadius: [10, 10, 4, 4] } })),
-    label: { show: true, position: 'top', distance: 6, color: '#3a3a3a', fontSize: 12, fontWeight: 600, formatter: p => `${fmt((p.value / r.total) * 100, 0)}%` },
-    emphasis: { focus: 'self', itemStyle: { shadowBlur: 12, shadowColor: 'rgba(0,0,0,.18)' } },
-    blur: { itemStyle: { opacity: 0.35 } },
-    animationDelay: i => i * 45,
-  }],
-});
-
-// 3. NPS por mês (fictício, como no Stater): linha suave com área, linha da meta, último mês destacado
 const meses = ['set', 'out', 'nov', 'dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago'];
 const desvios = [-7, -4, -6, -2, -5, -1, 1, -3, 2, 0, 3, 1];
-const serie = desvios.map(d => r.nps + d);
-novo('ec-mes', 260, {
-  grid: { left: 8, right: 16, top: 30, bottom: 4, containLabel: true },
-  tooltip: { ...TOOLTIP, trigger: 'axis', formatter: p => `<b>${p[0].name}</b><br>NPS ${p[0].value} (fictício)` },
-  xAxis: { type: 'category', boundaryGap: false, data: meses, axisLine: { lineStyle: { color: '#e6e6e6' } }, axisTick: { show: false }, axisLabel: { color: '#5c5c5c', fontSize: 12 } },
-  yAxis: { type: 'value', min: Math.min(0, r.nps - 20), max: 100, interval: 25, axisLabel: { color: '#8a8a8a', fontSize: 12 }, splitLine: { lineStyle: { color: '#eeeeee', type: [4, 4] } } },
-  series: [{
-    type: 'line', smooth: 0.35, data: serie, symbol: 'circle', symbolSize: 8, showSymbol: true,
-    lineStyle: { width: 3, color: CORES.pro },
-    itemStyle: { color: '#fff', borderColor: CORES.pro, borderWidth: 2 },
-    areaStyle: { color: grad('rgba(34,160,59,.28)', 'rgba(34,160,59,0)') },
-    label: { show: true, position: 'top', distance: 8, color: '#3a3a3a', fontSize: 12, fontWeight: 600 },
-    markLine: { symbol: 'none', silent: true, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 },
-      label: { formatter: `Meta ${meta}`, position: 'insideStartTop', color: '#1a1a1a', backgroundColor: '#ffc148', padding: [3, 6], borderRadius: 6, fontWeight: 600, fontSize: 12 },
-      data: [{ yAxis: meta }] },
-    markPoint: { symbol: 'circle', symbolSize: 14, itemStyle: { color: CORES.pro, borderColor: '#fff', borderWidth: 3, shadowBlur: 10, shadowColor: 'rgba(34,160,59,.5)' }, label: { show: false },
-      data: [{ coord: [meses.length - 1, serie[serie.length - 1]] }] },
-  }],
+AG.create({ ...agBase, container: altura('ag-mes', 240),
+  data: meses.map((m, i) => ({ m, v: r.nps + desvios[i] })),
+  series: [
+    { type: 'area', xKey: 'm', yKey: 'v', fill: CORES.pro, fillOpacity: 0.12, strokeWidth: 0, marker: { enabled: false }, tooltip: { enabled: false } },
+    { type: 'line', xKey: 'm', yKey: 'v', yName: 'NPS', stroke: CORES.pro, strokeWidth: 3, interpolation: { type: 'smooth' },
+      marker: { size: 8, fill: '#fff', stroke: CORES.pro, strokeWidth: 2 },
+      label: { fontSize: 12, fontWeight: 600, color: '#3a3a3a', ...fonte, formatter: p => fmt(p.value) } },
+  ],
+  axes: [
+    { type: 'category', position: 'bottom', label: { fontSize: 12, ...fonte } },
+    { type: 'number', position: 'left', min: Math.min(0, r.nps - 20), max: 100, label: { fontSize: 12, ...fonte }, gridLine: { style: [{ stroke: '#ececec', lineDash: [4, 4] }] },
+      crossLines: [{ type: 'line', value: meta, stroke: CORES.ama, lineDash: [5, 4], strokeWidth: 1.5, label: { text: `Meta ${meta}`, position: 'left', fontSize: 12, fontWeight: 600, color: '#1a1a1a', ...fonte } }] },
+  ],
 });

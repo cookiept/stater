@@ -1,16 +1,16 @@
 // Stater · protótipo. Uma página, menu de marcas à esquerda, cada tab lê o seu Excel.
-import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1219';
-import { icon } from './icons.js?v=20261103-1219';
-import { logo } from './logos.js?v=20261103-1219';
-import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1219';
-import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1219';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1219';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1219';
-import { limparGraficos, base, junta, desenhar } from './charts.js?v=20261103-1219';
-import * as vNps from './views/nps.js?v=20261103-1219';
-import * as vCausas from './views/causas.js?v=20261103-1219';
-import * as vMolho from './views/molho.js?v=20261103-1219';
-import { exemplos } from './exemplo.js?v=20261103-1219';
+import { BRANDS, GROUP, brandById, applyTheme } from './brands.js?v=20261103-1224';
+import { icon } from './icons.js?v=20261103-1224';
+import { logo } from './logos.js?v=20261103-1224';
+import { esc, info, def, ligarTooltips, toast, confirmar } from './ui.js?v=20261103-1224';
+import { lerPrimeiraFolha, parseNps, parseCausas, FicheiroErrado, formatarPeriodo, formatarData, identificar, TIPOS } from './excel.js?v=20261103-1224';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta, enriquecerCausas, causasFiaveis, destaques } from './stats.js?v=20261103-1224';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261103-1224';
+import { limparGraficos, base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261103-1224';
+import * as vNps from './views/nps.js?v=20261103-1224';
+import * as vCausas from './views/causas.js?v=20261103-1224';
+import * as vMolho from './views/molho.js?v=20261103-1224';
+import { exemplos } from './exemplo.js?v=20261103-1224';
 
 // Tabs que funcionam no protótipo
 const ANALISES = {
@@ -348,56 +348,58 @@ function alertasHtml(alertas) {
   </section>`;
 }
 
-// Põe a linha de nomes por baixo das barras e o logótipo de cada marca dentro da barra do NPS
-function alinharEixo(chart) {
+// Logótipo de cada marca dentro da barra do NPS (círculo branco), e a linha de nomes alinhada com as barras
+const OV_GRID = { left: 52, right: 16, top: 30, bottom: 8 };
+function logosNasBarras(g, dados) {
+  if (g.isDisposed()) return;
+  const el = g.getDom();
+  if (!el || !el.isConnected) return;
   const e = document.getElementById('ov-eixo');
-  if (!e) return;
-  const g = chart.w.globals;
-  e.style.marginLeft = `${g.translateX}px`;
-  e.style.width = `${g.gridWidth}px`;
-  const el = chart.el;
+  if (e) { e.style.marginLeft = `${OV_GRID.left}px`; e.style.width = `${el.clientWidth - OV_GRID.left - OV_GRID.right}px`; }
   el.querySelectorAll('.ov-bar-logo').forEach(n => n.remove());
-  const caixa = el.getBoundingClientRect();
-  el.querySelectorAll('.apexcharts-series[seriesName="NPS"] path.apexcharts-bar-area').forEach(p => {
-    const b = BRANDS[+p.getAttribute('j')];
-    const r = p.getBoundingClientRect();
-    if (!b || r.height < 30) return;
-    const tam = Math.min(r.width - 10, 56, r.height - 12);
-    const d = document.createElement('span');
-    d.className = 'ov-bar-logo';
-    d.innerHTML = logo(b.icon);
-    Object.assign(d.style, { width: `${tam}px`, height: `${tam}px`, padding: `${Math.round(tam * 0.18)}px`, left: `${r.left - caixa.left + (r.width - tam) / 2}px`, top: `${r.bottom - caixa.top - tam - 8}px` });
-    el.appendChild(d);
+  const banda = (el.clientWidth - OV_GRID.left - OV_GRID.right) / dados.length;
+  const larg = banda * 0.62 / 2 - 4;
+  dados.forEach((d, i) => {
+    if (!d.r || d.r.nps < 12) return;
+    const [x, yTopo] = g.convertToPixel({ gridIndex: 0 }, [i, d.r.nps]);
+    const [, yZero] = g.convertToPixel({ gridIndex: 0 }, [i, 0]);
+    const alt = yZero - yTopo;
+    const tam = Math.min(larg - 10, 56, alt - 12);
+    if (tam < 18) return;
+    const centro = x - larg / 2 - 2;
+    const s = document.createElement('span');
+    s.className = 'ov-bar-logo';
+    s.innerHTML = logo(d.b.icon);
+    Object.assign(s.style, { width: `${tam}px`, height: `${tam}px`, padding: `${Math.round(tam * 0.18)}px`, left: `${centro - tam / 2}px`, top: `${yZero - tam - 8}px` });
+    el.appendChild(s);
   });
 }
 
 function montarOverview() {
   const dados = BRANDS.map(b => { const rec = store.get(b.id, 'nps'); return { b, r: rec ? resumoNps(rec.data.contagens) : null, m: meta(b.id) }; });
-  // Duas barras por marca: NPS (cor da marca) e meta (cinzento claro), lado a lado
-  desenhar(document.getElementById('ch-ov'), junta(base(GROUP), {
-    // Os nomes saem do eixo e vão para a linha HTML #ov-eixo, com o logótipo antes do nome
-    chart: { type: 'bar', height: 400, events: { mounted: alinharEixo, updated: alinharEixo, animationEnd: alinharEixo } },
-    series: [
-      { name: 'NPS', data: dados.map(d => ({ x: d.b.name, y: d.r ? d.r.nps : null, fillColor: d.r ? corMeta(d.r.nps, d.m) : CORES.meta })) },
-      { name: 'Meta', data: dados.map(d => ({ x: d.b.name, y: d.m, fillColor: '#d6dde3' })) },
-    ],
-    legend: { show: false },
-    plotOptions: { bar: { columnWidth: '62%', borderRadius: 6, borderRadiusApplication: 'end', dataLabels: { position: 'top' } } },
-    stroke: { show: true, width: 4, colors: ['transparent'] },
-    dataLabels: {
-      enabled: true, offsetY: -20, formatter: v => (v == null ? '' : fmt(v)),
-      style: { fontSize: '12px', fontWeight: 700, colors: ['#1a1a1a', '#5f5f5f'] },
-    },
-    yaxis: { min: -100, max: 100, tickAmount: 10 },
-    annotations: { yaxis: [{ y: 0, borderColor: '#9a9a9a', strokeDashArray: 0, borderWidth: 1 }] },
-    xaxis: { axisBorder: { show: false }, axisTicks: { show: false }, labels: { show: false } },
-    // Tooltip próprio: a bolinha do NPS tem a cor da marca, como a barra
-    tooltip: { shared: true, intersect: false, custom: ({ dataPointIndex: i }) => { const d = dados[i]; if (!d) return '';
+  // Duas barras por marca: NPS (verde na meta ou acima, vermelho abaixo) e meta (cinzento claro), lado a lado
+  const g = desenhar(document.getElementById('ch-ov'), junta(base(GROUP), {
+    grid: { ...OV_GRID },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.035)' } }, formatter: p => { const d = dados[p[0].dataIndex];
       const linha = (cor, rot, v) => `<div class="ov-tt-l"><i style="background:${cor}"></i>${rot}<b>${v == null ? 'sem dados' : fmt(v)}</b></div>`;
-      return `<div class="ov-tt"><div class="ov-tt-t">${esc(d.b.name)}</div>${linha(d.r ? corMeta(d.r.nps, d.m) : CORES.meta, 'NPS', d.r ? d.r.nps : null)}${linha('#d6dde3', 'Meta', d.m)}</div>`; } },
-    // No hover as barras mantêm a cor da marca
-    states: { hover: { filter: { type: 'none' } }, active: { filter: { type: 'none' } } },
-  }));
+      return `<div class="ov-tt"><div class="ov-tt-t">${esc(d.b.name)}</div>${linha(d.r ? corMeta(d.r.nps, d.m) : CORES.meta, 'NPS', d.r ? d.r.nps : null)}${linha(CORES.meta, 'Meta', d.m)}</div>`; } },
+    // Os nomes saem do eixo e vão para a linha HTML #ov-eixo
+    xAxis: { type: 'category', data: dados.map(d => d.b.name), ...EIXO_CAT, axisLabel: { show: false } },
+    yAxis: { type: 'value', min: -100, max: 100, interval: 20, ...EIXO_VAL },
+    series: [
+      { name: 'NPS', type: 'bar', barGap: '8%', barWidth: '31%',
+        data: dados.map(d => ({ value: d.r ? d.r.nps : null, itemStyle: { color: comBrilho(d.r ? corMeta(d.r.nps, d.m) : CORES.meta), borderRadius: [10, 10, 4, 4] } })),
+        label: { show: true, position: 'top', distance: 6, color: '#1a1a1a', fontSize: 12, fontWeight: 700, formatter: p => (p.value == null ? '' : fmt(p.value)) },
+        markLine: { symbol: 'none', silent: true, label: { show: false }, lineStyle: { color: '#9a9a9a', type: 'solid', width: 1 }, data: [{ yAxis: 0 }] } },
+      { name: 'Meta', type: 'bar', barWidth: '31%',
+        data: dados.map(d => ({ value: d.m, itemStyle: { color: comBrilho(CORES.meta), borderRadius: [10, 10, 4, 4] } })),
+        label: { show: true, position: 'top', distance: 6, color: '#5f5f5f', fontSize: 12, fontWeight: 700, formatter: p => fmt(p.value) } },
+    ],
+  }), 400);
+  if (!g) return;
+  const pos = () => logosNasBarras(g, dados);
+  g.on('finished', pos);
+  g.on('rendered', () => requestAnimationFrame(pos));
 }
 
 // ---------- Exportar ----------

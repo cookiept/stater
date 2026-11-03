@@ -1,12 +1,12 @@
 // Tab "Todos ao molho" (Tabela única de causas): junta as causas raiz de todos os drivers numa só tabela.
 // Cada driver é um Excel "Relate" de Group NPS com a causa raiz desse driver; carregam-se vários de uma vez.
-import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261103-1219';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1219';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1219';
-import { icon } from '../icons.js?v=20261103-1219';
-import { formatarPeriodo } from '../excel.js?v=20261103-1219';
-import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261103-1219';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1219';
+import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261103-1224';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1224';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1224';
+import { icon } from '../icons.js?v=20261103-1224';
+import { formatarPeriodo } from '../excel.js?v=20261103-1224';
+import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261103-1224';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261103-1224';
 
 export const multi = true;
 
@@ -134,33 +134,30 @@ export function mount(rec, brand, meta) {
   const b = base(brand);
 
   desenhar(document.getElementById('ch-drv'), junta(b, {
-    chart: { type: 'bar', height: Math.max(200, ds.length * 46 + 70) },
-    series: [{ name: 'NPS', data: ds.map(d => ({ x: d.nome, y: d.nps, fillColor: d.abaixo ? CORES.det : CORES.pro })) }],
-    plotOptions: { bar: { horizontal: true, barHeight: '58%', borderRadius: 4, borderRadiusApplication: 'end', dataLabels: { position: 'top' } } },
-    dataLabels: { enabled: true, offsetX: 22, style: { fontSize: '12px', fontWeight: 700, colors: ['#1a1a1a'] }, formatter: v => fmt(v) },
-    xaxis: { min: Math.min(0, ...ds.map(d => d.nps)) - 10, max: 100, axisBorder: { show: false } },
-    yaxis: { labels: { maxWidth: 260, style: { fontSize: '12px', colors: ['#1a1a1a'] } } },
-    annotations: { xaxis: [{ x: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, orientation: 'horizontal', borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } }] },
-    tooltip: { y: { formatter: (v, { dataPointIndex }) => `${fmt(v)} · ${fmt(ds[dataPointIndex].respondentes)} pessoas` } },
-    grid: { xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-  }));
+    grid: { left: 8, right: 40, top: 10, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'item', formatter: p => `<b>${esc(ds[p.dataIndex].nome)}</b><br>NPS ${fmt(p.value)} · ${fmt(ds[p.dataIndex].respondentes)} pessoas` },
+    xAxis: { type: 'value', min: Math.min(0, ...ds.map(d => d.nps)) - 10, max: 100, ...EIXO_VAL },
+    yAxis: { type: 'category', inverse: true, data: ds.map(d => d.nome), ...EIXO_CAT, axisLabel: { ...EIXO_CAT.axisLabel, width: 240, overflow: 'truncate', color: '#1a1a1a', fontWeight: 400 } },
+    series: [{ type: 'bar', barWidth: '58%',
+      data: ds.map(d => ({ value: d.nps, itemStyle: { color: comBrilho(d.abaixo ? CORES.det : CORES.pro, true), borderRadius: [4, 10, 10, 4] } })),
+      label: { show: true, position: 'right', color: '#1a1a1a', fontSize: 12, fontWeight: 700, formatter: p => fmt(p.value) },
+      markLine: { symbol: 'none', silent: true, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: `Meta ${meta}`, position: 'end', ...ETIQ_META }, data: [{ xAxis: meta }] } }],
+  }), Math.max(200, ds.length * 46 + 70));
 
   const top = [...cs].filter(c => !c.zero && !c.semSugestao).sort((a, c) => c.total - a.total).slice(0, 12);
+  const cor3 = [CORES.det, CORES.neu, CORES.pro];
   desenhar(document.getElementById('ch-top'), junta(b, {
-    chart: { type: 'bar', height: Math.max(220, top.length * 48 + 60), stacked: true },
-    series: [
-      { name: 'Detratores', data: top.map(c => c.d) },
-      { name: 'Neutros', data: top.map(c => c.n) },
-      { name: 'Promotores', data: top.map(c => c.p) },
-    ],
-    colors: [CORES.det, CORES.neu, CORES.pro],
-    plotOptions: { bar: { horizontal: true, barHeight: '62%', borderRadius: 4, borderRadiusApplication: 'end', borderRadiusWhenStacked: 'last' } },
-    stroke: { width: 1, colors: ['#fff'] },
-    xaxis: { categories: top.map(c => [curto(c.nome), `${c.driver} · NPS ${fmt(c.nps)}`]), labels: { formatter: v => fmt(v) }, axisBorder: { show: false } },
-    yaxis: { labels: { minWidth: 230, maxWidth: 230, offsetX: 4, style: { fontSize: '12px', colors: ['#1a1a1a'] } } },
-    tooltip: { shared: true, intersect: false, y: { formatter: v => `${fmt(v)} menções` } },
-    grid: { xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-  }));
+    grid: { left: 8, right: 16, top: 6, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } } },
+    xAxis: { type: 'value', ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => fmt(v) } },
+    yAxis: { type: 'category', inverse: true, data: top.map(c => `{n|${curto(c.nome)}}\n{m|${c.driver} · NPS ${fmt(c.nps)}}`), ...EIXO_CAT,
+      axisLabel: { margin: 12, align: 'right', rich: { n: { fontSize: 12, color: '#1a1a1a', lineHeight: 16 }, m: { fontSize: 12, color: '#6b6b6b', lineHeight: 15 } } } },
+    series: ['Detratores', 'Neutros', 'Promotores'].map((nome, k) => ({
+      name: nome, type: 'bar', stack: 't', barWidth: '58%',
+      data: top.map(c => [c.d, c.n, c.p][k]),
+      itemStyle: { color: comBrilho(cor3[k], true), borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+    })),
+  }), Math.max(220, top.length * 48 + 60));
 
   // Tabela: filtrar por driver, procurar e ordenar
   const tbody = document.querySelector('#tbl-causas tbody');

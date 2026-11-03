@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1219';
-import { base, junta, desenhar } from '../charts.js?v=20261103-1219';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1219';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1219';
-import { icon } from '../icons.js?v=20261103-1219';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES } from '../stats.js?v=20261103-1224';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261103-1224';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261103-1224';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261103-1224';
+import { icon } from '../icons.js?v=20261103-1224';
 
 export const npsGlobal = data => {
   const a = data.amostraGrupo;
@@ -139,37 +139,46 @@ export function mount(rec, brand, meta) {
   const nomes = cs.map(c => c.nome);
   const altura = Math.max(220, cs.length * 54 + 60);
 
+  // Quem escolheu cada causa: barras 100% (detratores, neutros, promotores) com cantos redondos
+  const pct = [cs.map(c => c.pctD), cs.map(c => c.pctN), cs.map(c => c.pctP)];
+  const rotY = cs.map(c => `{n|${c.nome.length > 30 ? c.nome.slice(0, 29) + '…' : c.nome}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · NPS ${fmt(c.nps)}`}}`);
+  const cor3 = [CORES.det, CORES.neu, CORES.pro];
+  const nomes3 = ['Detratores', 'Neutros', 'Promotores'];
   desenhar(document.getElementById('ch-comp'), junta(b, {
-    chart: { type: 'bar', height: altura, stacked: true, stackType: '100%' },
-    series: [
-      { name: 'Detratores', data: cs.map(c => c.d) },
-      { name: 'Neutros', data: cs.map(c => c.n) },
-      { name: 'Promotores', data: cs.map(c => c.p) },
-    ],
-    colors: [CORES.det, CORES.neu, CORES.pro],
-    plotOptions: { bar: { horizontal: true, barHeight: '62%', borderRadius: 4, borderRadiusApplication: 'around', borderRadiusWhenStacked: 'all' } },
-    stroke: { width: 2, colors: ['#fff'] },
-    dataLabels: { enabled: true, formatter: (v) => (v >= 8 ? `${fmt(v)}%` : ''), style: { fontSize: '12px', fontWeight: 600, colors: ['#fff', '#1a1a1a', '#fff'] }, dropShadow: { enabled: false } },
-    xaxis: { categories: cs.map(c => [c.nome.length > 30 ? c.nome.slice(0, 29) + '…' : c.nome, c.zero ? '0 menções' : `${fmt(c.total)} menções · NPS ${fmt(c.nps)}`]), labels: { formatter: v => `${v}%` }, axisBorder: { show: false } },
-    yaxis: { labels: { minWidth: 230, maxWidth: 230, offsetX: 4, style: { fontSize: '12px', colors: ['#1a1a1a'] } } },
-    tooltip: { shared: true, intersect: false, y: { formatter: (v, { seriesIndex, dataPointIndex }) => `${fmt(v)} (${fmt([cs[dataPointIndex].pctD, cs[dataPointIndex].pctN, cs[dataPointIndex].pctP][seriesIndex], 1)}%)` } },
-    grid: { xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
-  }));
+    grid: { left: 8, right: 16, top: 6, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } },
+      formatter: p => { const c = cs[p[0].dataIndex]; return `<b>${esc(c.nome)}</b><br>` + (c.zero ? '0 menções' : p.map(x => `${x.marker}${x.seriesName}: ${fmt([c.d, c.n, c.p][x.seriesIndex])} (${fmt(x.value, 1)}%)`).join('<br>')); } },
+    xAxis: { type: 'value', max: 100, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => `${v}%` } },
+    yAxis: { type: 'category', inverse: true, data: rotY, ...EIXO_CAT,
+      axisLabel: { margin: 12, align: 'right', rich: { n: { fontSize: 12, color: '#1a1a1a', lineHeight: 16 }, m: { fontSize: 12, color: '#6b6b6b', lineHeight: 15 } } } },
+    series: [0, 1, 2].map(k => ({
+      name: nomes3[k], type: 'bar', stack: 't', barWidth: '58%',
+      data: pct[k].map((v, i) => (cs[i].zero ? null : v)),
+      itemStyle: { color: comBrilho(cor3[k], true), borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, color: k === 1 ? '#1a1a1a' : '#fff', fontSize: 12, fontWeight: 600, formatter: p => (p.value >= 8 ? `${fmt(p.value)}%` : '') },
+      emphasis: { focus: 'series' }, blur: { itemStyle: { opacity: 0.35 } },
+    })),
+  }), altura);
 
+  // Onde atuar primeiro: bolhas por causa, linha da meta e do NPS geral
+  const maxX = Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15);
+  const minY = Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10);
   desenhar(document.getElementById('ch-mat'), junta(b, {
-    chart: { type: 'scatter', height: 340 },
-    series: comM.map(c => ({ name: c.nome, data: [[c.total, c.nps]] })),
-    colors: comM.map(c => (c.nps < meta ? CORES.det : CORES.pro)),
-    markers: { size: 11, strokeWidth: 2, strokeColors: '#fff', hover: { sizeOffset: 2 } },
-    xaxis: { type: 'numeric', tickAmount: 5, min: 0, max: Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15), labels: { formatter: v => fmt(v) }, title: { text: 'Menções', style: { fontSize: '12px', fontWeight: 500, color: '#5f5f5f' } } },
-    yaxis: { min: Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10), max: 100, tickAmount: 4, title: { text: 'NPS', style: { fontSize: '12px', fontWeight: 500, color: '#5f5f5f' } } },
-    annotations: { yaxis: [
-      { y: meta, borderColor: '#e0a400', strokeDashArray: 4, label: { text: `Meta ${meta}`, position: 'right', textAnchor: 'end', borderColor: '#ffc148', style: { background: '#ffc148', color: '#1a1a1a', fontWeight: 600, fontSize: '12px' } } },
-      ...(g ? [{ y: g.nps, borderColor: '#b4b4b4', strokeDashArray: 2, label: { text: `NPS geral ${fmt(g.nps)}`, position: 'left', textAnchor: 'start', borderColor: 'transparent', style: { background: '#f0f0f0', color: '#494949', fontSize: '12px' } } }] : []),
-    ] },
-    tooltip: { custom: ({ seriesIndex }) => { const c = comM[seriesIndex]; return `<div style="padding:10px 12px;font-size:12px"><b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções</div>`; } },
-    grid: { xaxis: { lines: { show: true } } },
-  }));
+    grid: { left: 8, right: 24, top: 34, bottom: 30, containLabel: true },
+    tooltip: { trigger: 'item', formatter: p => { const c = comM[p.dataIndex]; return `<b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções`; } },
+    xAxis: { type: 'value', min: 0, max: maxX, splitNumber: 5, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => fmt(v) },
+      name: 'Menções', nameLocation: 'middle', nameGap: 28, nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
+    yAxis: { type: 'value', min: minY, max: 100, ...EIXO_VAL, name: 'NPS', nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
+    series: [{
+      type: 'scatter', symbolSize: 18,
+      data: comM.map(c => ({ value: [c.total, c.nps], itemStyle: { color: comBrilho(c.nps < meta ? CORES.det : CORES.pro), borderColor: '#fff', borderWidth: 3, shadowBlur: 8, shadowColor: 'rgba(0,0,0,.18)' } })),
+      emphasis: { scale: 1.3 },
+      markLine: { symbol: 'none', silent: true, data: [
+        { yAxis: meta, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: `Meta ${meta}`, position: 'insideEndTop', ...ETIQ_META } },
+        ...(g ? [{ yAxis: g.nps, lineStyle: { color: '#b4b4b4', type: [2, 3], width: 1 }, label: { formatter: `NPS geral ${fmt(g.nps)}`, position: 'insideStartTop', color: '#494949', backgroundColor: '#f0f0f0', padding: [3, 6], borderRadius: 6, fontSize: 12 } }] : []),
+      ] },
+    }],
+  }), 340);
 
   document.getElementById('lg-mat').innerHTML = comM.map(c => `<span><i style="background:${c.nps < meta ? CORES.det : CORES.pro};border-radius:50%"></i>${esc(c.nome)} <b class="num">${fmt(c.nps)}</b></span>`).join('');
 
