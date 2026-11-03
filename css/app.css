@@ -768,3 +768,10 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 /* Dois cartões ao lado do Resumo (sem o "vs objetivo") */
 .so-main .resumo { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); }
 .rs-factos { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+
+/* Avisos: entram e saem suavemente; 'ok' é verde com certo (Gonçalo, 2026-11-03) */
+.toast { opacity: 0; transform: translate(-50%, 16px) scale(.97); transition: opacity .32s cubic-bezier(.2, .8, .2, 1), transform .32s cubic-bezier(.2, .8, .2, 1); }
+.toast.is-in { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.toast-ok { background: #1e8a34; font-weight: 600; }
+.toast-ok .ico { stroke-width: 2.4; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: opacity .2s; transform: translateX(-50%); } }

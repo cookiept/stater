@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261103-1642';
-import { esc, info } from './ui.js?v=20261103-1642';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261103-1642';
-import { fmt } from './stats.js?v=20261103-1642';
-import { store, meta } from './store.js?v=20261103-1642';
-import { analiseDe, ativa } from './analises.js?v=20261103-1642';
-import { tileVars } from './layout.js?v=20261103-1642';
+import { icon } from './icons.js?v=20261103-1649';
+import { esc, info } from './ui.js?v=20261103-1649';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261103-1649';
+import { fmt } from './stats.js?v=20261103-1649';
+import { store, meta } from './store.js?v=20261103-1649';
+import { analiseDe, ativa } from './analises.js?v=20261103-1649';
+import { tileVars } from './layout.js?v=20261103-1649';
 
 // Aviso de ficheiro errado: o que é o ficheiro, o que falta e em que tab entra
 function avisoErro(erro, extra = '') {

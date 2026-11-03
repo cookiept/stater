@@ -1,5 +1,5 @@
 // Pequenas peças de interface partilhadas.
-import { icon } from './icons.js?v=20261103-1642';
+import { icon } from './icons.js?v=20261103-1649';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -54,14 +54,20 @@ export function ligarTooltips() {
   addEventListener('scroll', esconder, true);
 }
 
-export function toast(msg) {
-  document.querySelector('.toast')?.remove();
+// Aviso em baixo, ao centro. tipo 'ok' = verde com certo (ex.: objetivos guardados).
+export function toast(msg, tipo = '') {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
   const t = document.createElement('div');
-  t.className = 'toast';
+  t.className = `toast${tipo ? ` toast-${tipo}` : ''}`;
   t.setAttribute('role', 'status');
-  t.innerHTML = `${icon('sparkle')}<span>${esc(msg)}</span>`;
+  t.innerHTML = `${icon(tipo === 'ok' ? 'tick' : 'sparkle')}<span>${esc(msg)}</span>`;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3200);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('is-in')));
+  setTimeout(() => {
+    t.classList.remove('is-in');
+    t.addEventListener('transitionend', () => t.remove(), { once: true });
+    setTimeout(() => t.remove(), 600);
+  }, 3200);
 }
 
 export function confirmar(titulo, texto, acao = 'Apagar') {

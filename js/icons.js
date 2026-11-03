@@ -44,6 +44,7 @@ const P = {
   slides: '<rect x="3.5" y="4.5" width="17" height="12" rx="2"/><path d="M12 16.5v3.5M8.5 20h7"/><path d="M7.5 12.5l3-3 2.5 2 3.5-3.5"/>',
   print: '<path d="M7 8.5V3.5h10v5"/><rect x="3.5" y="8.5" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/>',
   alert: '<path d="M12 4l9 15.5H3L12 4z"/><path d="M12 10v4.5"/><path d="M12 17.3h.01" stroke-width="2.4"/>',
+  tick: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   sort: '<path d="M8 5v14M4.5 15.5L8 19l3.5-3.5M16 19V5M12.5 8.5L16 5l3.5 3.5"/>',
 };
 
