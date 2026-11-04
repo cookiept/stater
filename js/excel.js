@@ -134,26 +134,28 @@ export function extrairPergunta(rows) {
 // ---------- Que análise é este Excel? (para dizer em que tab entra) ----------
 // Devolve um dos tipos: nps, causa, relate, textiq, ces, csat, regressao, ou null.
 export const TIPOS = {
-  nps: { nome: 'Describe do NPS (notas de 0 a 10)', tabs: ['nps'] },
-  causa: { nome: 'Relate de Group NPS com a Causa Raiz', tabs: ['causa-raiz', 'molho'] },
-  relate: { nome: 'Relate de Group NPS com outra variável (driver, segmento ou resultado)', tabs: ['driver-relate', 'inspecao', 'segmento'] },
-  textiq: { nome: 'Text iQ (Topics, Level 1 / Level 2)', tabs: ['topics', 'causas', 'drivers', 'subtopics'] },
-  ces: { nome: 'CES (esforço do cliente)', tabs: ['nps-ces'] },
-  csat: { nome: 'CSAT', tabs: ['csat', 'nps-csat'] },
-  regressao: { nome: 'Regressão (importância relativa)', tabs: ['csat'] },
+  nps: { nome: 'Describe do NPS (notas de 0 a 10)', analises: ['nps'] },
+  causa: { nome: 'Relate de Group NPS com a Causa Raiz (resposta múltipla)', analises: ['causa-raiz', 'grupos', 'molho'] },
+  relate: { nome: 'Relate de Group NPS com outra variável (driver, segmento…)', analises: ['grupos'] },
+  grupos: { nome: 'Relate do NPS (0 a 10) com outra variável (resultado, CES, CSAT…)', analises: ['grupos'] },
+  textiq: { nome: 'Text iQ (média de quem mencionou cada tema)', analises: ['textiq'] },
+  ces: { nome: 'Describe do CES (escala de 1 a 7)', analises: ['ces'] },
+  csat: { nome: 'Relate de Group NPS com um CSAT', analises: ['csat-grupos'] },
+  regressao: { nome: 'Regressão (importância relativa)', analises: ['regressao'] },
 };
 
+// Que análise é este Excel? Vê a estrutura, não o nome do ficheiro.
 export function identificar(rows) {
   const topo = rows.slice(0, 12).flat().map(texto).join(' \n ');
   const tudo = rows.slice(0, 80).flat().map(texto).join(' \n ');
-  if (/\b(level 1|level 2|topic hierarchy)\b/i.test(topo)) return 'textiq';
-  if (/relative importance|regression/i.test(tudo)) return 'regressao';
-  if (/\(group\)[^\n]*\svs\.?\s/i.test(topo) || /checked count/i.test(tudo)) {
-    return /checked count|\bCR[\s_]|causa|razões|raz[oõ]es/i.test(topo) ? 'causa' : 'relate';
-  }
-  if (/\b(ces|customer effort)\b/i.test(topo)) return 'ces';
-  if (/\bcsat\b/i.test(topo)) return 'csat';
-  if (/summary of[^\n]*\bnps\b/i.test(topo) && /(^|\n)\s*count of/i.test(tudo)) return 'nps';
+  if (linhaCom(rows, /^is checked\??$/i) >= 0 || /\b(level 1|level 2|topic hierarchy)\b/i.test(topo)) return 'textiq';
+  if (/relative importance/i.test(tudo)) return 'regressao';
+  const cs = lerCounts(rows);
+  if (cs) return cs.every(g => grupoDe(g.nome)) ? 'csat' : 'grupos';
+  if (/checked count/i.test(tudo)) return 'causa';
+  if (rows.some(r => lower(r?.[0]) === 'count') && rows.some(r => grupoDe(r?.[0]))) return 'relate';
+  if (/\b(ces|customer effort)\b|esforço/i.test(topo) && /(^|\n)\s*count of/i.test(tudo)) return 'ces';
+  if (/\bnps\b/i.test(topo) && /(^|\n)\s*count of/i.test(tudo)) return 'nps';
   return null;
 }
 
@@ -199,6 +201,11 @@ export function parseCausas(rows) {
   const tipo = identificar(rows);
   if (tipo && tipo !== 'causa' && tipo !== 'relate')
     throw new FicheiroErrado(`Este Excel é um ${TIPOS[tipo].nome}. Nesta tab entra o Relate de Group NPS com a Causa Raiz.`, ['O bloco com "Checked Count" por Detrator, Neutro e Promotor']);
+  return lerCausas(rows);
+}
+
+// Leitura do Relate de "(Group) NPS" × variável, sem verificar o tipo (também usada pelo NPS por grupo)
+function lerCausas(rows) {
 
   let titulo = '';
   for (const r of rows.slice(0, 5)) for (const c of r || []) if (/\svs\.?\s/i.test(texto(c)) && !titulo) titulo = limparTitulo(c);
@@ -254,5 +261,157 @@ export function parseCausas(rows) {
       [inicio < 0 ? 'A coluna "Checked Count"' : 'Linhas com Detrator, Neutro e Promotor e o número de menções', 'Variável principal "(Group) NPS" e secundária a Causa Raiz, com a opção Relate']);
   const semRespostas = todas.filter(c => c.total === 0).map(c => c.nome);
   const respondentes = amostraGrupo.d + amostraGrupo.n + amostraGrupo.p;
-  return { titulo, causas, semRespostas, amostraGrupo: respondentes ? amostraGrupo : null, periodo: extrairPeriodo(rows), filtros: extrairFiltros(rows), pergunta: extrairPergunta(rows) };
+  return { titulo, causas, semRespostas, multi: inicio >= 0 && mapa.size > 0 && respondentes > 0, amostraGrupo: respondentes ? amostraGrupo : null, periodo: extrairPeriodo(rows), filtros: extrairFiltros(rows), pergunta: extrairPergunta(rows) };
+}
+
+// =====================================================================
+// Tipos novos (2026-11-04). Cada um devolve dados normalizados que a vista usa.
+// =====================================================================
+
+const numero = v => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const s = texto(v).replace(/\s/g, '').replace(',', '.');
+  return /^-?\d+(\.\d+)?$/.test(s) ? parseFloat(s) : null;
+};
+const resumoBase = rows => ({ periodo: extrairPeriodo(rows), filtros: extrairFiltros(rows), pergunta: extrairPergunta(rows) });
+const linhaCom = (rows, re, min = 1) => rows.findIndex(r => (r || []).filter(c => re.test(texto(c))).length >= min);
+
+// Tabela "Counts": linhas = nota, colunas = "Count of <grupo>". Devolve [{ nome, contagens: Map(nota → n) }].
+function lerCounts(rows) {
+  const i = linhaCom(rows, /^count of\s+/i, 2);
+  if (i < 0) return null;
+  const cab = rows[i] || [];
+  const cols = cab.map((c, j) => [j, texto(c)]).filter(([, s]) => /^count of\s+/i.test(s)).map(([j, s]) => [j, s.replace(/^count of\s+/i, '').trim()]);
+  const grupos = cols.map(([, nome]) => ({ nome, contagens: new Map() }));
+  let lidas = 0;
+  for (const r of rows.slice(i + 1, i + 30)) {
+    const nota = inteiro(r?.[0]);
+    if (nota == null) { if (lidas) break; continue; }
+    lidas++;
+    cols.forEach(([j], k) => { const n = inteiro(r[j]); if (n != null) grupos[k].contagens.set(nota, n); });
+  }
+  return lidas ? grupos : null;
+}
+
+// ---------- NPS por grupo: driver, resultado da inspeção, segmento, CES, CSAT… ----------
+// Aceita os dois formatos do Stats iQ:
+//  A) Relate de "(Group) NPS" com outra variável: bloco "Count" com Detrator/Neutro/Promotor × grupo
+//     (ou o bloco vertical "Checked Count" quando a variável é de resposta múltipla, ex.: Topics);
+//  B) Relate de NPS (0–10) com outra variável: tabela "Counts" com as notas 0–10 × "Count of <grupo>".
+// Ordem das escalas conhecidas (o resto vai por número de respostas)
+const ESCALAS = [
+  ['discordo totalmente', 'discordo', 'discordo parcialmente', 'nem discordo, nem concordo', 'concordo parcialmente', 'concordo', 'concordo totalmente'],
+  ['muito insatisfeito', 'insatisfeito', 'neutro', 'satisfeito', 'muito satisfeito'],
+];
+export function ordemEscala(nomes) {
+  const ls = nomes.map(lower);
+  for (const e of ESCALAS) if (ls.length >= 2 && ls.every(n => e.includes(n))) return n => e.indexOf(lower(n));
+  return null;
+}
+
+export function parseGrupos(rows) {
+  const topo = rows.slice(0, 12).flat().map(texto).join(' \n ');
+  if (linhaCom(rows, /^is checked\??$/i) >= 0)
+    throw new FicheiroErrado('Este Excel é um Text iQ (média de quem mencionou cada tema). Nesta tab entra o Relate do NPS com outra variável.', ['O NPS cruzado com a variável (driver, resultado, segmento…) com a opção Relate']);
+  if (/relative importance|regression/i.test(topo))
+    throw new FicheiroErrado('Este Excel é uma Regressão. Nesta tab entra o Relate do NPS com outra variável.', ['O NPS cruzado com a variável com a opção Relate']);
+
+  // B) notas 0–10 por grupo
+  const cs = lerCounts(rows);
+  if (cs && !cs.every(g => grupoDe(g.nome))) {
+    const notas = new Set(cs.flatMap(g => [...g.contagens.keys()]));
+    if ([...notas].every(n => n >= 0 && n <= 10)) {
+      const grupos = cs.map(g => {
+        const c = Array.from({ length: 11 }, (_, k) => g.contagens.get(k) || 0);
+        const total = c.reduce((a, b) => a + b, 0);
+        return { nome: g.nome, d: c.slice(0, 7).reduce((a, b) => a + b, 0), n: c[7] + c[8], p: c[9] + c[10], total, media: total ? c.reduce((a, v, k) => a + v * k, 0) / total : null };
+      });
+      return { grupos: grupos.filter(g => g.total > 0), semRespostas: grupos.filter(g => !g.total).map(g => g.nome), multi: false, amostraGrupo: null, ...resumoBase(rows) };
+    }
+  }
+  // A) Group NPS × variável
+  let base;
+  try { base = lerCausas(rows); } catch (e) {
+    throw new FicheiroErrado('Não encontrei o NPS por grupo. Confirma que exportaste, no Stats iQ, o NPS cruzado com a variável desta tab com a opção Relate.',
+      ['A tabela "Count" com Detrator, Neutro e Promotor por grupo', 'ou a tabela "Counts" com as notas de 0 a 10 por grupo']);
+  }
+  return { grupos: base.causas, semRespostas: base.semRespostas, multi: !!base.multi, amostraGrupo: base.amostraGrupo, ...resumoBase(rows) };
+}
+
+// ---------- Text iQ: média da recomendação de quem mencionou cada tema (CHECKED / UNCHECKED) ----------
+export function parseTextiq(rows) {
+  const i = linhaCom(rows, /^is checked\??$/i);
+  if (i < 0) {
+    const tipo = identificar(rows);
+    throw new FicheiroErrado(`${tipo ? `Este Excel é um ${TIPOS[tipo].nome}. ` : ''}Nesta tab entra o Text iQ: NPS (numérico) cruzado com os temas, com as linhas CHECKED e UNCHECKED.`,
+      ['A coluna "Is Checked?" com CHECKED e UNCHECKED', 'As colunas "Average" e "Sample Size"']);
+  }
+  const cab = (rows[i] || []).map(lower);
+  const col = re => cab.findIndex(c => re.test(c));
+  const cChk = col(/^is checked/), cMed = col(/^average$/), cSoma = col(/^sum$/), cN = col(/^sample size$/);
+  const mapa = new Map();
+  for (const r of rows.slice(i + 1)) {
+    const nome = texto(r?.[0]), chk = lower(r?.[cChk]);
+    if (!nome) break;
+    if (chk !== 'checked' && chk !== 'unchecked') continue;
+    if (!mapa.has(nome)) mapa.set(nome, { nome, nC: 0, somaC: 0, nU: 0, somaU: 0 });
+    const t = mapa.get(nome), n = inteiro(r[cN]) || 0;
+    const soma = cSoma >= 0 && numero(r[cSoma]) != null ? numero(r[cSoma]) : (numero(r[cMed]) || 0) * n;
+    if (chk === 'checked') { t.nC = n; t.somaC = soma; } else { t.nU = n; t.somaU = soma; }
+  }
+  const temas = [...mapa.values()];
+  if (!temas.length) throw new FicheiroErrado('Encontrei o cabeçalho do Text iQ mas nenhuma linha de tema.', ['Linhas com o nome do tema e CHECKED / UNCHECKED']);
+  const ref = temas.reduce((a, t) => (t.nC + t.nU > a.nC + a.nU ? t : a), temas[0]);
+  const total = ref.nC + ref.nU;
+  return { temas, total, media: total ? (ref.somaC + ref.somaU) / total : null, variavel: texto(rows[i][0]).replace(/\s*-\s*topic hierarchy.*$/i, ''), ...resumoBase(rows) };
+}
+
+// ---------- CES: distribuição das respostas numa escala (1 a 7) ----------
+export function parseCes(rows) {
+  const topo = rows.slice(0, 12).flat().map(texto).join(' \n ');
+  const i = rows.findIndex(r => /^count of\s+/i.test(texto(r?.[1])));
+  if (!/\bces\b|esforço|effort/i.test(topo) || i < 0) {
+    const tipo = identificar(rows);
+    throw new FicheiroErrado(`${tipo ? `Este Excel é um ${TIPOS[tipo].nome}. ` : ''}Nesta tab entra o Describe do CES (escala de 1 a 7).`, ['A variável CES com a opção Describe', 'A tabela "Count of CES" com cada valor da escala']);
+  }
+  const contagens = new Map();
+  for (const r of rows.slice(i + 1, i + 15)) { const v = inteiro(r?.[0]), n = inteiro(r?.[1]); if (v == null || n == null) { if (contagens.size) break; continue; } contagens.set(v, n); }
+  const vals = [...contagens.keys()];
+  if (vals.length < 3 || Math.max(...vals) > 10) throw new FicheiroErrado('Não encontrei a contagem de cada valor do CES.', ['As linhas 1 a 7 com o número de respostas']);
+  const min = Math.min(1, ...vals), max = Math.max(7, ...vals);
+  return { min, max, contagens: Array.from({ length: max - min + 1 }, (_, k) => contagens.get(min + k) || 0), ...resumoBase(rows) };
+}
+
+// ---------- CSAT por grupo de NPS (um Excel por atributo; ex.: Overview CSAT's da Brisa) ----------
+export function parseCsatGrupos(rows) {
+  const cs = lerCounts(rows);
+  const nomeCsat = rows.slice(0, 40).flat().map(texto).find(s => /^csat[_\s-]/i.test(s));
+  if (!cs || !cs.every(g => grupoDe(g.nome)) || !nomeCsat)
+    throw new FicheiroErrado('Nesta tab entra o Relate de "(Group) NPS" com um CSAT (um Excel por CSAT).', ['Uma variável CSAT (ex.: CSAT_EficiênciaServiço)', 'A tabela "Counts" com "Count of Detrator / Passivo / Promotor"']);
+  const porGrupo = { d: null, n: null, p: null };
+  for (const g of cs) porGrupo[grupoDe(g.nome)] = Object.fromEntries(g.contagens);
+  return { atributo: nomeCsat.replace(/^csat[_\s-]*/i, '').replace(/([a-zà-ú])([A-ZÀ-Ú])/g, '$1 $2').trim(), porGrupo, ...resumoBase(rows) };
+}
+
+// ---------- Regressão: importância relativa de cada variável no NPS ----------
+export function parseRegressao(rows) {
+  const i = rows.findIndex(r => (r || []).some(c => lower(c) === 'relative importance'));
+  if (i < 0) throw new FicheiroErrado('Nesta tab entra a Regressão do NPS com os CSAT (Stats iQ, opção Regression).', ['A coluna "Relative Importance"', 'As variáveis de entrada (ex.: CSAT_Serviço)']);
+  const cab = (rows[i] || []).map(lower);
+  const cNome = cab.indexOf('variable'), cImp = cab.indexOf('relative importance'), cCoef = cab.indexOf('coefficient');
+  const variaveis = [];
+  for (const r of rows.slice(i + 1)) {
+    const nome = texto(r?.[cNome]), imp = numero(r?.[cImp]);
+    if (!nome || imp == null) break;
+    variaveis.push({ nome: nome.replace(/^csat[_\s-]*/i, ''), imp: imp * 100, coef: numero(r?.[cCoef]) });
+  }
+  const j = rows.findIndex(r => (r || []).some(c => lower(c) === 'r-squared'));
+  let n = null, r2 = null;
+  if (j >= 0) {
+    const c = (rows[j] || []).map(lower), v = rows[j + 1] || [];
+    n = inteiro(String(v[c.indexOf('sample size')] ?? '').replace(/[.,\s]/g, ''));
+    r2 = numero(v[c.indexOf('r-squared')]);
+  }
+  if (!variaveis.length) throw new FicheiroErrado('Encontrei a tabela da regressão mas sem variáveis.', ['Linhas com cada variável e a sua Relative Importance']);
+  return { variaveis: variaveis.sort((a, b) => b.imp - a.imp), n, r2, ...resumoBase(rows) };
 }

@@ -6,15 +6,25 @@
 //   2. a vista em js/views/ (chips, resumo, html, mount, exportar, importar, e lado/multi/juntar se precisar);
 //   3. uma linha aqui;
 //   4. `live: true` (e `tipo`, se o id da tab for outro) nas tabs de brands.js.
-import { parseNps, parseCausas } from './excel.js?v=20261104-1126';
-import * as vNps from './views/nps.js?v=20261104-1126';
-import * as vCausas from './views/causas.js?v=20261104-1126';
-import * as vMolho from './views/molho.js?v=20261104-1126';
+import { parseNps, parseCausas, parseGrupos, parseTextiq, parseCes, parseCsatGrupos, parseRegressao } from './excel.js?v=20261104-1147';
+import * as vNps from './views/nps.js?v=20261104-1147';
+import * as vCausas from './views/causas.js?v=20261104-1147';
+import * as vMolho from './views/molho.js?v=20261104-1147';
+import * as vGrupos from './views/grupos.js?v=20261104-1147';
+import * as vTextiq from './views/textiq.js?v=20261104-1147';
+import * as vCes from './views/ces.js?v=20261104-1147';
+import * as vCsat from './views/csat.js?v=20261104-1147';
+import * as vRegressao from './views/regressao.js?v=20261104-1147';
 
 export const ANALISES = {
   nps: { parse: parseNps, view: vNps },
   'causa-raiz': { parse: parseCausas, view: vCausas },
   molho: { parse: parseCausas, view: vMolho },
+  grupos: { parse: parseGrupos, view: vGrupos }, // NPS por driver, resultado, segmento, CES, CSAT, topics
+  textiq: { parse: parseTextiq, view: vTextiq }, // média de quem mencionou cada tema (CHECKED / UNCHECKED)
+  ces: { parse: parseCes, view: vCes }, // distribuição do CES (1 a 7)
+  'csat-grupos': { parse: parseCsatGrupos, view: vCsat }, // CSAT por grupo de NPS, um Excel por CSAT
+  regressao: { parse: parseRegressao, view: vRegressao }, // importância relativa de cada CSAT
 };
 
 export const analiseDe = t => (t ? ANALISES[t.tipo || t.id] : undefined);

@@ -1,4 +1,7 @@
 // Dados fictícios para quem abre o protótipo sem Excel. Não são dados reais.
+// Período e filtro dos exemplos novos
+const P = { periodo: { inicio: '2026-07-01T00:00:00.000Z', fim: '2026-09-30T00:00:00.000Z' }, filtros: [{ campo: 'Data de início', valor: '1 jul 2026 a 30 set 2026', data: true }] };
+
 export const exemplos = {
   nps: {
     fileName: 'Exemplo – NPS.xlsx',
@@ -41,5 +44,43 @@ export const exemplos = {
       ];
       return { ficheiros, periodo, filtros };
     })(),
+  },
+  grupos: {
+    fileName: 'Exemplo – NPS por grupo.xlsx',
+    data: {
+      grupos: [
+        { nome: 'Chegada', d: 120, n: 340, p: 1240 },
+        { nome: 'Atendimento', d: 260, n: 410, p: 980 },
+        { nome: 'Pagamento', d: 310, n: 280, p: 520 },
+        { nome: 'Instalações', d: 60, n: 150, p: 610 },
+        { nome: 'Saída', d: 9, n: 8, p: 12 },
+      ].map(c => ({ ...c, total: c.d + c.n + c.p })),
+      semRespostas: [], multi: false, amostraGrupo: null, ...P,
+    },
+  },
+  textiq: {
+    fileName: 'Exemplo – Text iQ.xlsx',
+    data: (() => {
+      const total = 12000, media = 8.3;
+      const t = (nome, nC, mC) => ({ nome, nC, somaC: nC * mC, nU: total - nC, somaU: total * media - nC * mC });
+      return { temas: [t('Preço', 2100, 7.1), t('Tempo de espera', 1300, 6.8), t('Simpatia', 900, 9.1), t('Limpeza', 640, 7.6), t('Estacionamento', 220, 7.9), t('Sinalização', 18, 7.0), t('Sem sugestões', 3100, 9.3)], total, media, ...P };
+    })(),
+  },
+  ces: { fileName: 'Exemplo – CES.xlsx', data: { min: 1, max: 7, contagens: [410, 220, 260, 640, 900, 3900, 4100], ...P } },
+  'csat-grupos': {
+    fileName: 'Exemplo – 3 CSAT',
+    data: (() => {
+      const f = (atributo, d, n, p) => ({ atributo, fileName: `Exemplo – CSAT ${atributo}.xlsx`, porGrupo: { d, n, p }, ...P });
+      const ficheiros = [
+        f('Eficiência do serviço', { 5: 20, 6: 30, 7: 25, 8: 15 }, { 7: 40, 8: 90, 9: 60, 10: 30 }, { 8: 40, 9: 160, 10: 520 }),
+        f('Simpatia', { 6: 15, 7: 30, 8: 30, 9: 15 }, { 8: 70, 9: 100, 10: 50 }, { 9: 120, 10: 600 }),
+        f('Tempo de espera', { 2: 25, 3: 25, 4: 20, 5: 20 }, { 5: 50, 6: 70, 7: 60, 8: 40 }, { 7: 90, 8: 200, 9: 210, 10: 220 }),
+      ];
+      return { ficheiros, periodo: P.periodo, filtros: P.filtros };
+    })(),
+  },
+  regressao: {
+    fileName: 'Exemplo – Regressão CSAT.xlsx',
+    data: { variaveis: [{ nome: 'Serviço', imp: 41, coef: 0.38 }, { nome: 'Instalações', imp: 34, coef: 0.31 }, { nome: 'Produtos', imp: 25, coef: 0.24 }], n: 1800, r2: 0.58, ...P },
   },
 };

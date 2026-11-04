@@ -1,18 +1,18 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1126';
-import { logo } from './logos.js?v=20261104-1126';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1126';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1126';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1126';
-import { limparGraficos } from './charts.js?v=20261104-1126';
-import { exemplos } from './exemplo.js?v=20261104-1126';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1126';
-import { analiseDe, ativa } from './analises.js?v=20261104-1126';
-import { sidebar, topbar } from './layout.js?v=20261104-1126';
-import { painel } from './painel.js?v=20261104-1126';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1126';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1147';
+import { logo } from './logos.js?v=20261104-1147';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1147';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1147';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1147';
+import { limparGraficos } from './charts.js?v=20261104-1147';
+import { exemplos } from './exemplo.js?v=20261104-1147';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1147';
+import { analiseDe, ativa } from './analises.js?v=20261104-1147';
+import { sidebar, topbar } from './layout.js?v=20261104-1147';
+import { painel } from './painel.js?v=20261104-1147';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1147';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
@@ -34,7 +34,7 @@ async function exportar(oque, id) {
       await exportarOverview(GROUP, dadosOverview());
     } else {
       const rec = store.get(r.brand.id, r.tab.id);
-      const e = analiseDe(r.tab).view.exportar(rec, r.brand, meta(r.brand.id));
+      const e = analiseDe(r.tab).view.exportar(rec, r.brand, meta(r.brand.id), r.tab);
       const sub = formatarPeriodo(rec.data.periodo) + (rec.exemplo ? ' · dados de exemplo' : '');
       if (oque === 'grafico') await exportarGrafico(r.brand, r.tab, e, id, sub);
       else await exportarTab(r.brand, r.tab, e, sub);
@@ -69,7 +69,7 @@ function render() {
       ${painel(r.brand, r.tab, erro)}`;
     const A = analiseDe(r.tab);
     const rec = store.get(r.brand.id, r.tab.id);
-    if (rec && ativa(r.brand, r.tab)) A.view.mount(rec, r.brand, meta(r.brand.id));
+    if (rec && ativa(r.brand, r.tab)) A.view.mount(rec, r.brand, meta(r.brand.id), r.tab);
     $('#file').multiple = !!A?.view.multi;
     ligarDrop();
   }
@@ -80,7 +80,7 @@ function render() {
 function sugestoesPara(rows, brand, tabAtual) {
   const tipo = identificar(rows);
   if (!tipo) return [];
-  return TIPOS[tipo].tabs.map(id => brand.tabs.find(t => t.id === id)).filter(t => t && t.id !== tabAtual.id && ativa(brand, t))
+  return brand.tabs.filter(t => t.id !== tabAtual.id && ativa(brand, t) && TIPOS[tipo].analises.includes(t.tipo || t.id))
     .map(t => ({ b: brand.id, id: t.id, nome: t.name }));
 }
 
@@ -139,7 +139,8 @@ document.addEventListener('click', async e => {
   if (b.dataset.act === 'rm-ficheiro' && r.brand) {
     const rec = store.get(r.brand.id, r.tab.id);
     const f = rec?.data.ficheiros?.[+b.dataset.i];
-    if (f && await confirmar(`Tirar o driver "${f.driver}"?`, 'Sai só o Excel deste driver. Os outros ficam.', 'Tirar')) {
+    const nomeF = f?.driver || f?.atributo;
+    if (f && await confirmar(`Tirar "${nomeF}"?`, 'Sai só este Excel. Os outros ficam.', 'Tirar')) {
       const ficheiros = rec.data.ficheiros.filter((_, i) => i !== +b.dataset.i);
       if (ficheiros.length) store.set(r.brand.id, r.tab.id, { ...rec, data: { ...rec.data, ficheiros, periodo: ficheiros[0].periodo, filtros: ficheiros[0].filtros } });
       else store.del(r.brand.id, r.tab.id);
