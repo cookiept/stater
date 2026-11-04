@@ -1,16 +1,17 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261104-1723';
-import { icon } from '../icons.js?v=20261104-1723';
-import { formatarPeriodo } from '../excel.js?v=20261104-1723';
-import * as C from './causas.js?v=20261104-1723';
+import { esc } from '../ui.js?v=20261104-1734';
+import { icon } from '../icons.js?v=20261104-1734';
+import { formatarPeriodo } from '../excel.js?v=20261104-1734';
+import * as C from './causas.js?v=20261104-1734';
 
 const TODOS = '*';
 export const multi = true;
 export const multiTexto = 'Um Excel por driver, com a causa raiz desse driver. Podes carregar todos de uma vez.';
 
-const nomeDriver = (novo, fileName) => (novo.titulo || '').replace(/\.\.\.$/, '…').replace(/^(RC|CR)[_\s-]*/i, '').trim() || fileName.replace(/\.[^.]+$/, '');
+const maiuscula = s => s.charAt(0).toUpperCase() + s.slice(1);
+const nomeDriver = (novo, fileName) => maiuscula((novo.titulo || '').replace(/\.\.\.$/, '…').replace(/^(RC|CR)[_\s-]*/i, '').trim() || fileName.replace(/\.[^.]+$/, ''));
 
 // Junta um Excel novo aos que já existem; o mesmo driver é substituído
 export function juntar(rec, novo, fileName) {
