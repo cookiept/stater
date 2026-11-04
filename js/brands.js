@@ -30,7 +30,7 @@ export const BRANDS = [
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'área de conforto', varios: 'áreas de conforto', col: 'Área de conforto' } }, live: true },
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', tipo: 'grupos', termos: { um: 'tema', varios: 'temas', col: 'Tema' }, live: true },
-      { id: 'molho', name: 'Todos ao molho', icon: 'layers' },
+      { id: 'molho', name: 'Todos ao molho', icon: 'layers', off: 'Desativada até encontrarmos uma forma simples de juntar as causas de todos os drivers.' },
     ],
   },
   {
