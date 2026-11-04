@@ -135,7 +135,7 @@ export function extrairPergunta(rows) {
 // Devolve um dos tipos: nps, causa, relate, textiq, ces, csat, regressao, ou null.
 export const TIPOS = {
   nps: { nome: 'Describe do NPS (notas de 0 a 10)', analises: ['nps'] },
-  causa: { nome: 'Relate de Group NPS com a Causa Raiz (resposta múltipla)', analises: ['causa-raiz', 'grupos', 'molho', 'breakdown'] },
+  causa: { nome: 'Relate de Group NPS com a Causa Raiz (resposta múltipla)', analises: ['causa-raiz', 'causasdrivers', 'grupos', 'molho', 'breakdown'] },
   relate: { nome: 'Relate de Group NPS com outra variável (driver, segmento…)', analises: ['grupos', 'breakdown'] },
   grupos: { nome: 'Relate do NPS (0 a 10) com outra variável (resultado, CES, CSAT…)', analises: ['grupos', 'breakdown'] },
   textiq: { nome: 'Text iQ (média de quem mencionou cada tema)', analises: ['textiq'] },
