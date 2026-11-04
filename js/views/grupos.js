@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261104-1215';
-import { esc, def } from '../ui.js?v=20261104-1215';
-import { ordemEscala } from '../excel.js?v=20261104-1215';
-import { baseGrafico, textoDe } from '../export.js?v=20261104-1215';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, miniDnp, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261104-1215';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261104-1232';
+import { esc, def } from '../ui.js?v=20261104-1232';
+import { ordemEscala } from '../excel.js?v=20261104-1232';
+import { baseGrafico, textoDe } from '../export.js?v=20261104-1232';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, miniDnp, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261104-1232';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -13,7 +13,8 @@ const termos = tab => ({ ...T0, ...(tab?.termos || {}) });
 
 // Itens com NPS, %, peso e, se a variável for uma escala (ex.: Discordo… Concordo), a ordem da escala
 function itens(data) {
-  const todos = enriquecerCausas(comZeros(data.grupos, data.semRespostas));
+  const a = data.amostraGrupo;
+  const todos = enriquecerCausas(comZeros(data.grupos, data.semRespostas), a ? a.d + a.n + a.p : 0);
   const ordem = ordemEscala(todos.map(c => c.nome));
   if (ordem) todos.sort((a, b) => ordem(a.nome) - ordem(b.nome));
   else todos.sort((a, b) => (a.zero - b.zero) || (b.total - a.total));
@@ -58,7 +59,7 @@ export function resumo(rec, meta, tab) {
   };
 }
 
-const sub = (c, multi) => (c.zero ? `0 ${multi ? 'menções' : 'respostas'}` : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · NPS ${fmt(c.nps)}`);
+const sub = (c, multi) => (c.zero ? `0 ${multi ? 'menções' : 'respostas'}` : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`);
 
 export function html(rec, meta, tab) {
   const T = termos(tab);
@@ -81,8 +82,8 @@ export function html(rec, meta, tab) {
     ${cartao('nps', `NPS por ${T.um}`, `Uma barra por ${T.um}, com o NPS de quem ${multi ? 'o escolheu' : 'está nesse ' + T.um} (de −100 a 100). Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. A linha amarela é o objetivo. Por baixo do nome estão as respostas. ${itens(rec.data).ordem ? 'Os valores seguem a ordem da escala.' : `Os ${T.varios} vão do que tem mais respostas para o que tem menos.`}`,
       { nota: `Linha amarela: objetivo (${meta}).`, aria: `NPS por ${T.um}` })}
     ${cartao('comp', `Quem respondeu em cada ${T.um}`, `Cada barra é 100% de quem ${multi ? 'escolheu' : 'está em'} esse ${T.um}, dividida em detratores (vermelho, notas 0 a 6), neutros (cinzento, 7 e 8) e promotores (verde, 9 e 10).`, { legenda: LEGENDA_DNP })}
-    ${tabelaHtml('tab', 'Tabela', `Uma linha por ${T.um}. NPS: % promotores − % detratores (vermelho se abaixo do objetivo, ${meta}). ${multi ? 'Menções' : 'Respostas'}: quantas pessoas. Detratores · Neutros · Promotores em %. Peso: a parte de todas as ${multi ? 'menções' : 'respostas'} que vai para este ${T.um}.${temMedia ? ' Nota média: a média das notas de 0 a 10.' : ''} Clica no título de uma coluna para ordenar.`,
-      [{ k: 'nome', rot: T.col }, { k: 'nps', rot: 'NPS', r: true }, { k: 'total', rot: multi ? 'Menções' : 'Respostas', r: true }, { k: 'dnp', rot: 'Detratores · Neutros · Promotores', ordena: false }, { k: 'quota', rot: 'Peso', r: true }, ...(temMedia ? [{ k: 'media', rot: 'Nota média', r: true }] : [])], (T.um.length > 14 ? 'Procurar' : `Procurar ${T.um}`))}`;
+    ${tabelaHtml('tab', 'Tabela', `Uma linha por ${T.um}. NPS: % promotores − % detratores (vermelho se abaixo do objetivo, ${meta}). ${multi ? 'Menções' : 'Respostas'}: quantas pessoas. Detratores · Neutros · Promotores em %. % das respostas: das ${fmt(geral(rec.data).total)} pessoas que responderam ao NPS, quantas ${multi ? 'escolheram' : 'estão em'} este ${T.um}${multi ? ' (uma pessoa pode escolher vários, por isso somam mais de 100%)' : ''}.${temMedia ? ' Nota média: a média das notas de 0 a 10.' : ''} Clica no título de uma coluna para ordenar.`,
+      [{ k: 'nome', rot: T.col }, { k: 'nps', rot: 'NPS', r: true }, { k: 'total', rot: multi ? 'Menções' : 'Respostas', r: true }, { k: 'dnp', rot: 'Detratores · Neutros · Promotores', ordena: false }, { k: 'quota', rot: '% das respostas', r: true }, ...(temMedia ? [{ k: 'media', rot: 'Nota média', r: true }] : [])], (T.um.length > 14 ? 'Procurar' : `Procurar ${T.um}`))}`;
 }
 
 export function mount(rec, brand, meta, tab) {
@@ -91,7 +92,7 @@ export function mount(rec, brand, meta, tab) {
   const multi = rec.data.multi;
   const temMedia = todos.some(c => c.media != null);
   const comSub = todos.map(c => ({ ...c, sub: sub(c, multi) }));
-  barrasH(document.getElementById('ch-nps'), brand, comSub.map(c => ({ ...c, valor: c.nps, cor: corMeta(c.nps, meta), sub: c.zero ? c.sub : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'}${c.media != null ? ` · média ${fmt(c.media, 1)}` : ''}` })),
+  barrasH(document.getElementById('ch-nps'), brand, comSub.map(c => ({ ...c, valor: c.nps, cor: corMeta(c.nps, meta), sub: c.zero ? c.sub : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${fmt(c.quota)}%${c.media != null ? ` · média ${fmt(c.media, 1)}` : ''}` })),
     { min: -100, max: 100, linha: { valor: meta, rotulo: `Objetivo ${meta}` },
       tooltip: c => `<b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} ${multi ? 'menções' : 'respostas'}${c.media != null ? `<br>Nota média ${fmt(c.media, 1)}` : ''}${c.amostraPequena ? `<br><i>Menos de ${LIM} respostas</i>` : ''}` });
   composicao(document.getElementById('ch-comp'), brand, comSub);
@@ -125,7 +126,7 @@ export function exportar(rec, brand, meta, tab) {
     graficos: [
       { id: 'nps', titulo: `NPS por ${T.um}`, desenhar: pptBarras(b, todos.map(c => ({ ...c, valor: c.nps })), { nome: 'NPS', min: -100, max: 100 }) },
       { id: 'comp', titulo: `Quem respondeu em cada ${T.um}`, desenhar: pptComposicao(b, todos) },
-      { id: 'tab', titulo: 'Tabela', desenhar: pptTabela(b, [T.col, 'NPS', rec.data.multi ? 'Menções' : 'Respostas', 'Detratores', 'Neutros', 'Promotores', 'Peso', ...(temMedia ? ['Nota média'] : [])],
+      { id: 'tab', titulo: 'Tabela', desenhar: pptTabela(b, [T.col, 'NPS', rec.data.multi ? 'Menções' : 'Respostas', 'Detratores', 'Neutros', 'Promotores', '% das respostas', ...(temMedia ? ['Nota média'] : [])],
         todos.map(c => [c.nome, c.zero ? '–' : fmt(c.nps), fmt(c.total), `${fmt(c.pctD)}%`, `${fmt(c.pctN)}%`, `${fmt(c.pctP)}%`, `${fmt(c.quota, 1)}%`, ...(temMedia ? [c.media != null ? fmt(c.media, 1) : '–'] : [])]),
         { dir: [1, 2, 3, 4, 5, 6, 7] }) },
     ],

@@ -32,8 +32,10 @@ export const comZeros = (causas, semRespostas = [], extra = {}) =>
   [...causas, ...semRespostas.map(nome => ({ nome, d: 0, n: 0, p: 0, total: 0, ...extra }))];
 
 // Ordem: sempre da causa com mais menções para a com menos; as de 0 menções no fim
-export function enriquecerCausas(causas) {
-  const totalGeral = causas.reduce((a, c) => a + c.total, 0);
+// base: o total de pessoas que responderam ao NPS. Em resposta múltipla, a % de cada opção é sobre essas pessoas
+// (não sobre a soma das menções), por isso as % podem somar mais de 100%.
+export function enriquecerCausas(causas, base = 0) {
+  const totalGeral = base || causas.reduce((a, c) => a + c.total, 0);
   return causas.map(c => {
     const zero = c.total === 0;
     const quota = totalGeral ? (c.total / totalGeral) * 100 : 0;
