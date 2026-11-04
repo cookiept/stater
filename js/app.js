@@ -1,18 +1,18 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1429';
-import { logo } from './logos.js?v=20261104-1429';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1429';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1429';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1429';
-import { limparGraficos } from './charts.js?v=20261104-1429';
-import { exemplos } from './exemplo.js?v=20261104-1429';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1429';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1429';
-import { sidebar, topbar } from './layout.js?v=20261104-1429';
-import { painel } from './painel.js?v=20261104-1429';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1429';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1514';
+import { logo } from './logos.js?v=20261104-1514';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1514';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1514';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1514';
+import { limparGraficos } from './charts.js?v=20261104-1514';
+import { exemplos } from './exemplo.js?v=20261104-1514';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1514';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1514';
+import { sidebar, topbar } from './layout.js?v=20261104-1514';
+import { painel } from './painel.js?v=20261104-1514';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1514';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
@@ -105,7 +105,7 @@ async function carregar(files) {
       if (e.name === 'QuotaExceededError') erro = { msg: 'A memória do browser para o Stater está cheia. Apaga dados de outras tabs e tenta de novo.' };
     }
   }
-  if (ok) toast(ok === 1 ? `${files.length === 1 ? files[0].name : '1 ficheiro'} carregado.` : `${ok} ficheiros carregados.`);
+  if (ok) toast(ok === 1 ? `${files.length === 1 ? files[0].name : '1 ficheiro'} carregado com sucesso.` : `${ok} ficheiros carregados com sucesso.`, 'ok');
   render();
 }
 
