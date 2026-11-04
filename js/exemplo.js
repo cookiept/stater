@@ -58,6 +58,19 @@ export const exemplos = {
       semRespostas: [], multi: false, amostraGrupo: null, ...P,
     },
   },
+  breakdown: {
+    fileName: '3 Excels de exemplo',
+    data: (() => {
+      const g = (nome, d, n, p) => ({ nome, d, n, p, total: d + n + p });
+      const f = (area, grupos) => ({ grupos, semRespostas: [], multi: false, amostraGrupo: null, ...P, filtros: [...P.filtros, { campo: 'Centro', valor: `igual a ${area}` }], fileName: `Exemplo – NPS por Driver – ${area}.xlsx`, area: { campo: 'Centro', valor: area } });
+      const ficheiros = [
+        f('Norte', [g('Chegada', 60, 170, 620), g('Atendimento', 130, 200, 490), g('Pagamento', 150, 140, 260), g('Instalações', 30, 75, 300)]),
+        f('Centro', [g('Chegada', 40, 110, 420), g('Atendimento', 70, 150, 330), g('Pagamento', 120, 90, 180), g('Instalações', 20, 50, 210)]),
+        f('Sul', [g('Chegada', 20, 60, 200), g('Atendimento', 60, 60, 160), g('Pagamento', 40, 50, 80), g('Instalações', 10, 25, 100), g('Saída', 4, 3, 6)]),
+      ];
+      return { ficheiros, sel: '*', periodo: P.periodo, filtros: P.filtros };
+    })(),
+  },
   textiq: {
     fileName: 'Exemplo – Text iQ.xlsx',
     data: (() => {

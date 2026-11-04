@@ -81,7 +81,7 @@ const OPERADORES = [
   [/\s+does not contain\s+/i, ' não contém '], [/\s+contains\s+/i, ' contém '],
   [/\s+is greater than or equal to\s*/i, ' maior ou igual a '], [/\s+is less than or equal to\s*/i, ' menor ou igual a '],
   [/\s+is greater than\s*/i, ' maior que '], [/\s+is less than\s*/i, ' menor que '],
-  [/\s+is not equal to\s+/i, ' diferente de '], [/\s+is equal to\s+/i, ' igual a '],
+  [/\s+is not equal to\s+/i, ' diferente de '], [/\s+does not equal\s+/i, ' diferente de '], [/\s+equals\s+/i, ' igual a '], [/\s+is equal to\s+/i, ' igual a '],
   [/\s+is any of\s+/i, ' é um de '], [/\s+is not\s+/i, ' não é '], [/\s+is\s+/i, ' é '],
 ];
 
@@ -135,9 +135,9 @@ export function extrairPergunta(rows) {
 // Devolve um dos tipos: nps, causa, relate, textiq, ces, csat, regressao, ou null.
 export const TIPOS = {
   nps: { nome: 'Describe do NPS (notas de 0 a 10)', analises: ['nps'] },
-  causa: { nome: 'Relate de Group NPS com a Causa Raiz (resposta múltipla)', analises: ['causa-raiz', 'grupos', 'molho'] },
-  relate: { nome: 'Relate de Group NPS com outra variável (driver, segmento…)', analises: ['grupos'] },
-  grupos: { nome: 'Relate do NPS (0 a 10) com outra variável (resultado, CES, CSAT…)', analises: ['grupos'] },
+  causa: { nome: 'Relate de Group NPS com a Causa Raiz (resposta múltipla)', analises: ['causa-raiz', 'grupos', 'molho', 'breakdown'] },
+  relate: { nome: 'Relate de Group NPS com outra variável (driver, segmento…)', analises: ['grupos', 'breakdown'] },
+  grupos: { nome: 'Relate do NPS (0 a 10) com outra variável (resultado, CES, CSAT…)', analises: ['grupos', 'breakdown'] },
   textiq: { nome: 'Text iQ (média de quem mencionou cada tema)', analises: ['textiq'] },
   ces: { nome: 'Describe do CES (escala de 1 a 7)', analises: ['ces'] },
   csat: { nome: 'Relate de Group NPS com um CSAT', analises: ['csat-grupos'] },

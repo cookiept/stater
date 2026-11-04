@@ -1,18 +1,18 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1147';
-import { logo } from './logos.js?v=20261104-1147';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1147';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1147';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1147';
-import { limparGraficos } from './charts.js?v=20261104-1147';
-import { exemplos } from './exemplo.js?v=20261104-1147';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1147';
-import { analiseDe, ativa } from './analises.js?v=20261104-1147';
-import { sidebar, topbar } from './layout.js?v=20261104-1147';
-import { painel } from './painel.js?v=20261104-1147';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1147';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1159';
+import { logo } from './logos.js?v=20261104-1159';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1159';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1159';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1159';
+import { limparGraficos } from './charts.js?v=20261104-1159';
+import { exemplos } from './exemplo.js?v=20261104-1159';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1159';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1159';
+import { sidebar, topbar } from './layout.js?v=20261104-1159';
+import { painel } from './painel.js?v=20261104-1159';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1159';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
@@ -33,7 +33,7 @@ async function exportar(oque, id) {
     if (!r.brand) {
       await exportarOverview(GROUP, dadosOverview());
     } else {
-      const rec = store.get(r.brand.id, r.tab.id);
+      const rec = vistaDe(analiseDe(r.tab), store.get(r.brand.id, r.tab.id));
       const e = analiseDe(r.tab).view.exportar(rec, r.brand, meta(r.brand.id), r.tab);
       const sub = formatarPeriodo(rec.data.periodo) + (rec.exemplo ? ' · dados de exemplo' : '');
       if (oque === 'grafico') await exportarGrafico(r.brand, r.tab, e, id, sub);
@@ -68,7 +68,7 @@ function render() {
       </header>
       ${painel(r.brand, r.tab, erro)}`;
     const A = analiseDe(r.tab);
-    const rec = store.get(r.brand.id, r.tab.id);
+    const rec = vistaDe(A, store.get(r.brand.id, r.tab.id));
     if (rec && ativa(r.brand, r.tab)) A.view.mount(rec, r.brand, meta(r.brand.id), r.tab);
     $('#file').multiple = !!A?.view.multi;
     ligarDrop();
@@ -138,8 +138,9 @@ document.addEventListener('click', async e => {
   if (b.dataset.act === 'exp-pdf') imprimir();
   if (b.dataset.act === 'rm-ficheiro' && r.brand) {
     const rec = store.get(r.brand.id, r.tab.id);
+    if (rec && !rec.data.ficheiros) { store.del(r.brand.id, r.tab.id); render(); return; } // um só Excel, guardado antes das listas
     const f = rec?.data.ficheiros?.[+b.dataset.i];
-    const nomeF = f?.driver || f?.atributo;
+    const nomeF = analiseDe(r.tab).view.nomeFicheiro?.(f) || f?.driver || f?.atributo;
     if (f && await confirmar(`Tirar "${nomeF}"?`, 'Sai só este Excel. Os outros ficam.', 'Tirar')) {
       const ficheiros = rec.data.ficheiros.filter((_, i) => i !== +b.dataset.i);
       if (ficheiros.length) store.set(r.brand.id, r.tab.id, { ...rec, data: { ...rec.data, ficheiros, periodo: ficheiros[0].periodo, filtros: ficheiros[0].filtros } });
@@ -147,6 +148,7 @@ document.addEventListener('click', async e => {
       render();
     }
   }
+  if (b.dataset.act === 'vista' && b.tagName === 'BUTTON' && r.brand) escolherVista(r, b.dataset.v);
   if (b.dataset.act === 'upload') $('#file').click();
   if (b.dataset.act === 'metas') editarMetas(render);
   if (b.dataset.act === 'sample' && r.brand) {
@@ -163,6 +165,22 @@ document.addEventListener('click', async e => {
       render();
     }
   }
+});
+
+// Vistas com escolha (ex.: uma área ou todas): fica guardada com os dados da tab
+function escolherVista(r, v) {
+  const rec = store.get(r.brand.id, r.tab.id);
+  if (!rec) return;
+  store.set(r.brand.id, r.tab.id, { ...rec, data: { ...rec.data, sel: v } });
+  const y = window.scrollY;
+  render();
+  window.scrollTo({ top: y });
+  document.querySelector(`[data-act="vista"][data-v="${CSS.escape(v)}"], #sel-vista`)?.focus({ preventScroll: true });
+}
+document.addEventListener('change', e => {
+  const s = e.target.closest('select[data-act="vista"]');
+  const r = rota();
+  if (s && r.brand) escolherVista(r, s.value);
 });
 
 $('#file').addEventListener('change', e => { carregar(e.target.files); e.target.value = ''; });

@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261104-1147';
-import { esc, info } from './ui.js?v=20261104-1147';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1147';
-import { fmt } from './stats.js?v=20261104-1147';
-import { store, meta } from './store.js?v=20261104-1147';
-import { analiseDe, ativa } from './analises.js?v=20261104-1147';
-import { tileVars } from './layout.js?v=20261104-1147';
+import { icon } from './icons.js?v=20261104-1159';
+import { esc, info } from './ui.js?v=20261104-1159';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1159';
+import { fmt } from './stats.js?v=20261104-1159';
+import { store, meta } from './store.js?v=20261104-1159';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1159';
+import { tileVars } from './layout.js?v=20261104-1159';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -93,7 +93,7 @@ function resumoHtml(r) {
 
 export function painel(brand, tab, erro) {
   const A = analiseDe(tab);
-  const rec = store.get(brand.id, tab.id);
+  const rec = vistaDe(A, store.get(brand.id, tab.id));
   const head = (chipsHtml = '') => `
     <div class="panel-head">
       <span class="tile" style="${tileVars(brand)}">${icon(tab.icon)}</span>
