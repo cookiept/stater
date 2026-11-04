@@ -1,6 +1,6 @@
 # Stater
 
-O Stater mostra os resultados do Qualtrics Stats iQ das marcas do Grupo Brisa (Brisa Autoestradas, Via Verde, Colibri, Controlauto, Controlauto ITV e Nedlinq) de forma clara: gráficos, tabelas e um resumo de cada tab.
+O Stater mostra resultados exportados do Qualtrics Stats iQ de forma clara: gráficos, tabelas e um resumo de cada tab, organizados por marca.
 
 **Abrir:** https://cookiept.github.io/stater-test/
 
@@ -17,21 +17,21 @@ No **Overview** ficam o NPS de cada marca e o objetivo ("Editar objetivos").
 |---|---|---|
 | NPS | Describe do NPS (0 a 10) | NPS |
 | Causa Raiz | Relate de Group NPS com a Causa Raiz (resposta múltipla) | NPS por Causa Raiz |
-| NPS por grupo | Relate do NPS com outra variável | Inspeção, Segmento, NPS x CES, NPS x CSAT, Topics da Colibri |
+| NPS por grupo | Relate do NPS com outra variável | Resultado, Segmento, NPS x CES, NPS x CSAT, Topics |
 | NPS por Driver | Pivot Table (driver × área × Group NPS) ou um Relate por área | NPS por Driver |
 | Text iQ | Relate do NPS com os tópicos (CHECKED / UNCHECKED) | Topics, Causas, Drivers e Subtopics (Text iQ) |
 | CES | Describe do CES (1 a 7) | CES |
-| CSAT | Um Relate de Group NPS por CSAT | Overview CSAT's (Brisa AE) |
-| Regressão | Regression com os CSAT | Overview CSAT's (Colibri) |
+| CSAT | Um Relate de Group NPS por CSAT | Overview CSAT's |
+| Regressão | Regression com os CSAT | Overview CSAT's |
 
-Desativadas por agora: "Todos ao molho" (Colibri) e as tabs de Text iQ da Nedlinq e da Controlauto ITV.
+Algumas tabs estão desativadas por agora (aparecem a cinzento no menu).
 
 ## Dados
 Os Excel são lidos só no browser de quem os abre e ficam guardados nesse browser (localStorage). Nada é enviado para a internet. **Não ponhas ficheiros Excel neste repositório** (o `.gitignore` bloqueia-os).
 
 ## Estrutura do código
 - `index.html`: página única.
-- `css/app.css`: estilos, com os tokens do "Design System @ Grupo Brisa".
+- `css/app.css`: estilos, com os tokens do design system.
 - `js/brands.js`: marcas, cores, fontes e tabs (cada tab diz o seu `tipo`).
 - `js/analises.js`: lista dos tipos de análise (leitura do Excel + vista).
 - `js/excel.js`: leitura do Excel, período, filtros e um parser por tipo.
