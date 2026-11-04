@@ -2,7 +2,7 @@
 
 O Stater mostra resultados exportados do Qualtrics Stats iQ de forma clara: gráficos, tabelas e um resumo de cada tab, organizados por marca.
 
-**Abrir:** https://cookiept.github.io/stater-test/
+**Abrir:** https://cookiept.github.io/stater/
 
 ## Como se usa
 1. No Stats iQ, faz a análise da tab (Describe, Relate, Pivot Table, Regression ou Text iQ) e exporta para Excel. Cada tab tem os passos em "Como importar".
