@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261104-1125';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261104-1125';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261104-1125';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261104-1125';
-import { icon } from '../icons.js?v=20261104-1125';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261104-1126';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261104-1126';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261104-1126';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261104-1126';
+import { icon } from '../icons.js?v=20261104-1126';
 
 const LIM = LIMITES.amostraPequena;
 

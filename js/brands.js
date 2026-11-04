@@ -40,8 +40,8 @@ export const BRANDS = [
     chart: ['#14789c', '#8fd2f8', '#074257', '#0f6381', '#c5e5fb'],
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars' },
-      { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag' },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search' },
+      { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', off: 'Ainda não há Text iQ na Nedlinq.' },
+      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Nedlinq.' },
     ],
   },
   {
