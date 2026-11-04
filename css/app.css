@@ -801,3 +801,6 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .tbl.cruz th:first-child { min-width: 140px; }
 .tbl.cruz .badge.pouco { background: transparent; box-shadow: inset 0 0 0 1px currentColor; }
 .tbl.cruz tr.is-sel td { background: #f1f4ff !important; }
+
+/* Logótipo com o nome completo (S de duas linhas + "tater" em IBM Plex Sans) */
+.sb-logo-nome { height: 40px; width: auto; display: block; flex: none; }
