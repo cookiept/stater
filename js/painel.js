@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261104-1238';
-import { esc, info } from './ui.js?v=20261104-1238';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1238';
-import { fmt } from './stats.js?v=20261104-1238';
-import { store, meta } from './store.js?v=20261104-1238';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1238';
-import { tileVars } from './layout.js?v=20261104-1238';
+import { icon } from './icons.js?v=20261104-1241';
+import { esc, info } from './ui.js?v=20261104-1241';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1241';
+import { fmt } from './stats.js?v=20261104-1241';
+import { store, meta } from './store.js?v=20261104-1241';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1241';
+import { tileVars } from './layout.js?v=20261104-1241';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -30,13 +30,11 @@ function painelVazio(A, erro, tab) {
         <p>${multi ? `${esc(A.view.multiTexto || 'Um Excel por driver.')} Podes escolher ou arrastar vários de uma vez.` : 'Arrasta o ficheiro para aqui ou escolhe-o no computador.'} Aceita .xlsx, .xls e .csv.</p>
         <div class="row">
           <button class="btn btn-primary" data-act="upload">${icon('upload')} Escolher ficheiro</button>
-          <button class="btn btn-secondary" data-act="sample">${icon('sparkle')} Ver com dados de exemplo</button>
         </div>
       </div>
       <div class="howto">
         <h3>${esc(imp.titulo)}</h3>
         <p class="import-txt">${esc(imp.texto)}</p>
-        <div class="alert alert-info" style="margin-top:16px">${icon('lock')}<div>O ficheiro é lido só neste browser. Nada é enviado para a internet.</div></div>
       </div>
     </div>`;
 }
