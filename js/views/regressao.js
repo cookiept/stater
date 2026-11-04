@@ -1,9 +1,9 @@
 // Tipo "Regressão": quanto cada CSAT pesa na recomendação (importância relativa do Stats iQ).
 // Ex.: Overview CSAT's da Colibri (Instalações, Serviço, Produtos).
-import { fmt } from '../stats.js?v=20261104-1605';
-import { esc } from '../ui.js?v=20261104-1605';
-import { baseGrafico, textoDe } from '../export.js?v=20261104-1605';
-import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261104-1605';
+import { fmt } from '../stats.js?v=20261104-1628';
+import { esc } from '../ui.js?v=20261104-1628';
+import { baseGrafico, textoDe } from '../export.js?v=20261104-1628';
+import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261104-1628';
 
 // Cor neutra: a importância não é boa nem má
 const NEUTRA = '#14789c';

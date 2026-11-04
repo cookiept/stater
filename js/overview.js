@@ -1,15 +1,15 @@
 // Overview do Grupo Brisa: cartões por marca, gráfico NPS vs objetivo e edição dos objetivos
-import { BRANDS, GROUP } from './brands.js?v=20261104-1605';
-import { icon } from './icons.js?v=20261104-1605';
-import { logo } from './logos.js?v=20261104-1605';
-import { esc, info, def, toast } from './ui.js?v=20261104-1605';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1605';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261104-1605';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261104-1605';
-import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261104-1605';
-import { ativa } from './analises.js?v=20261104-1605';
-import { tileVars } from './layout.js?v=20261104-1605';
-import { menuExportar } from './painel.js?v=20261104-1605';
+import { BRANDS, GROUP } from './brands.js?v=20261104-1628';
+import { icon } from './icons.js?v=20261104-1628';
+import { logo } from './logos.js?v=20261104-1628';
+import { esc, info, def, toast } from './ui.js?v=20261104-1628';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1628';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261104-1628';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261104-1628';
+import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261104-1628';
+import { ativa } from './analises.js?v=20261104-1628';
+import { tileVars } from './layout.js?v=20261104-1628';
+import { menuExportar } from './painel.js?v=20261104-1628';
 
 // Janela "Objetivos de NPS". depois() corre quando se guarda.
 export function editarMetas(depois) {
@@ -76,7 +76,7 @@ export function overview() {
     <div class="ov-grid">${dados.map(({ b, rec, r, m, vivas }) => `
       <div class="ov-card" style="${tileVars(b)};--font-b:${b.font}, 'Noto Sans', sans-serif">
         <div class="top"><span class="tile mark">${logo(b.icon)}</span><b>${esc(b.name)}</b>
-          ${r ? `<span class="badge ${r.nps >= m ? 'good' : 'bad'}" title="NPS ${fmt(r.nps)} menos o objetivo ${m} = ${sinal(r.nps - m)}">${sinal(r.nps - m)} vs objetivo</span>` : '<span class="badge">Sem dados</span>'}</div>
+          ${r ? `<span class="badge seta ${r.nps >= m ? 'good' : 'bad'}" title="NPS ${fmt(r.nps)} menos o objetivo ${m} = ${sinal(r.nps - m)}">${icon(r.nps >= m ? 'arrowUp' : 'arrowDown')}${sinal(r.nps - m)} vs objetivo</span>` : '<span class="badge">Sem dados</span>'}</div>
         ${r ? `<div class="val"><b class="num">${fmt(r.nps)}</b><span class="muted">NPS · ${fmt(r.total)} respostas</span>${info(`NPS da ${b.name}`, `NPS = ${fmt(r.pctP, 1)}% promotores − ${fmt(r.pctD, 1)}% detratores = ${fmt(r.nps)}. Das ${fmt(r.total)} respostas: ${fmt(r.d)} detratores (0 a 6), ${fmt(r.n)} neutros (7 e 8) e ${fmt(r.p)} promotores (9 e 10). Nota média ${fmt(r.media, 1)} em 10. Objetivo ${m}: ${r.nps >= m ? `${fmt(r.nps - m)} pontos acima` : `${fmt(m - r.nps)} pontos abaixo`}. Período do Excel: ${formatarPeriodo(rec.data.periodo)}. Vem da tab NPS da marca.`)}</div>
           <div class="compo" style="height:10px" aria-hidden="true"><div class="d" style="flex:${r.pctD}"></div><div class="n" style="flex:${r.pctN}"></div><div class="p" style="flex:${r.pctP}"></div></div>
           <div class="ov-dnp num"><span><i class="d"></i>Detratores ${fmt(r.pctD)}%</span><span><i class="n"></i>Neutros ${fmt(r.pctN)}%</span><span><i class="p"></i>Promotores ${fmt(r.pctP)}%</span></div>

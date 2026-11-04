@@ -1,10 +1,10 @@
 // Menu lateral e barra de topo
-import { BRANDS, GROUP } from './brands.js?v=20261104-1605';
-import { icon } from './icons.js?v=20261104-1605';
-import { logo } from './logos.js?v=20261104-1605';
-import { esc } from './ui.js?v=20261104-1605';
-import { formatarData } from './excel.js?v=20261104-1605';
-import { store, abertas } from './store.js?v=20261104-1605';
+import { BRANDS, GROUP } from './brands.js?v=20261104-1628';
+import { icon } from './icons.js?v=20261104-1628';
+import { logo } from './logos.js?v=20261104-1628';
+import { esc } from './ui.js?v=20261104-1628';
+import { formatarData } from './excel.js?v=20261104-1628';
+import { store, abertas } from './store.js?v=20261104-1628';
 
 export function tileVars(b) {
   return `--tile-bg:${b.colors.main};--tile-on:${b.colors.on};--tile-soft:${b.colors.lightest};--tile-ink:${b.colors.darkest}`;

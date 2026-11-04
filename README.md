@@ -1,29 +1,46 @@
-# Stater · protótipo
+# Stater
 
-Protótipo do novo Stater: os resultados do Qualtrics Stats iQ das marcas do Grupo Brisa, com o design system do grupo.
+O Stater mostra os resultados do Qualtrics Stats iQ das marcas do Grupo Brisa (Brisa Autoestradas, Via Verde, Colibri, Controlauto, Controlauto ITV e Nedlinq) de forma clara: gráficos, tabelas e um resumo de cada tab.
 
-**Ver online:** https://cookiept.github.io/stater-test/
+**Abrir:** https://cookiept.github.io/stater-test/
 
-## O que funciona
-- Menu com todas as marcas e tabs, com os nomes do Stater atual.
-- **NPS** de todas as marcas menos a Nedlinq, **NPS por Causa Raiz** da Colibri. "Todos ao molho" está desligado até haver uma forma melhor de obter os Excel (o código fica em js/views/molho.js; para ligar, `live: true` em js/brands.js).
-- Filtros da extração lidos do topo do Excel, avisos de ficheiro errado com o que falta e a tab certa, explicações "i", destaques e avisos de poucas respostas.
-- Alertas abaixo da meta por marca, driver e causa raiz (Overview, menu e tabs). Drivers e causas usam a meta da marca.
-- **Overview**: marcas na meta, respostas, alertas e um cartão por marca.
-- Exportar: cada gráfico tem "Download" (PowerPoint editável); o menu Exportar tem PDF e PowerPoint (com capa).
-- As outras tabs aparecem como "Disponível na versão final".
+## Como se usa
+1. No Stats iQ, faz a análise da tab (Describe, Relate, Pivot Table, Regression ou Text iQ) e exporta para Excel. Cada tab tem os passos em "Como importar".
+2. No Stater, abre a marca e a tab, e arrasta o Excel (ou carrega em "Escolher ficheiro").
+3. A tab mostra o período e os filtros do Excel, os números principais, os gráficos, a tabela e o resumo.
+4. "Exportar" gera PDF ou PowerPoint (com capa); cada gráfico tem também "Download" em PowerPoint.
+
+No **Overview** ficam o NPS de cada marca e o objetivo ("Editar objetivos").
+
+## Tipos de análise
+| Tipo | Excel do Stats iQ | Tabs |
+|---|---|---|
+| NPS | Describe do NPS (0 a 10) | NPS |
+| Causa Raiz | Relate de Group NPS com a Causa Raiz (resposta múltipla) | NPS por Causa Raiz |
+| NPS por grupo | Relate do NPS com outra variável | Inspeção, Segmento, NPS x CES, NPS x CSAT, Topics da Colibri |
+| NPS por Driver | Pivot Table (driver × área × Group NPS) ou um Relate por área | NPS por Driver |
+| Text iQ | Relate do NPS com os tópicos (CHECKED / UNCHECKED) | Topics, Causas, Drivers e Subtopics (Text iQ) |
+| CES | Describe do CES (1 a 7) | CES |
+| CSAT | Um Relate de Group NPS por CSAT | Overview CSAT's (Brisa AE) |
+| Regressão | Regression com os CSAT | Overview CSAT's (Colibri) |
+
+Desativadas por agora: "Todos ao molho" (Colibri) e as tabs de Text iQ da Nedlinq e da Controlauto ITV.
 
 ## Dados
 Os Excel são lidos só no browser de quem os abre e ficam guardados nesse browser (localStorage). Nada é enviado para a internet. **Não ponhas ficheiros Excel neste repositório** (o `.gitignore` bloqueia-os).
 
-## Estrutura
+## Estrutura do código
 - `index.html`: página única.
-- `css/app.css`: estilos; tokens do "Design System @ Grupo Brisa".
-- `js/brands.js`: marcas, cores, fontes e tabs.
-- `js/excel.js`: leitura do Excel e parsers por tipo de análise.
+- `css/app.css`: estilos, com os tokens do "Design System @ Grupo Brisa".
+- `js/brands.js`: marcas, cores, fontes e tabs (cada tab diz o seu `tipo`).
+- `js/analises.js`: lista dos tipos de análise (leitura do Excel + vista).
+- `js/excel.js`: leitura do Excel, período, filtros e um parser por tipo.
 - `js/stats.js`: contas do NPS (uma só regra).
-- `js/views/`: uma vista por tipo de análise.
-- `vendor/`: ApexCharts 8.5.0 e PptxGenJS 4.0.1 (MIT, só carrega ao exportar). SheetJS 0.20.3 vem de cdn.sheetjs.com.
+- `js/views/`: uma vista por tipo de análise; `comum.js` tem os blocos partilhados (números, cartões, barras, tabelas, PowerPoint).
+- `js/painel.js`, `js/overview.js`, `js/layout.js`, `js/store.js`, `js/app.js`: página da tab, Overview, menu, dados guardados e ações.
+- `vendor/`: Apache ECharts 5.5.1 (gráficos) e PptxGenJS 4.0.1 (PowerPoint). SheetJS 0.20.3 vem de cdn.sheetjs.com.
+
+Para juntar um tipo de análise novo: o parser em `excel.js`, a vista em `js/views/`, uma linha em `analises.js` e o `tipo` nas tabs de `brands.js`.
 
 Sem passo de build: abre com qualquer servidor estático (ex.: `npx serve .`).
 
