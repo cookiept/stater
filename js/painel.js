@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261104-1246';
-import { esc, info } from './ui.js?v=20261104-1246';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1246';
-import { fmt } from './stats.js?v=20261104-1246';
-import { store, meta } from './store.js?v=20261104-1246';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1246';
-import { tileVars } from './layout.js?v=20261104-1246';
+import { icon } from './icons.js?v=20261104-1429';
+import { esc, info } from './ui.js?v=20261104-1429';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1429';
+import { fmt } from './stats.js?v=20261104-1429';
+import { store, meta } from './store.js?v=20261104-1429';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1429';
+import { tileVars } from './layout.js?v=20261104-1429';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -25,16 +25,6 @@ export function passosDe(texto, multi) {
   return [...frases, multi ? 'Arraste os Excels para aqui (pode ser vários de uma vez) ou escolha-os no computador.' : 'Arraste o Excel para aqui ou escolha-o no computador.'];
 }
 
-// Esqueleto cinzento do que a tab vai mostrar (cada vista diz que blocos tem; por omissão: números, barras e tabela)
-const BLOCOS = {
-  kpis: () => `<div class="sk-kpis">${'<div class="sk-kpi"><i></i><b></b><i></i></div>'.repeat(4)}</div>`,
-  barras: () => `<div class="sk-card"><i class="sk-t"></i>${[86, 70, 58, 44, 30].map(w => `<div class="sk-barra"><i></i><b style="width:${w}%"></b></div>`).join('')}</div>`,
-  colunas: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-colunas">${[22, 14, 18, 30, 42, 78, 92].map(h => `<b style="height:${h}%"></b>`).join('')}</div></div>`,
-  pontos: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-pontos">${[[12, 30], [28, 62], [44, 40], [58, 74], [72, 22], [86, 52]].map(([x, y]) => `<b style="left:${x}%;bottom:${y}%"></b>`).join('')}</div></div>`,
-  tabela: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-cab"></div>${'<div class="sk-linha"><i></i><i></i><i></i></div>'.repeat(4)}</div>`,
-};
-const esqueleto = A => `<div class="sk" aria-hidden="true">${(A.view.esqueleto || ['kpis', 'barras', 'tabela']).map(k => BLOCOS[k]?.() || '').join('')}</div>`;
-
 function painelVazio(A, erro, tab) {
   const multi = A.view.multi;
   const imp = importarDe(A, tab);
@@ -42,7 +32,6 @@ function painelVazio(A, erro, tab) {
   return `
     ${avisoErro(erro)}
     <div class="empty">
-      ${esqueleto(A)}
       <div class="empty-card">
         <div class="drop" id="drop">
           <div class="big">${icon('upload')}</div>

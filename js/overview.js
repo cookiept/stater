@@ -1,15 +1,15 @@
 // Overview do Grupo Brisa: cartões por marca, gráfico NPS vs objetivo e edição dos objetivos
-import { BRANDS, GROUP } from './brands.js?v=20261104-1246';
-import { icon } from './icons.js?v=20261104-1246';
-import { logo } from './logos.js?v=20261104-1246';
-import { esc, info, def, toast } from './ui.js?v=20261104-1246';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1246';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261104-1246';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261104-1246';
-import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261104-1246';
-import { ativa } from './analises.js?v=20261104-1246';
-import { tileVars } from './layout.js?v=20261104-1246';
-import { menuExportar } from './painel.js?v=20261104-1246';
+import { BRANDS, GROUP } from './brands.js?v=20261104-1429';
+import { icon } from './icons.js?v=20261104-1429';
+import { logo } from './logos.js?v=20261104-1429';
+import { esc, info, def, toast } from './ui.js?v=20261104-1429';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1429';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261104-1429';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261104-1429';
+import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261104-1429';
+import { ativa } from './analises.js?v=20261104-1429';
+import { tileVars } from './layout.js?v=20261104-1429';
+import { menuExportar } from './painel.js?v=20261104-1429';
 
 // Janela "Objetivos de NPS". depois() corre quando se guarda.
 export function editarMetas(depois) {
@@ -106,20 +106,22 @@ function logosNasBarras(g, dados) {
   const e = document.getElementById('ov-eixo');
   if (e) { e.style.marginLeft = `${OV_GRID.left}px`; e.style.width = `${el.clientWidth - OV_GRID.left - OV_GRID.right}px`; }
   el.querySelectorAll('.ov-bar-logo').forEach(n => n.remove());
-  const banda = (el.clientWidth - OV_GRID.left - OV_GRID.right) / dados.length;
-  const larg = banda * 0.62 / 2 - 4;
+  // Posição real de cada barra de NPS (centro e largura), para o logo ficar mesmo ao meio
+  const dadosNps = g.getModel?.().getSeriesByIndex(0)?.getData();
   dados.forEach((d, i) => {
     if (!d.r || d.r.nps < 12) return;
     const [x, yTopo] = g.convertToPixel({ gridIndex: 0 }, [i, d.r.nps]);
     const [, yZero] = g.convertToPixel({ gridIndex: 0 }, [i, 0]);
     const alt = yZero - yTopo;
-    const tam = Math.min(larg - 10, 56, alt - 12);
+    const lay = dadosNps?.getItemLayout(i);
+    const larg = lay ? Math.abs(lay.width) : 40;
+    const centro = lay ? lay.x + lay.width / 2 : x;
+    const tam = Math.round(Math.min(larg - 10, 56, alt - 12));
     if (tam < 18) return;
-    const centro = x - larg / 2 - 2;
     const s = document.createElement('span');
     s.className = 'ov-bar-logo';
     s.innerHTML = logo(d.b.icon);
-    Object.assign(s.style, { width: `${tam}px`, height: `${tam}px`, padding: `${Math.round(tam * 0.18)}px`, left: `${centro - tam / 2}px`, top: `${yZero - tam - 8}px` });
+    Object.assign(s.style, { width: `${tam}px`, height: `${tam}px`, padding: `${Math.round(tam * 0.18)}px`, left: `${Math.round(centro - tam / 2)}px`, top: `${Math.round(yZero - tam - 8)}px` });
     el.appendChild(s);
   });
 }
