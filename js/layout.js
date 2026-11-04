@@ -1,10 +1,10 @@
 // Menu lateral e barra de topo
-import { BRANDS, GROUP } from './brands.js?v=20261104-1628';
-import { icon } from './icons.js?v=20261104-1628';
-import { logo } from './logos.js?v=20261104-1628';
-import { esc } from './ui.js?v=20261104-1628';
-import { formatarData } from './excel.js?v=20261104-1628';
-import { store, abertas } from './store.js?v=20261104-1628';
+import { BRANDS, GROUP } from './brands.js?v=20261104-1659';
+import { icon } from './icons.js?v=20261104-1659';
+import { logo } from './logos.js?v=20261104-1659';
+import { esc } from './ui.js?v=20261104-1659';
+import { formatarData } from './excel.js?v=20261104-1659';
+import { store, abertas } from './store.js?v=20261104-1659';
 
 export function tileVars(b) {
   return `--tile-bg:${b.colors.main};--tile-on:${b.colors.on};--tile-soft:${b.colors.lightest};--tile-ink:${b.colors.darkest}`;
@@ -28,7 +28,7 @@ export function sidebar({ brand, tab }) {
     <div>
       <div class="sb-label">Marcas</div>
       <nav class="sb-nav" aria-label="Marcas">
-        <a class="sb-item sb-ov${!brand ? ' is-open' : ''}" href="#/" style="${tileVars(GROUP)}" ${!brand ? 'aria-current="page"' : ''}><span class="tile mark">${logo('grupo')}</span><span>Overview</span><span class="count">grupo</span></a>
+        <a class="sb-item sb-ov${!brand ? ' is-open' : ''}" href="#/" style="${tileVars(GROUP)}" ${!brand ? 'aria-current="page"' : ''}><span class="tile mark">${logo('grupo')}</span><span>Overview</span></a>
         ${itens}
       </nav>
     </div>
