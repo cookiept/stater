@@ -142,12 +142,14 @@ export const TIPOS = {
   ces: { nome: 'Describe do CES (escala de 1 a 7)', analises: ['ces'] },
   csat: { nome: 'Relate de Group NPS com um CSAT', analises: ['csat-grupos'] },
   regressao: { nome: 'Regressão (importância relativa)', analises: ['regressao'] },
+  pivot: { nome: 'Pivot Table de Group NPS por driver e área', analises: ['breakdown'] },
 };
 
 // Que análise é este Excel? Vê a estrutura, não o nome do ficheiro.
 export function identificar(rows) {
   const topo = rows.slice(0, 12).flat().map(texto).join(' \n ');
   const tudo = rows.slice(0, 80).flat().map(texto).join(' \n ');
+  if (/^pivot table result/i.test(texto(rows[0]?.[0]))) return 'pivot';
   if (linhaCom(rows, /^is checked\??$/i) >= 0 || /\b(level 1|level 2|topic hierarchy)\b/i.test(topo)) return 'textiq';
   if (/relative importance/i.test(tudo)) return 'regressao';
   const cs = lerCounts(rows);
@@ -415,3 +417,39 @@ export function parseRegressao(rows) {
   if (!variaveis.length) throw new FicheiroErrado('Encontrei a tabela da regressão mas sem variáveis.', ['Linhas com cada variável e a sua Relative Importance']);
   return { variaveis: variaveis.sort((a, b) => b.imp - a.imp), n, r2, ...resumoBase(rows) };
 }
+
+// ---------- Pivot Table: Group NPS por driver e por área num só Excel ----------
+// Linhas "Driver | Área | Detrator | Neutro | Promotor | Total"; a linha "Total" fica de fora.
+// Devolve uma lista de "ficheiros", um por área, como se cada área viesse no seu Excel.
+const PISTA_AREA = /área|area|centro|loja|local|regi|zona|posto|esta[cç]/i;
+export function parsePivot(rows) {
+  const iRows = rows.findIndex(r => lower(r?.[0]) === 'rows');
+  const iCab = rows.findIndex(r => (r || []).some(c => lower(c) === 'detrator') && (r || []).some(c => lower(c) === 'promotor'));
+  if (iRows < 0 || iCab < 0) {
+    throw new FicheiroErrado('Esta Pivot Table não tem o formato esperado.', ['Nas linhas: o driver e, por baixo, a área ou o centro', 'Nas colunas: (Group) NPS, com COUNT']);
+  }
+  const nomes = (rows[iRows + 1] || []).slice(0, 2).map(c => texto(c).replace(/^embedded data\s*-\s*|^survey metadata\s*-\s*/i, ''));
+  const cA = !PISTA_AREA.test(nomes[1]) && PISTA_AREA.test(nomes[0]) ? 0 : 1, cG = 1 - cA;
+  const cab = rows[iCab].map(lower);
+  const col = k => cab.indexOf(k);
+  const [cd, cn, cp] = [col('detrator'), col('neutro'), col('promotor')];
+  const areas = new Map();
+  for (const r of rows.slice(iCab + 1)) {
+    const g = texto(r?.[cG]), a = texto(r?.[cA]);
+    if (!g || !a || /^total$/i.test(g) || /^total$/i.test(a)) continue;
+    const [d, n, p] = [cd, cn, cp].map(c => numero(r[c]) || 0);
+    if (!areas.has(a)) areas.set(a, []);
+    areas.get(a).push({ nome: g, d, n, p, total: d + n + p });
+  }
+  if (!areas.size) throw new FicheiroErrado('A Pivot Table não tem linhas com contagens.', ['Linhas com driver, área e as contagens de Detrator, Neutro e Promotor']);
+  const base = resumoBase(rows);
+  const campo = nomes[cA] || 'Área';
+  const ficheiros = [...areas.entries()].sort((x, y) => x[0].localeCompare(y[0], 'pt')).map(([a, grupos]) => ({
+    grupos, semRespostas: [], multi: false, amostraGrupo: null, ...base,
+    filtros: [...base.filtros, { campo, valor: `igual a ${a}` }], area: { campo, valor: a },
+  }));
+  return { pivot: true, ficheiros, periodo: base.periodo, filtros: base.filtros, campoArea: campo, variavel: nomes[cG] };
+}
+
+// NPS por Driver: um Excel do Relate (uma área) ou uma Pivot Table (todas as áreas)
+export const parseBreakdown = rows => (identificar(rows) === 'pivot' ? parsePivot(rows) : parseGrupos(rows));

@@ -2,13 +2,13 @@
 // (área de conforto, centro de inspeção…). Cada Excel vem filtrado no Stats iQ por uma área; o Stater lê esse
 // filtro, dá o nome à área e junta tudo. Mostra "Todas" (soma de todos os Excels) ou uma área de cada vez,
 // mais uma tabela cruzada área × driver. O resto da página é a vista "NPS por grupo" (grupos.js).
-import { npsDe, fmt, LIMITES } from '../stats.js?v=20261104-1159';
-import { esc } from '../ui.js?v=20261104-1159';
-import { icon } from '../icons.js?v=20261104-1159';
-import { formatarPeriodo } from '../excel.js?v=20261104-1159';
-import { baseGrafico } from '../export.js?v=20261104-1159';
-import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261104-1159';
-import * as G from './grupos.js?v=20261104-1159';
+import { npsDe, fmt, LIMITES } from '../stats.js?v=20261104-1215';
+import { esc } from '../ui.js?v=20261104-1215';
+import { icon } from '../icons.js?v=20261104-1215';
+import { formatarPeriodo } from '../excel.js?v=20261104-1215';
+import { baseGrafico } from '../export.js?v=20261104-1215';
+import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261104-1215';
+import * as G from './grupos.js?v=20261104-1215';
 
 const LIM = LIMITES.amostraPequena;
 const TODAS = '*';
@@ -21,7 +21,7 @@ const areaT = tab => {
 const termos = tab => ({ um: 'grupo', varios: 'grupos', col: 'Grupo', ...(tab?.termos || {}) });
 
 export const multi = true;
-export const multiTexto = 'Um Excel por área, já filtrado no Stats iQ (ex.: Centro = Palamós). O Stater lê o filtro e dá o nome a cada área.';
+export const multiTexto = 'Uma Pivot Table com todas as áreas, ou um Excel por área já filtrado no Stats iQ (ex.: Centro = Palamós). O Stater lê o filtro e dá o nome a cada área.';
 
 // ---------- A área de cada Excel, a partir dos filtros ----------
 const PISTA = /área|area|centro|loja|local|regi|zona|posto|esta[cç]/i;
@@ -47,7 +47,12 @@ function ficheirosDe(rec) {
 
 // Junta um Excel novo; a mesma área é substituída
 export function juntar(rec, novo, fileName) {
-  const ficheiros = [...ficheirosDe(rec)];
+  // Uma Pivot Table já traz todas as áreas: substitui o que estava
+  if (novo.pivot) {
+    const ficheiros = novo.ficheiros.map(f => ({ ...f, fileName }));
+    return { ficheiros, pivot: fileName, sel: ficheiros.length > 1 ? TODAS : nomeDe(ficheiros[0]), periodo: novo.periodo, filtros: novo.filtros };
+  }
+  const ficheiros = rec?.data.pivot ? [] : [...ficheirosDe(rec)];
   const f = { ...novo, fileName, area: areaDe(novo.filtros, ficheiros) };
   const i = ficheiros.findIndex(x => nomeDe(x) === nomeDe(f));
   if (i >= 0) ficheiros[i] = f; else ficheiros.push(f);
@@ -84,9 +89,9 @@ export function preparar(rec) {
   const comuns = fs[0].filtros.filter(f => !f.data && fs.every(x => (x.filtros || []).some(g => g.campo === f.campo && g.valor === f.valor)));
   const data = um ? { ...um } : {
     ...somar(fs), periodo: periodoDe(fs), pergunta: fs[0].pergunta,
-    filtros: [...fs[0].filtros.filter(f => f.data), ...comuns, { campo: fs[0].area?.campo || 'Área', valor: `${fs.length} Excels juntos (${nomes.join(', ')})` }],
+    filtros: [...fs[0].filtros.filter(f => f.data), ...comuns, { campo: fs[0].area?.campo || 'Área', valor: rec.data.pivot ? `todas (${fs.length})` : `${fs.length} Excels juntos (${nomes.join(', ')})` }],
   };
-  return { ...rec, fileName: um ? um.fileName : `${fs.length} Excels`, data: { ...data, ficheiros: fs, sel } };
+  return { ...rec, fileName: rec.data.pivot || (um ? um.fileName : `${fs.length} Excels`), data: { ...data, ficheiros: fs, sel, pivot: rec.data.pivot } };
 }
 
 // ---------- Tabela área × driver ----------
@@ -148,7 +153,7 @@ function tabelaCruz(rec, meta, tab) {
   const fs = rec.data.ficheiros, A = areaT(tab), T = termos(tab);
   if (fs.length < 2) return '';
   const { grupos } = cruz(rec);
-  return tabelaHtml('cruz', `NPS de cada ${T.um} por ${A.um}`, `Uma linha por ${A.um} (um Excel cada) e uma coluna por ${T.um}. Cada número é o NPS de quem escolheu esse ${T.um} ${A.nessa}. Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. Números claros: menos de ${LIM} respostas, mudam muito. Passa o rato por cima para ver as respostas.`,
+  return tabelaHtml('cruz', `NPS de cada ${T.um} por ${A.um}`, `Uma linha por ${A.um} e uma coluna por ${T.um}. Cada número é o NPS de quem escolheu esse ${T.um} ${A.nessa}. Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. Números claros: menos de ${LIM} respostas, mudam muito. Passa o rato por cima para ver as respostas.`,
     [{ k: 'nome', rot: A.col }, { k: 'nps', rot: 'NPS geral', r: true }, { k: 'total', rot: 'Respostas', r: true }, ...grupos.map((g, i) => ({ k: `g${i}`, rot: g, r: true }))], A.um.length > 14 ? "Procurar" : `Procurar ${A.um}`)
     .replace('class="tbl"', 'class="tbl cruz"');
 }
@@ -182,6 +187,13 @@ export function exportar(rec, brand, meta, tab) {
 // Lista de Excels carregados (menu Ficheiro)
 export function lado(rec, meta, tab) {
   const A = areaT(tab);
+  if (rec.data.pivot) return `<div class="side-block">
+    <div class="filecard">${icon('file')}<div><div class="fn">${esc(rec.data.pivot)}</div><div class="fm">Pivot Table · ${fmt(rec.data.ficheiros.length)} ${esc(A.varios)} · ${esc(formatarPeriodo(rec.data.ficheiros[0].periodo))}</div></div></div>
+    <div class="file-actions">
+      <button class="btn btn-secondary btn-sm" data-act="upload">${icon('upload')} Substituir</button>
+      <button class="btn btn-danger-ghost btn-sm" data-act="clear" title="Apaga o ficheiro desta tab">${icon('trash')} Apagar</button>
+    </div>
+  </div>`;
   return `<div class="side-block">
     <h3 class="sec-title">${esc(A.varios[0].toUpperCase() + A.varios.slice(1))} ${A.carregadas}</h3>
     <ul class="drv-lista">${rec.data.ficheiros.map((f, i) => `
@@ -199,5 +211,5 @@ export const nomeFicheiro = f => nomeDe(f);
 
 export const importar = {
   titulo: 'Como importar os dados de NPS por Driver',
-  texto: 'No Stats iQ, selecione a variável principal "(Group) NPS" e, como variável secundária, os Drivers. Execute a opção "Relate". Para ver por área, aplique um filtro por área (ex.: Centro = Palamós) e exporte um Excel por área. Pode carregar todos de uma vez: o Stater lê o filtro de cada Excel e junta-os.',
+  texto: 'Para ver todas as áreas de uma vez: no Stats iQ, selecione os Drivers, a área (ex.: Centro ou AreaConfortoNome) e "(Group) NPS". Vá a Advanced → Pivot Table e coloque nas linhas os Drivers e, por baixo, a área; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel". Em alternativa, faça um "Relate" de "(Group) NPS" com os Drivers, um Excel por área (filtrado pela área), e carregue-os todos de uma vez.',
 };
