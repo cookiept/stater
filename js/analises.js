@@ -6,10 +6,10 @@
 //   2. a vista em js/views/ (chips, resumo, html, mount, exportar, importar, e lado/multi/juntar se precisar);
 //   3. uma linha aqui;
 //   4. `live: true` (e `tipo`, se o id da tab for outro) nas tabs de brands.js.
-import { parseNps, parseCausas } from './excel.js?v=20261104-1120';
-import * as vNps from './views/nps.js?v=20261104-1120';
-import * as vCausas from './views/causas.js?v=20261104-1120';
-import * as vMolho from './views/molho.js?v=20261104-1120';
+import { parseNps, parseCausas } from './excel.js?v=20261104-1125';
+import * as vNps from './views/nps.js?v=20261104-1125';
+import * as vCausas from './views/causas.js?v=20261104-1125';
+import * as vMolho from './views/molho.js?v=20261104-1125';
 
 export const ANALISES = {
   nps: { parse: parseNps, view: vNps },
