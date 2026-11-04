@@ -1,10 +1,10 @@
 // Menu lateral e barra de topo
-import { BRANDS, GROUP } from './brands.js?v=20261103-1649';
-import { icon } from './icons.js?v=20261103-1649';
-import { logo } from './logos.js?v=20261103-1649';
-import { esc } from './ui.js?v=20261103-1649';
-import { formatarData } from './excel.js?v=20261103-1649';
-import { store, abertas } from './store.js?v=20261103-1649';
+import { BRANDS, GROUP } from './brands.js?v=20261104-1120';
+import { icon } from './icons.js?v=20261104-1120';
+import { logo } from './logos.js?v=20261104-1120';
+import { esc } from './ui.js?v=20261104-1120';
+import { formatarData } from './excel.js?v=20261104-1120';
+import { store, abertas } from './store.js?v=20261104-1120';
 
 export function tileVars(b) {
   return `--tile-bg:${b.colors.main};--tile-on:${b.colors.on};--tile-soft:${b.colors.lightest};--tile-ink:${b.colors.darkest}`;
@@ -14,7 +14,8 @@ export function sidebar({ brand, tab }) {
   const itens = BRANDS.map(b => {
     const atual = brand?.id === b.id;
     const aberta = abertas.has(b.id);
-    const sub = aberta ? `<div class="sb-sub-nav" id="tabs-${b.id}">${b.tabs.map(t => `
+    const sub = aberta ? `<div class="sb-sub-nav" id="tabs-${b.id}">${b.tabs.map(t => t.off ? `
+        <span class="sb-tab is-off" aria-disabled="true" tabindex="0" data-tip-title="Tab desativada" data-tip="${esc(t.off)}">${icon(t.icon)}<span class="lbl">${esc(t.name)}</span></span>` : `
         <a class="sb-tab" href="#/${b.id}/${t.id}" ${atual && tab?.id === t.id ? 'aria-current="page"' : ''}>${icon(t.icon)}<span class="lbl" title="${esc(t.name)}">${esc(t.name)}</span>${store.get(b.id, t.id) ? '<span class="dot" title="Com dados"></span>' : ''}</a>`).join('')}</div>` : '';
     return `<div class="sb-row" style="${tileVars(b)}">
         <a class="sb-item${atual ? ' is-open' : ''}" href="#/${b.id}/${b.tabs[0].id}">

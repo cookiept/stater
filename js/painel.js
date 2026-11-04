@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261103-1649';
-import { esc, info } from './ui.js?v=20261103-1649';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261103-1649';
-import { fmt } from './stats.js?v=20261103-1649';
-import { store, meta } from './store.js?v=20261103-1649';
-import { analiseDe, ativa } from './analises.js?v=20261103-1649';
-import { tileVars } from './layout.js?v=20261103-1649';
+import { icon } from './icons.js?v=20261104-1120';
+import { esc, info } from './ui.js?v=20261104-1120';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1120';
+import { fmt } from './stats.js?v=20261104-1120';
+import { store, meta } from './store.js?v=20261104-1120';
+import { analiseDe, ativa } from './analises.js?v=20261104-1120';
+import { tileVars } from './layout.js?v=20261104-1120';
 
 // Aviso de ficheiro errado: o que é o ficheiro, o que falta e em que tab entra
 function avisoErro(erro, extra = '') {
@@ -95,6 +95,7 @@ export function painel(brand, tab, erro) {
       <h2>${esc(tab.name)}</h2>
       <div class="chips">${chipsHtml}</div>
     </div>`;
+  if (tab.off) return `<section class="panel">${head()}<div class="soon-panel"><div class="big">${icon(tab.icon)}</div><h3>Tab desativada</h3><p>${esc(tab.off)}</p></div></section>`;
   if (!ativa(brand, tab)) return `<section class="panel">${head()}${painelEmBreve(brand, tab)}</section>`;
   if (!rec) return `<section class="panel">${head()}${painelVazio(A, erro)}</section>`;
 

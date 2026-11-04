@@ -775,3 +775,8 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .toast-ok { background: #1e8a34; font-weight: 600; }
 .toast-ok .ico { stroke-width: 2.4; }
 @media (prefers-reduced-motion: reduce) { .toast { transition: opacity .2s; transform: translateX(-50%); } }
+
+/* Tabs desativadas no menu (ex.: Text iQ da Controlauto ITV) */
+.sb-tab.is-off { color: var(--text-disabled); cursor: not-allowed; }
+.sb-tab.is-off .ico { color: var(--text-disabled); }
+.sb-tab.is-off:hover { background: none; color: var(--text-disabled); }

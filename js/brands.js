@@ -12,6 +12,7 @@ export const GROUP = {
 };
 
 // Tabs: os nomes são os do Stater v10. `live` = funciona no protótipo.
+// `off` = tab desativada (cinzenta no menu, não abre); o texto diz porquê.
 export const BRANDS = [
   {
     id: 'colibri', name: 'Colibri', icon: 'colibri',
@@ -70,8 +71,8 @@ export const BRANDS = [
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel' },
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search' },
       { id: 'nps-csat', name: 'NPS x CSAT', icon: 'smile' },
-      { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag' },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search' },
+      { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', off: 'Ainda não há Text iQ na Controlauto ITV.' },
+      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Controlauto ITV.' },
     ],
   },
   {
