@@ -2,13 +2,13 @@
 // (área de conforto, centro de inspeção…). Cada Excel vem filtrado no Stats iQ por uma área; o Stater lê esse
 // filtro, dá o nome à área e junta tudo. Mostra "Todas" (soma de todos os Excels) ou uma área de cada vez,
 // mais uma tabela cruzada área × driver. O resto da página é a vista "NPS por grupo" (grupos.js).
-import { npsDe, fmt, LIMITES } from '../stats.js?v=20261104-1241';
-import { esc } from '../ui.js?v=20261104-1241';
-import { icon } from '../icons.js?v=20261104-1241';
-import { formatarPeriodo } from '../excel.js?v=20261104-1241';
-import { baseGrafico } from '../export.js?v=20261104-1241';
-import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261104-1241';
-import * as G from './grupos.js?v=20261104-1241';
+import { npsDe, fmt, LIMITES } from '../stats.js?v=20261104-1246';
+import { esc } from '../ui.js?v=20261104-1246';
+import { icon } from '../icons.js?v=20261104-1246';
+import { formatarPeriodo } from '../excel.js?v=20261104-1246';
+import { baseGrafico } from '../export.js?v=20261104-1246';
+import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261104-1246';
+import * as G from './grupos.js?v=20261104-1246';
 
 const LIM = LIMITES.amostraPequena;
 const TODAS = '*';
@@ -211,5 +211,5 @@ export const nomeFicheiro = f => nomeDe(f);
 
 export const importar = {
   titulo: 'Como importar os dados de NPS por Driver',
-  texto: 'Para ver todas as áreas de uma vez: no Stats iQ, selecione os Drivers, a área (ex.: Centro ou AreaConfortoNome) e "(Group) NPS". Vá a Advanced → Pivot Table e coloque nas linhas os Drivers e, por baixo, a área; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel". Em alternativa, faça um "Relate" de "(Group) NPS" com os Drivers, um Excel por área (filtrado pela área), e carregue-os todos de uma vez.',
+  texto: 'No Stats iQ, selecione os Drivers, a área (ex.: Centro ou AreaConfortoNome) e "(Group) NPS". Vá a Advanced → Pivot Table: nas linhas os Drivers e, por baixo, a área; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel".',
 };

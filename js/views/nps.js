@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261104-1241';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261104-1241';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261104-1241';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261104-1241';
-import { icon } from '../icons.js?v=20261104-1241';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261104-1246';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261104-1246';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261104-1246';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261104-1246';
+import { icon } from '../icons.js?v=20261104-1246';
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima do objetivo' : nps === meta ? 'No objetivo' : 'Abaixo do objetivo');
 
@@ -240,6 +240,8 @@ export function exportar(rec, brand, meta) {
 }
 
 // Texto do Stater v10, sem alterações
+export const esqueleto = ['kpis', 'colunas', 'barras'];
+
 export const importar = {
   titulo: 'Como importar os dados de NPS',
   texto: 'No Stats iQ, selecione a variável principal "(Numeric) NPS" e execute a opção "Describe". Em seguida, exporte a tabela para Excel.',

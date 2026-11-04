@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261104-1241';
-import { esc, info } from './ui.js?v=20261104-1241';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1241';
-import { fmt } from './stats.js?v=20261104-1241';
-import { store, meta } from './store.js?v=20261104-1241';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1241';
-import { tileVars } from './layout.js?v=20261104-1241';
+import { icon } from './icons.js?v=20261104-1246';
+import { esc, info } from './ui.js?v=20261104-1246';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261104-1246';
+import { fmt } from './stats.js?v=20261104-1246';
+import { store, meta } from './store.js?v=20261104-1246';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1246';
+import { tileVars } from './layout.js?v=20261104-1246';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -18,23 +18,42 @@ function avisoErro(erro, extra = '') {
   return `<div class="alert error aviso-erro" role="alert">${icon('alert')}<div><b>${esc(erro.ficheiro ? `"${erro.ficheiro}" não serve para esta tab` : 'Este ficheiro não serve para esta tab')}</b><p>${esc(erro.msg)}${extra}</p>${lista}${ir}</div></div>`;
 }
 
+// Passos do "Como importar": cada frase do texto é um passo, e o último é sempre carregar aqui
+export function passosDe(texto, multi) {
+  const frases = texto.split(/(?<=[.!?])\s+(?=[A-ZÀ-Ú"])/).map(f => f.replace(/^(em seguida|depois|por fim),\s*/i, '').trim()).filter(Boolean)
+    .map(f => f[0].toUpperCase() + f.slice(1));
+  return [...frases, multi ? 'Arraste os Excels para aqui (pode ser vários de uma vez) ou escolha-os no computador.' : 'Arraste o Excel para aqui ou escolha-o no computador.'];
+}
+
+// Esqueleto cinzento do que a tab vai mostrar (cada vista diz que blocos tem; por omissão: números, barras e tabela)
+const BLOCOS = {
+  kpis: () => `<div class="sk-kpis">${'<div class="sk-kpi"><i></i><b></b><i></i></div>'.repeat(4)}</div>`,
+  barras: () => `<div class="sk-card"><i class="sk-t"></i>${[86, 70, 58, 44, 30].map(w => `<div class="sk-barra"><i></i><b style="width:${w}%"></b></div>`).join('')}</div>`,
+  colunas: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-colunas">${[22, 14, 18, 30, 42, 78, 92].map(h => `<b style="height:${h}%"></b>`).join('')}</div></div>`,
+  pontos: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-pontos">${[[12, 30], [28, 62], [44, 40], [58, 74], [72, 22], [86, 52]].map(([x, y]) => `<b style="left:${x}%;bottom:${y}%"></b>`).join('')}</div></div>`,
+  tabela: () => `<div class="sk-card"><i class="sk-t"></i><div class="sk-cab"></div>${'<div class="sk-linha"><i></i><i></i><i></i></div>'.repeat(4)}</div>`,
+};
+const esqueleto = A => `<div class="sk" aria-hidden="true">${(A.view.esqueleto || ['kpis', 'barras', 'tabela']).map(k => BLOCOS[k]?.() || '').join('')}</div>`;
+
 function painelVazio(A, erro, tab) {
   const multi = A.view.multi;
   const imp = importarDe(A, tab);
+  const passos = passosDe(imp.texto, multi);
   return `
     ${avisoErro(erro)}
     <div class="empty">
-      <div class="drop" id="drop">
-        <div class="big">${icon('upload')}</div>
-        <h3>${multi ? 'Carrega os Excel desta tab' : 'Carrega o Excel desta tab'}</h3>
-        <p>${multi ? `${esc(A.view.multiTexto || 'Um Excel por driver.')} Podes escolher ou arrastar vários de uma vez.` : 'Arrasta o ficheiro para aqui ou escolhe-o no computador.'} Aceita .xlsx, .xls e .csv.</p>
-        <div class="row">
-          <button class="btn btn-primary" data-act="upload">${icon('upload')} Escolher ficheiro</button>
+      ${esqueleto(A)}
+      <div class="empty-card">
+        <div class="drop" id="drop">
+          <div class="big">${icon('upload')}</div>
+          <h3>${multi ? 'Carrega os Excel desta tab' : 'Carrega o Excel desta tab'}</h3>
+          <p>${multi ? `${esc(A.view.multiTexto || 'Um Excel por driver.')} ` : ''}Aceita .xlsx, .xls e .csv.</p>
+          <div class="row"><button class="btn btn-primary" data-act="upload">${icon('upload')} Escolher ficheiro</button></div>
         </div>
-      </div>
-      <div class="howto">
-        <h3>${esc(imp.titulo)}</h3>
-        <p class="import-txt">${esc(imp.texto)}</p>
+        <div class="howto">
+          <h3>${esc(imp.titulo)}</h3>
+          <ol class="passos">${passos.map((p, i) => `<li><span class="passo-n">${i + 1}</span><span>${esc(p)}</span></li>`).join('')}</ol>
+        </div>
       </div>
     </div>`;
 }

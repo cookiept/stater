@@ -1,18 +1,18 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1241';
-import { logo } from './logos.js?v=20261104-1241';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1241';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1241';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1241';
-import { limparGraficos } from './charts.js?v=20261104-1241';
-import { exemplos } from './exemplo.js?v=20261104-1241';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1241';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1241';
-import { sidebar, topbar } from './layout.js?v=20261104-1241';
-import { painel } from './painel.js?v=20261104-1241';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1241';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261104-1246';
+import { logo } from './logos.js?v=20261104-1246';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261104-1246';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261104-1246';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261104-1246';
+import { limparGraficos } from './charts.js?v=20261104-1246';
+import { exemplos } from './exemplo.js?v=20261104-1246';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261104-1246';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261104-1246';
+import { sidebar, topbar } from './layout.js?v=20261104-1246';
+import { painel } from './painel.js?v=20261104-1246';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261104-1246';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
