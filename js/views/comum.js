@@ -1,11 +1,11 @@
 // Peças partilhadas pelas vistas: números grandes, cartões de gráfico, tabela ordenável e
 // gráficos que se repetem (barras horizontais de um valor, composição detratores/neutros/promotores).
 // Uma vista nova deve montar-se com estas peças para o Stater ficar igual em todas as tabs.
-import { CORES, fmt } from '../stats.js?v=20261106-1339';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1339';
-import { info, esc, btnPptx } from '../ui.js?v=20261106-1339';
-import { icon } from '../icons.js?v=20261106-1339';
-import { hex, TPL } from '../export.js?v=20261106-1339';
+import { CORES, fmt } from '../stats.js?v=20261106-1349';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1349';
+import { info, esc, btnPptx } from '../ui.js?v=20261106-1349';
+import { icon } from '../icons.js?v=20261106-1349';
+import { hex, TPL } from '../export.js?v=20261106-1349';
 
 // Número grande (KPI). hero = o primeiro, em fundo escuro.
 export const kpi = (rot, val, det, tip, hero = false) => `
@@ -23,20 +23,34 @@ export function cartao(id, titulo, tip, { legenda = '', nota = '', aria = titulo
 export const LEGENDA_DNP = `<span><i style="background:var(--detractor)"></i>Detratores</span><span><i style="background:var(--passive)"></i>Neutros</span><span><i style="background:var(--promoter)"></i>Promotores</span>`;
 
 // Tabela com títulos que ordenam e caixa de procura. colunas: [{ k, rot, r (à direita), ordena }]
-export function tabelaHtml(id, titulo, tip, colunas, procurar = 'Procurar', extra = '') {
+export function tabelaHtml(id, titulo, tip, colunas, procurar = 'Procurar', extra = '', grafico = null) {
+  // grafico = { id, legenda, aria }: o cartão começa no gráfico e um botão troca para a tabela
+  const g = grafico, m = modo => (g ? ` data-modo="${modo}"${modo === 'tab' ? ' hidden' : ''}` : '');
   return `<section class="card" aria-labelledby="h-${id}" style="padding-bottom:16px">
     <div class="card-head" style="margin-bottom:10px">
       <h3 id="h-${id}">${esc(titulo)} ${info(titulo, tip)}</h3>
       <div class="tbl-tools" style="margin-left:auto">
-        ${extra}<label class="search">${icon('search')}<span class="sr-only">${esc(procurar)}</span><input id="q-${id}" type="search" placeholder="${esc(procurar)}"></label>
-        ${btnPptx(id)}
+        ${g?.legenda ? `<div class="legend"${m('graf')} style="margin:0">${g.legenda}</div>` : ''}
+        ${g ? alternar(`modo-${id}`, [['graf', 'Gráfico'], ['tab', 'Tabela']], 'graf', 'Mostrar como') : ''}
+        <span class="tbl-only"${m('tab')}>${extra}</span><label class="search"${m('tab')}>${icon('search')}<span class="sr-only">${esc(procurar)}</span><input id="q-${id}" type="search" placeholder="${esc(procurar)}"></label>
+        ${btnPptx(g ? g.id : id)}
       </div>
     </div>
-    <div class="tbl-wrap"><table class="tbl" id="tbl-${id}">
+    ${g ? `<div id="ch-${g.id}" class="chart" data-modo="graf" role="img" aria-label="${esc(g.aria || titulo)}"></div>` : ''}
+    <div class="tbl-wrap"${m('tab')}><table class="tbl" id="tbl-${id}">
       <thead><tr>${colunas.map(c => `<th scope="col"${c.r ? ' class="r"' : ''}>${c.ordena === false ? esc(c.rot) : `<button data-sort="${c.k}">${esc(c.rot)} ${icon('sort')}</button>`}${c.tip ? ` ${info(c.rot, c.tip)}` : ''}</th>`).join('')}</tr></thead>
       <tbody></tbody>
     </table></div>
   </section>`;
+}
+
+// Liga o botão Gráfico / Tabela de um cartão feito com tabelaHtml(..., grafico)
+export function ligarModo(id, graficoId) {
+  ligarAlternar(`modo-${id}`, v => {
+    const card = document.querySelector(`[aria-labelledby="h-${id}"]`);
+    card.querySelectorAll('[data-modo]').forEach(el => { el.hidden = el.dataset.modo !== v; });
+    card.querySelector('.exp')?.setAttribute('data-exp', v === 'tab' ? id : graficoId);
+  });
 }
 
 // Botões para alternar a forma de ver (ex.: % ou n.º de pessoas). ops: [[valor, texto]]
