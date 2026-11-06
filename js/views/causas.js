@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1317';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1317';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261106-1317';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1317';
-import { icon } from '../icons.js?v=20261106-1317';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1325';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1325';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261106-1325';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1325';
+import { icon } from '../icons.js?v=20261106-1325';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -17,7 +17,6 @@ export const npsGlobal = data => {
 // impNps: impacto estimado no NPS da marca = % das respostas × (NPS da causa − NPS da marca)
 const comImpacto = (cs, g) => cs.map(c => ({ ...c, impNps: c.zero || !g ? null : (c.quota / 100) * (c.nps - g.nps) }));
 export const todasCausas = data => comImpacto(enriquecerCausas(comZeros(data.causas, data.semRespostas), npsGlobal(data)?.total), npsGlobal(data));
-const IMPACTO_TIP = 'Impacto mede o peso da causa: a parte das pessoas que responderam ao NPS que a escolheu. Alto: 15% ou mais. Médio: de 5% a 14,9%. Baixo: menos de 5%. Diz quantas pessoas a referem, não se é boa ou má.';
 const IMPNPS_TIP = g => `Quanto esta causa puxa o NPS da marca${g ? ` (${fmt(g.nps)})` : ''} para cima (+) ou para baixo (−), em pontos: % das respostas × (NPS da causa − NPS da marca). Ex.: 6% das respostas com NPS 56 numa marca com NPS 41 dá 0,06 × (56 − 41) = +0,9.`;
 const um = v => (v > 0 ? '+' : '') + fmt(v, 1);
 
@@ -88,7 +87,7 @@ export function html(rec, meta, depoisKpis = '') {
     </section>
     <section class="card" aria-labelledby="h-tab" style="padding-bottom:16px">
       <div class="card-head" style="margin-bottom:10px">
-        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto: o peso da causa (Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
+        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
@@ -101,7 +100,6 @@ export function html(rec, meta, depoisKpis = '') {
           <th scope="col" class="r"><button data-sort="total">Menções ${icon('sort')}</button></th>
           <th scope="col">Detratores · Neutros · Promotores</th>
           <th scope="col" class="r"><button data-sort="quota">% das respostas ${icon('sort')}</button></th>
-          <th scope="col"><button data-sort="quota">Impacto ${icon('sort')}</button> ${info('Impacto', IMPACTO_TIP)}</th>
           <th scope="col" class="r"><button data-sort="impNps">Impacto no NPS ${icon('sort')}</button> ${info('Impacto no NPS', IMPNPS_TIP(g))}</th>
         </tr></thead>
         <tbody></tbody>
@@ -137,9 +135,8 @@ export function linhas(cs, meta, pior, extra = () => '') {
       <td class="r num">${fmt(c.total)}</td>
       <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>
  <td class="r"><span class="muted num">${fmt(c.quota, 1)}%</span></td>
-      <td><span class="badge" title="${esc(IMPACTO_TIP)}">${c.impacto}</span></td>
       <td class="r num ${c.impNps == null ? 'muted' : c.impNps < 0 ? 'neg' : 'pos'}">${c.impNps == null ? '–' : um(c.impNps)}</td>
-    </tr>`).join('') || `<tr><td colspan="${8}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
+    </tr>`).join('') || `<tr><td colspan="${7}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
 }
 
 export function mount(rec, brand, meta) {
