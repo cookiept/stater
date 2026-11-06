@@ -2,6 +2,7 @@
 // PowerPoint: os gráficos vão como gráficos nativos (clicar com o botão direito > Editar dados no PowerPoint).
 // PDF: usa a impressão do browser ("Guardar como PDF"), com estilos de impressão em css/app.css.
 // O PptxGenJS (vendor/) só é carregado quando alguém exporta.
+import { pelaOrdem } from './arrastar.js?v=20261106-1129';
 
 let pedido = null;
 function biblioteca() {
@@ -96,7 +97,7 @@ export async function exportarGrafico(b, tab, e, id, sub) {
 
 function juntarTab(p, b, tab, e, sub) {
   capa(p, b, tab, e, sub);
-  for (const g of e.graficos) g.desenhar(slide(p, b, g.titulo, `${b.name} · ${tab.name}${sub ? ` · ${sub}` : ''}`), p);
+  for (const g of pelaOrdem(e.graficos, b.id, tab.id)) g.desenhar(slide(p, b, g.titulo, `${b.name} · ${tab.name}${sub ? ` · ${sub}` : ''}`), p);
 }
 
 export async function exportarTab(b, tab, e, sub) {

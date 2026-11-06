@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261106-1112';
-import { esc, info } from './ui.js?v=20261106-1112';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1112';
-import { fmt } from './stats.js?v=20261106-1112';
-import { store, meta } from './store.js?v=20261106-1112';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261106-1112';
-import { tileVars } from './layout.js?v=20261106-1112';
+import { icon } from './icons.js?v=20261106-1129';
+import { esc, info } from './ui.js?v=20261106-1129';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1129';
+import { fmt } from './stats.js?v=20261106-1129';
+import { store, meta, ordem } from './store.js?v=20261106-1129';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261106-1129';
+import { tileVars } from './layout.js?v=20261106-1129';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -68,7 +68,7 @@ export function menuExportar() {
 }
 
 // Menu "Ficheiro": o Excel desta tab, Substituir/Apagar e como importar
-function menuFicheiro(rec, A, m, tab) {
+function menuFicheiro(rec, A, m, tab, brand) {
   const imp = importarDe(A, tab);
   return `<details class="menu-exp menu-fich">
     <summary class="btn btn-secondary btn-sm" role="button" aria-haspopup="true">${icon('file')} Ficheiro</summary>
@@ -79,6 +79,7 @@ function menuFicheiro(rec, A, m, tab) {
           <button class="btn btn-secondary btn-sm" data-act="upload">${icon('upload')} Substituir</button>
           <button class="btn btn-danger-ghost btn-sm" data-act="clear" title="Apaga só o ficheiro desta tab">${icon('trash')} Apagar</button>
         </div>`}
+      ${brand && ordem(brand.id, tab.id).length ? `<button type="button" class="btn btn-ghost btn-sm repor" data-act="repor-ordem">${icon('grip')} Repor a ordem dos gráficos</button>` : ''}
       <details class="fold">
         <summary>${icon('chevron')} ${esc(imp.titulo)}</summary>
         <div class="fold-body"><p class="import-txt">${esc(imp.texto)}</p></div>
@@ -116,7 +117,7 @@ export function painel(brand, tab, erro) {
     ${rec.exemplo ? `<span class="chip" style="background:#ece7fb;color:#4b2a9c">${icon('sparkle')} Dados de exemplo</span>` : ''}
     <span class="chip">${icon('calendar')} Período em análise <b class="chip brand" style="padding:2px 8px">${esc(formatarPeriodo(rec.data.periodo))}</b> ${info('Período em análise', `De ${formatarPeriodo(rec.data.periodo).replace(' – ', ' a ')}. São as datas do filtro usado no Qualtrics ao exportar o Excel "${rec.fileName}", não a data em que o ficheiro foi carregado (${formatarData(rec.savedAt)}).`)}</span>
     <span class="chip">${icon('users')} ${ch.rotulo || 'Respostas'} <b class="num">${fmt(ch.respostas)}</b></span>
-    ${menuFicheiro(rec, A, m, tab)}
+    ${menuFicheiro(rec, A, m, tab, brand)}
     ${menuExportar()}`;
   return `<section class="panel">
     ${head(chipsHtml)}

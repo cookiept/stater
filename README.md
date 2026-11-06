@@ -20,7 +20,7 @@ No **Overview** ficam o NPS de cada marca e o objetivo ("Editar objetivos").
 | Causa Raiz por driver | Um Relate de Group NPS por driver, com a causa raiz desse driver | NPS por Causa Raiz (quando cada driver tem a sua causa raiz) |
 | NPS por grupo | Relate do NPS com outra variável | Resultado, Segmento, NPS x CES, NPS x CSAT, Topics |
 | NPS por Driver | Pivot Table (driver × área × Group NPS) ou um Relate por área | NPS por Driver |
-| Text iQ | Relate do NPS com os tópicos (CHECKED / UNCHECKED) | Topics, Causas, Drivers e Subtopics (Text iQ) |
+| Text iQ | Relate do NPS com os tópicos (CHECKED / UNCHECKED) | Topic Hierarchy Level 1 e 2, Drivers e Subtopics (Text iQ) |
 | CES | Describe do CES (1 a 7) | CES |
 | CSAT | Um Relate de Group NPS por CSAT | Overview CSAT's |
 | Regressão | Regression com os CSAT | Overview CSAT's |

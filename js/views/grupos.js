@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1112';
-import { esc, def } from '../ui.js?v=20261106-1112';
-import { ordemEscala } from '../excel.js?v=20261106-1112';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1112';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1112';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1129';
+import { esc, def } from '../ui.js?v=20261106-1129';
+import { ordemEscala } from '../excel.js?v=20261106-1129';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1129';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1129';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -76,13 +76,14 @@ export function html(rec, meta, tab) {
   const abaixo = fiaveis(todos).filter(c => c.nps < meta);
   const mencoes = comResp.reduce((a, c) => a + c.total, 0);
   const temMedia = todos.some(c => c.media != null);
-  const pequenos = comResp.filter(c => c.amostraPequena).length;
+  const maisPeso = [...comResp].sort((x, y) => y.total - x.total)[0];
   return `
     ${kpis([
       kpi('NPS geral', fmt(g.nps), `${fmt(g.total)} ${multi ? 'pessoas' : 'respostas'} · objetivo ${meta}`, `NPS de todas as ${fmt(g.total)} ${multi ? 'pessoas que responderam' : 'respostas do Excel'}: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Objetivo da marca: ${meta} (${g.nps >= meta ? `${fmt(g.nps - meta)} pontos acima` : `${fmt(meta - g.nps)} pontos abaixo`}).`, true),
       multi ? kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher vários', `Soma das vezes que cada ${T.um} foi escolhido: ${fmt(mencoes)}. Uma pessoa pode escolher mais do que um, por isso não é o número de pessoas (${fmt(g.total)}).`)
         : kpi('Respostas', fmt(g.total), `notas de 0 a 10`, `Respostas com nota de 0 a 10, somando todos os ${T.varios}: ${fmt(g.total)}.`),
-      kpi('Com respostas', fmt(comResp.length), `de ${fmt(todos.length)} ${todos.length === 1 ? T.um : T.varios}${pequenos ? ` · ${pequenos} com menos de ${LIM}` : ''}`, `${fmt(comResp.length)} dos ${fmt(todos.length)} ${T.varios} do Excel têm respostas. ${pequenos ? `${pequenos} ${pequenos === 1 ? 'tem' : 'têm'} menos de ${LIM}: o NPS desses muda muito com poucas respostas e aparecem com o aviso "poucas respostas".` : ''}`),
+      maisPeso ? kpi(`${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, `<span class="kv-txt">${esc(maisPeso.nome)}</span>`, `${fmt(maisPeso.quota)}% das ${multi ? 'pessoas' : 'respostas'} · NPS ${fmt(maisPeso.nps)}`, `${maisPeso.nome} é o ${T.um} com mais ${multi ? 'menções' : 'respostas'}: ${fmt(maisPeso.total)} de ${fmt(g.total)} (${fmt(maisPeso.quota, 1)}%), com NPS ${fmt(maisPeso.nps)}. Como junta a maior parte dos clientes, é o que mais mexe no NPS geral.`)
+        : kpi('Com respostas', `${fmt(comResp.length)}/${fmt(todos.length)}`, T.varios, ''),
       kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(fiaveis(todos).length)}`, abaixo.length ? `${T.varios} com NPS abaixo de ${meta}` : `nenhum ${T.um}`, `${T.varios[0].toUpperCase() + T.varios.slice(1)} com ${LIM} ou mais respostas cujo NPS fica abaixo do objetivo (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} respostas)`).join('; ')}.` : 'Neste Excel nenhum está abaixo.'}`),
     ])}
     ${cartao('nps', `NPS por ${T.um}`, `Uma barra por ${T.um}, com o NPS de quem ${multi ? 'o escolheu' : 'está nesse ' + T.um} (de −100 a 100). Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. A linha amarela é o objetivo. Por baixo do nome estão as respostas. ${itens(rec.data).ordem ? 'Os valores seguem a ordem da escala.' : `Os ${T.varios} vão do que tem mais respostas para o que tem menos.`}`,
@@ -130,7 +131,7 @@ export function exportar(rec, brand, meta, tab) {
   return {
     kpis: [
       { rot: 'NPS geral', val: fmt(g.nps), det: `${fmt(g.total)} ${rec.data.multi ? 'pessoas' : 'respostas'} · objetivo ${meta}` },
-      { rot: 'Com respostas', val: fmt(todos.filter(c => !c.zero).length), det: `de ${fmt(todos.length)}` },
+      ...(() => { const m = [...todos].filter(c => !c.zero).sort((x, y) => y.total - x.total)[0]; return m ? [{ rot: `${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, val: m.nome, det: `${fmt(m.quota)}% · NPS ${fmt(m.nps)}` }] : []; })(),
       { rot: 'Abaixo do objetivo', val: `${fmt(abaixo.length)}/${fmt(fiaveis(todos).length)}`, det: abaixo.map(c => c.nome).join(', ') || `nenhum ${T.um}` },
     ],
     resumo: [textoDe(resumo(rec, meta, tab).texto)],

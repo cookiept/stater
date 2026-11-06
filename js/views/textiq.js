@@ -1,11 +1,11 @@
 // Tipo "Text iQ": média da recomendação (0 a 10) de quem mencionou cada tema nas sugestões,
 // comparada com quem não o mencionou (linhas CHECKED / UNCHECKED do Stats iQ).
 // Serve para Topics, Causa Raiz (Text iQ), Drivers e Subtopics. Não é NPS: é a média das notas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1112';
-import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1112';
-import { esc, def } from '../ui.js?v=20261106-1112';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1112';
-import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1112';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1129';
+import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1129';
+import { esc, def } from '../ui.js?v=20261106-1129';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1129';
+import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1129';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'tema', varios: 'temas', col: 'Tema' };
@@ -43,7 +43,7 @@ export function resumo(rec, meta, tab) {
     texto: partes.join(' '),
     factos: [
       ...(pior && pior.dif < 0 ? [{ valor: fmt(pior.dif, 1), rot: `pontos em quem menciona ${pior.nome}`, tom: 'bad', tip: `Média de quem mencionou ${pior.nome} (${m1(pior.mediaC)}, ${fmt(pior.total)} pessoas) menos a média de quem não mencionou (${m1(pior.mediaU)}): ${fmt(pior.dif, 2)}. É o ${T.um} com a maior descida, entre os que têm ${LIM} ou mais menções (sem "Outros" e "Sem sugestões").` }] : []),
-      { valor: fmt(abaixo.length), rot: `de ${fmt(f.length)} ${T.varios} abaixo da média`, tom: abaixo.length ? 'bad' : 'good', tip: `${T.col}s com ${LIM} ou mais menções cuja média de quem os mencionou fica abaixo da média geral (${m1(media)}). ${abaixo.length ? `São: ${abaixo.map(t => `${t.nome} (${m1(t.mediaC)})`).join('; ')}.` : ''}` },
+      { valor: `${fmt(abaixo.length)}/${fmt(f.length)}`, rot: `${T.varios} abaixo da média`, tom: abaixo.length ? 'bad' : 'good', tip: `${T.col}s com ${LIM} ou mais menções cuja média de quem os mencionou fica abaixo da média geral (${m1(media)}). ${abaixo.length ? `São: ${abaixo.map(t => `${t.nome} (${m1(t.mediaC)})`).join('; ')}.` : ''}` },
     ],
   };
 }

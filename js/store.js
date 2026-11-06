@@ -1,5 +1,5 @@
 // Tudo o que o Stater guarda no browser (localStorage). Nada sai do computador.
-import { brandById } from './brands.js?v=20261106-1112';
+import { brandById } from './brands.js?v=20261106-1129';
 
 const chave = (b, t) => `stater:v1:${b}:${t}`;
 
@@ -28,3 +28,8 @@ export function guardarMetas(valores) {
 const CHAVE_ABERTAS = 'stater:v1:ui:abertas';
 export const abertas = new Set((() => { try { return JSON.parse(localStorage.getItem(CHAVE_ABERTAS)) || []; } catch { return []; } })());
 export const guardarAbertas = () => { try { localStorage.setItem(CHAVE_ABERTAS, JSON.stringify([...abertas])); } catch { /* browser sem espaço ou bloqueado */ } };
+
+// Ordem dos gráficos e tabelas de cada tab (escolhida ao arrastar). Lista de ids dos cartões.
+const chaveOrdem = (b, t) => `stater:v1:ui:ordem:${b}:${t}`;
+export const ordem = (b, t) => { try { return JSON.parse(localStorage.getItem(chaveOrdem(b, t))) || []; } catch { return []; } };
+export const guardarOrdem = (b, t, lista) => { try { if (lista) localStorage.setItem(chaveOrdem(b, t), JSON.stringify(lista)); else localStorage.removeItem(chaveOrdem(b, t)); } catch { /* sem espaço */ } };

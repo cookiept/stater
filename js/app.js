@@ -1,18 +1,19 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261106-1112';
-import { logo } from './logos.js?v=20261106-1112';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261106-1112';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261106-1112';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261106-1112';
-import { limparGraficos } from './charts.js?v=20261106-1112';
-import { exemplos } from './exemplo.js?v=20261106-1112';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261106-1112';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261106-1112';
-import { sidebar, topbar } from './layout.js?v=20261106-1112';
-import { painel } from './painel.js?v=20261106-1112';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261106-1112';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261106-1129';
+import { logo } from './logos.js?v=20261106-1129';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261106-1129';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261106-1129';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261106-1129';
+import { limparGraficos } from './charts.js?v=20261106-1129';
+import { exemplos } from './exemplo.js?v=20261106-1129';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261106-1129';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261106-1129';
+import { sidebar, topbar } from './layout.js?v=20261106-1129';
+import { painel } from './painel.js?v=20261106-1129';
+import { ligarArrastar, reporOrdem } from './arrastar.js?v=20261106-1129';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261106-1129';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
@@ -69,7 +70,10 @@ function render() {
       ${painel(r.brand, r.tab, erro)}`;
     const A = analiseDe(r.tab);
     const rec = vistaDe(A, store.get(r.brand.id, r.tab.id));
-    if (rec && ativa(r.brand, r.tab)) A.view.mount(rec, r.brand, meta(r.brand.id), r.tab);
+    if (rec && ativa(r.brand, r.tab)) {
+      A.view.mount(rec, r.brand, meta(r.brand.id), r.tab);
+      ligarArrastar(c.querySelector('.panel-main'), r.brand.id, r.tab.id);
+    }
     $('#file').multiple = !!A?.view.multi;
     ligarDrop();
   }
@@ -136,6 +140,7 @@ document.addEventListener('click', async e => {
   const r = rota();
   if (b.dataset.act === 'exp-tab') exportar('tab');
   if (b.dataset.act === 'exp-pdf') imprimir();
+  if (b.dataset.act === 'repor-ordem' && r.brand) { reporOrdem(r.brand.id, r.tab.id); render(); toast('Ordem original reposta.', 'ok'); return; }
   if (b.dataset.act === 'rm-ficheiro' && r.brand) {
     const rec = store.get(r.brand.id, r.tab.id);
     if (rec && !rec.data.ficheiros) { store.del(r.brand.id, r.tab.id); render(); return; } // um só Excel, guardado antes das listas
