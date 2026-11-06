@@ -24,8 +24,6 @@ export const BRANDS = [
     target: 60,
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
-      { id: 'drivers', name: 'Média da Recomendação Drivers (Text iQ)', icon: 'tag', tipo: 'textiq', termos: { col: 'Driver' }, live: true },
-      { id: 'subtopics', name: 'Média da Recomendação Subtopics (Text iQ)', icon: 'tags', tipo: 'textiq', termos: { col: 'Subtópico' }, live: true },
       { id: 'csat', name: "Overview CSAT's", icon: 'smile', tipo: 'regressao', live: true },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'área de conforto', varios: 'áreas de conforto', col: 'Área de conforto' } }, live: true },
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', live: true },
