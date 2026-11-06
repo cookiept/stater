@@ -1,10 +1,10 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261104-1734';
-import { icon } from '../icons.js?v=20261104-1734';
-import { formatarPeriodo } from '../excel.js?v=20261104-1734';
-import * as C from './causas.js?v=20261104-1734';
+import { esc } from '../ui.js?v=20261106-0945';
+import { icon } from '../icons.js?v=20261106-0945';
+import { formatarPeriodo } from '../excel.js?v=20261106-0945';
+import * as C from './causas.js?v=20261106-0945';
 
 const TODOS = '*';
 export const multi = true;
