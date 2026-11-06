@@ -1,11 +1,11 @@
 // Peças partilhadas pelas vistas: números grandes, cartões de gráfico, tabela ordenável e
 // gráficos que se repetem (barras horizontais de um valor, composição detratores/neutros/promotores).
 // Uma vista nova deve montar-se com estas peças para o Stater ficar igual em todas as tabs.
-import { CORES, fmt } from '../stats.js?v=20261106-1349';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1349';
-import { info, esc, btnPptx } from '../ui.js?v=20261106-1349';
-import { icon } from '../icons.js?v=20261106-1349';
-import { hex, TPL } from '../export.js?v=20261106-1349';
+import { CORES, fmt } from '../stats.js?v=20261106-1358';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1358';
+import { info, esc, btnPptx } from '../ui.js?v=20261106-1358';
+import { icon } from '../icons.js?v=20261106-1358';
+import { hex, TPL } from '../export.js?v=20261106-1358';
 
 // Número grande (KPI). hero = o primeiro, em fundo escuro.
 export const kpi = (rot, val, det, tip, hero = false) => `
@@ -29,9 +29,9 @@ export function tabelaHtml(id, titulo, tip, colunas, procurar = 'Procurar', extr
   return `<section class="card" aria-labelledby="h-${id}" style="padding-bottom:16px">
     <div class="card-head" style="margin-bottom:10px">
       <h3 id="h-${id}">${esc(titulo)} ${info(titulo, tip)}</h3>
+      ${g ? `<div class="modo-sw">${alternar(`modo-${id}`, [['graf', 'Gráfico'], ['tab', 'Tabela']], 'graf', 'Mostrar como')}</div>` : ''}
       <div class="tbl-tools" style="margin-left:auto">
         ${g?.legenda ? `<div class="legend"${m('graf')} style="margin:0">${g.legenda}</div>` : ''}
-        ${g ? alternar(`modo-${id}`, [['graf', 'Gráfico'], ['tab', 'Tabela']], 'graf', 'Mostrar como') : ''}
         <span class="tbl-only"${m('tab')}>${extra}</span><label class="search"${m('tab')}>${icon('search')}<span class="sr-only">${esc(procurar)}</span><input id="q-${id}" type="search" placeholder="${esc(procurar)}"></label>
         ${btnPptx(g ? g.id : id)}
       </div>

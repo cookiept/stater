@@ -837,3 +837,4 @@ body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: n
 .delta.up { color: #10641d; } .delta.down { color: #ad2c19; }
 .kpi.hero .delta.up { color: #8fe3a0; } .kpi.hero .delta.down { color: #ffb3a6; }
 [data-modo][hidden] { display: none !important; }
+.modo-sw { margin-left: 14px; }
