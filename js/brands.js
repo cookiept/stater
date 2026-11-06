@@ -42,7 +42,7 @@ export const BRANDS = [
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', off: 'Ainda não há Text iQ na Nedlinq.' },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Nedlinq.' },
+      { id: 'causas', name: 'NPS por Subtopics (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Nedlinq.' },
     ],
   },
   {
@@ -57,7 +57,7 @@ export const BRANDS = [
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
       { id: 'nps-ces', name: 'NPS x CES', icon: 'gauge', tipo: 'grupos', termos: { um: 'nível de concordância', varios: 'níveis de concordância', col: 'Resposta ao CES' }, live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Causa' }, live: true },
+      { id: 'causas', name: 'NPS por Subtopics (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
     ],
   },
   {
@@ -73,7 +73,7 @@ export const BRANDS = [
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
       { id: 'nps-csat', name: 'NPS x CSAT', icon: 'smile', tipo: 'grupos', termos: { um: 'nível de satisfação', varios: 'níveis de satisfação', col: 'Resposta ao CSAT' }, live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', off: 'Ainda não há Text iQ na Controlauto ITV.' },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Controlauto ITV.' },
+      { id: 'causas', name: 'NPS por Subtopics (Text iQ)', icon: 'search', off: 'Ainda não há Text iQ na Controlauto ITV.' },
     ],
   },
   {
@@ -85,9 +85,9 @@ export const BRANDS = [
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'área', varios: 'áreas', col: 'Área' } }, live: true },
-      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', live: true },
+      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Causa' }, live: true },
+      { id: 'causas', name: 'NPS por Subtopics (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
       { id: 'csat', name: "Overview CSAT's", icon: 'smile', tipo: 'csat-grupos', live: true },
     ],
   },
@@ -99,7 +99,7 @@ export const BRANDS = [
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
       { id: 'topics', name: 'NPS por Topics (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
-      { id: 'causas', name: 'NPS por Causa Raiz (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Causa' }, live: true },
+      { id: 'causas', name: 'NPS por Subtopics (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
       { id: 'ces', name: 'CES', icon: 'gauge', live: true },
     ],
   },

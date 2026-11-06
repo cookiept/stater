@@ -1,11 +1,11 @@
 // Peças partilhadas pelas vistas: números grandes, cartões de gráfico, tabela ordenável e
 // gráficos que se repetem (barras horizontais de um valor, composição detratores/neutros/promotores).
 // Uma vista nova deve montar-se com estas peças para o Stater ficar igual em todas as tabs.
-import { CORES, fmt } from '../stats.js?v=20261106-0945';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-0945';
-import { info, esc, btnPptx } from '../ui.js?v=20261106-0945';
-import { icon } from '../icons.js?v=20261106-0945';
-import { hex, TPL } from '../export.js?v=20261106-0945';
+import { CORES, fmt } from '../stats.js?v=20261106-1112';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1112';
+import { info, esc, btnPptx } from '../ui.js?v=20261106-1112';
+import { icon } from '../icons.js?v=20261106-1112';
+import { hex, TPL } from '../export.js?v=20261106-1112';
 
 // Número grande (KPI). hero = o primeiro, em fundo escuro.
 export const kpi = (rot, val, det, tip, hero = false) => `
@@ -23,20 +23,32 @@ export function cartao(id, titulo, tip, { legenda = '', nota = '', aria = titulo
 export const LEGENDA_DNP = `<span><i style="background:var(--detractor)"></i>Detratores</span><span><i style="background:var(--passive)"></i>Neutros</span><span><i style="background:var(--promoter)"></i>Promotores</span>`;
 
 // Tabela com títulos que ordenam e caixa de procura. colunas: [{ k, rot, r (à direita), ordena }]
-export function tabelaHtml(id, titulo, tip, colunas, procurar = 'Procurar') {
+export function tabelaHtml(id, titulo, tip, colunas, procurar = 'Procurar', extra = '') {
   return `<section class="card" aria-labelledby="h-${id}" style="padding-bottom:16px">
     <div class="card-head" style="margin-bottom:10px">
       <h3 id="h-${id}">${esc(titulo)} ${info(titulo, tip)}</h3>
       <div class="tbl-tools" style="margin-left:auto">
-        <label class="search">${icon('search')}<span class="sr-only">${esc(procurar)}</span><input id="q-${id}" type="search" placeholder="${esc(procurar)}"></label>
+        ${extra}<label class="search">${icon('search')}<span class="sr-only">${esc(procurar)}</span><input id="q-${id}" type="search" placeholder="${esc(procurar)}"></label>
         ${btnPptx(id)}
       </div>
     </div>
     <div class="tbl-wrap"><table class="tbl" id="tbl-${id}">
-      <thead><tr>${colunas.map(c => `<th scope="col"${c.r ? ' class="r"' : ''}>${c.ordena === false ? esc(c.rot) : `<button data-sort="${c.k}">${esc(c.rot)} ${icon('sort')}</button>`}</th>`).join('')}</tr></thead>
+      <thead><tr>${colunas.map(c => `<th scope="col"${c.r ? ' class="r"' : ''}>${c.ordena === false ? esc(c.rot) : `<button data-sort="${c.k}">${esc(c.rot)} ${icon('sort')}</button>`}${c.tip ? ` ${info(c.rot, c.tip)}` : ''}</th>`).join('')}</tr></thead>
       <tbody></tbody>
     </table></div>
   </section>`;
+}
+
+// Botões para alternar a forma de ver (ex.: % ou n.º de pessoas). ops: [[valor, texto]]
+export const alternar = (id, ops, on, rot = 'Mostrar') => `<div class="seg-toggle" role="group" aria-label="${esc(rot)}" id="sg-${id}">${ops.map(([v, t]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${v === on}">${esc(t)}</button>`).join('')}</div>`;
+export function ligarAlternar(id, fn) {
+  const g = document.getElementById(`sg-${id}`);
+  g?.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fn(b.dataset.v);
+  });
 }
 
 // Liga a ordenação e a procura. Linhas com zero ficam sempre no fim.
@@ -64,6 +76,7 @@ export function ligarTabela(id, itens, linha, { chave: k0 = 'total', dir: d0 = -
   }));
   document.getElementById(`q-${id}`)?.addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); pintar(); });
   pintar();
+  return pintar;
 }
 
 // Mini barra detratores/neutros/promotores para tabelas
@@ -86,7 +99,7 @@ export function barrasH(el, brand, itens, { min, max, linha = null, formato = v 
       type: 'bar', barWidth: '56%', showBackground: true, backgroundStyle: { color: '#f4f4f4', borderRadius: 6 },
       data: itens.map(c => (c.zero ? null : { value: c.valor, itemStyle: { color: comBrilho(c.cor, true), borderRadius: 6 } })),
       label: { show: true, position: 'right', color: '#1a1a1a', fontSize: 12, fontWeight: 700, formatter: p => (p.value == null ? '' : formato(p.value)) },
-      markLine: linha ? { symbol: 'none', silent: true, data: [{ xAxis: linha.valor, lineStyle: { color: linha.cor || CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: linha.rotulo, position: 'end', ...(linha.cor ? { color: '#494949', backgroundColor: '#f0f0f0', padding: [3, 6], borderRadius: 6, fontSize: 12 } : ETIQ_META) } }] } : undefined,
+      markLine: linha ? { symbol: 'none', silent: true, data: [{ xAxis: linha.valor, lineStyle: { color: linha.cor || CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: linha.rotulo, position: 'start', distance: 6, ...(linha.cor ? { color: '#494949', backgroundColor: '#f0f0f0', padding: [3, 6], borderRadius: 6, fontSize: 12 } : ETIQ_META) } }] } : undefined,
     }],
   }), h);
 }

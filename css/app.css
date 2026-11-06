@@ -809,3 +809,8 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .badge.seta::before { display: none; }
 .badge.seta { gap: 3px; }
 .badge.seta .ico { width: 13px; height: 13px; stroke-width: 2.6; }
+
+/* Tabela: pontos face ao objetivo */
+.tbl td.neg { color: #ad2c19; font-weight: 600; }
+.tbl td.pos { color: #10641d; font-weight: 600; }
+.tbl-tools .seg-toggle { margin-right: 4px; }

@@ -1,10 +1,10 @@
 // Tipo "CES": distribuição das respostas numa escala de concordância (1 a 7, Describe do Stats iQ).
 // 1 a 3 = discordam, 4 e 5 = ao meio, 6 e 7 = concordam (a regra do Stater v10 olha para 6 e 7).
-import { CORES, fmt } from '../stats.js?v=20261106-0945';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261106-0945';
-import { esc } from '../ui.js?v=20261106-0945';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-0945';
-import { kpi, kpis, cartao } from './comum.js?v=20261106-0945';
+import { CORES, fmt } from '../stats.js?v=20261106-1112';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261106-1112';
+import { esc } from '../ui.js?v=20261106-1112';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-1112';
+import { kpi, kpis, cartao } from './comum.js?v=20261106-1112';
 
 function contas(data) {
   const c = data.contagens, min = data.min;

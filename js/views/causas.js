@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-0945';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-0945';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-0945';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-0945';
-import { icon } from '../icons.js?v=20261106-0945';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1112';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1112';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1112';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1112';
+import { icon } from '../icons.js?v=20261106-1112';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -14,7 +14,12 @@ export const npsGlobal = data => {
 };
 
 // Todas as causas do Excel, com as de 0 menções no fim
-export const todasCausas = data => enriquecerCausas(comZeros(data.causas, data.semRespostas), npsGlobal(data)?.total);
+// impNps: impacto estimado no NPS da marca = % das respostas × (NPS da causa − NPS da marca)
+const comImpacto = (cs, g) => cs.map(c => ({ ...c, impNps: c.zero || !g ? null : (c.quota / 100) * (c.nps - g.nps) }));
+export const todasCausas = data => comImpacto(enriquecerCausas(comZeros(data.causas, data.semRespostas), npsGlobal(data)?.total), npsGlobal(data));
+const IMPACTO_TIP = 'Impacto mede o peso da causa: a parte das pessoas que responderam ao NPS que a escolheu. Alto: 15% ou mais. Médio: de 5% a 14,9%. Baixo: menos de 5%. Diz quantas pessoas a referem, não se é boa ou má.';
+const IMPNPS_TIP = g => `Quanto esta causa puxa o NPS da marca${g ? ` (${fmt(g.nps)})` : ''} para cima (+) ou para baixo (−), em pontos: % das respostas × (NPS da causa − NPS da marca). Ex.: 6% das respostas com NPS 56 numa marca com NPS 41 dá 0,06 × (56 − 41) = +0,9.`;
+const um = v => (v > 0 ? '+' : '') + fmt(v, 1);
 
 export function chips(rec) {
   const g = npsGlobal(rec.data);
@@ -24,31 +29,30 @@ export function chips(rec) {
 // Resumo descritivo (exemplo para demonstrar; as regras finais vão ser escolhidas pelos colegas).
 // "Outra"/"Sem sugestões" e causas com menos de 30 menções não entram no melhor e pior.
 export function resumo(rec, meta) {
-  const cs = enriquecerCausas(rec.data.causas, npsGlobal(rec.data)?.total);
-  const mencoes = cs.reduce((a, c) => a + c.total, 0);
   const g = npsGlobal(rec.data);
+  const cs = comImpacto(enriquecerCausas(rec.data.causas, g?.total), g);
   const dz = destaques(cs);
   const fiaveis = causasFiaveis(cs);
-  const melhor = [...(fiaveis.length ? fiaveis : cs.filter(c => !c.semSugestao))].sort((a, b) => b.nps - a.nps)[0];
   const abaixo = fiaveis.filter(c => c.nps < meta);
-  const maior = dz.maisReferida, pior = dz.pior;
+  const maior = dz.maisReferida;
+  const baixam = [...fiaveis].filter(c => c.impNps < 0).sort((x, y) => x.impNps - y.impNps);
+  const sobem = [...fiaveis].filter(c => c.impNps > 0).sort((x, y) => y.impNps - x.impNps);
   const partes = [];
-  partes.push(`Com base em <strong>${fmt(mencoes)}</strong> menções${g ? ` de <strong>${fmt(g.total)}</strong> pessoas` : ''}${g ? `, o NPS de quem respondeu foi <strong>${fmt(g.nps)}</strong>, ${g.nps > meta ? 'acima do' : g.nps === meta ? 'em linha com o' : 'abaixo do'} objetivo (${meta})` : ''}.`);
-  if (maior) partes.push(`O motivo mais referido é <strong>${esc(maior.nome)}</strong>, com <strong>${fmt(maior.total)}</strong> menções (${fmt(maior.quota)}% das respostas ao NPS) e NPS de <strong>${sinal(maior.nps)}</strong>.`);
-  if (melhor && pior && melhor !== pior) partes.push(`A causa mais bem avaliada é <strong>${esc(melhor.nome)}</strong> (NPS ${sinal(melhor.nps)}) e a que mais afasta clientes é <strong>${esc(pior.nome)}</strong> (NPS ${sinal(pior.nps)}, ${fmt(pior.pctD)}% de detratores).`);
-  partes.push(abaixo.length ? `${abaixo.length === 1 ? 'Uma causa está' : `<strong>${abaixo.length}</strong> causas estão`} abaixo do objetivo, por isso é aí que vale a pena atuar primeiro.` : 'Nenhuma causa com volume suficiente está abaixo do objetivo.');
-  const notas = [];
-  const pequenas = cs.filter(c => c.amostraPequena && !c.semSugestao).length;
-  if (pequenas) notas.push(`${pequenas === 1 ? 'Uma causa tem' : `${pequenas} causas têm`} menos de 30 menções e não entra${pequenas === 1 ? '' : 'm'} no melhor e pior.`);
-  if (rec.data.semRespostas?.length) notas.push(`${rec.data.semRespostas.length === 1 ? 'Uma opção não teve' : `${rec.data.semRespostas.length} opções não tiveram`} menções neste período: aparece${rec.data.semRespostas.length === 1 ? '' : 'm'} no fim, com 0.`);
+  if (g) partes.push(`O NPS de quem respondeu foi <strong>${fmt(g.nps)}</strong>, ${g.nps > meta ? 'acima do' : g.nps === meta ? 'em linha com o' : 'abaixo do'} objetivo (${meta}).`);
+  if (maior) partes.push(`A causa mais referida é <strong>${esc(maior.nome)}</strong>, escolhida por <strong>${fmt(maior.quota)}%</strong> das pessoas, com NPS ${sinal(maior.nps)}.`);
+  if (g && baixam.length) partes.push(`A que mais baixa o NPS da marca é <strong>${esc(baixam[0].nome)}</strong> (NPS ${sinal(baixam[0].nps)}, ${um(baixam[0].impNps)} pontos)${baixam[1] ? `, seguida de <strong>${esc(baixam[1].nome)}</strong> (${um(baixam[1].impNps)})` : ''}.`);
+  else if (g && fiaveis.length) partes.push(`Nenhuma causa com ${LIM} ou mais menções baixa o NPS da marca: todas têm NPS acima de ${fmt(g.nps)}${sobem[0] && sobem[0] !== maior ? `, e a que mais o sobe é <strong>${esc(sobem[0].nome)}</strong> (${um(sobem[0].impNps)} pontos)` : ''}.`);
+  const maiorAbaixo = [...abaixo].sort((x, y) => y.total - x.total)[0];
+  partes.push(!abaixo.length ? 'Nenhuma causa com volume suficiente está abaixo do objetivo.'
+    : abaixo.length === fiaveis.length && abaixo.length > 1 ? `Todas as <strong>${abaixo.length}</strong> causas com ${LIM} ou mais menções têm NPS abaixo do objetivo.`
+    : `${abaixo.length === 1 ? 'Uma causa tem' : `<strong>${abaixo.length}</strong> de ${fiaveis.length} causas têm`} NPS abaixo do objetivo${maiorAbaixo !== maior ? `; a mais referida delas é <strong>${esc(maiorAbaixo.nome)}</strong>` : ''}.`);
   return {
     tom: g && g.nps < meta ? 'bad' : 'good',
     texto: partes.join(' '),
     factos: [
-      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: 'das respostas referem a mais citada', tip: `${maior.nome} foi escolhida por ${fmt(maior.total)} das ${fmt(npsGlobal(rec.data)?.total || mencoes)} pessoas que responderam ao NPS: ${fmt(maior.quota, 1)}%. É a causa mais referida (só contam causas com ${LIM} ou mais menções, sem "Outra" e "Sem sugestões").` }] : []),
-      { valor: fmt(abaixo.length), rot: `de ${fmt(fiaveis.length)} causas abaixo do objetivo`, tom: abaixo.length ? 'bad' : 'good', tip: `Causas com ${LIM} ou mais menções e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhuma neste Excel.'}` },
+      ...(maior ? [{ valor: `${fmt(maior.quota)}%`, rot: `escolheram ${maior.nome}, a causa mais referida`, tip: `${maior.nome} foi escolhida por ${fmt(maior.total)} das ${fmt(g?.total || cs.reduce((x, c) => x + c.total, 0))} pessoas que responderam ao NPS: ${fmt(maior.quota, 1)}%. É a causa mais referida (só contam causas com ${LIM} ou mais menções, sem "Outra" e "Sem sugestões").` }] : []),
+      { valor: `${fmt(abaixo.length)}/${fmt(fiaveis.length)}`, rot: `causas com NPS abaixo do objetivo (${meta})`, tom: abaixo.length ? 'bad' : 'good', tip: `Causas com ${LIM} ou mais menções e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhuma neste Excel.'}` },
     ],
-    notas,
   };
 }
 
@@ -66,7 +70,7 @@ export function html(rec, meta) {
       ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · objetivo ${meta}`, info('NPS de quem respondeu', `NPS de todas as ${fmt(g.total)} pessoas que responderam a esta pergunta: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Vem do tamanho de cada grupo (Sample Size) no Excel, por isso conta pessoas e não menções. O objetivo da marca é ${meta}: ${g.nps >= meta ? `está ${fmt(g.nps - meta)} pontos acima` : `está ${fmt(meta - g.nps)} pontos abaixo`}.`), true) : ''}
       ${kpi('Causas com menções', fmt(nMenc), `de ${fmt(cs.length)} opções`, info('Causas com menções', `${fmt(nMenc)} das ${fmt(cs.length)} causas possíveis foram escolhidas pelo menos uma vez. ${cs.length - nMenc ? `As outras ${fmt(cs.length - nMenc)} tiveram 0 menções e aparecem no fim do gráfico e da tabela, a cinzento claro.` : 'Todas as causas tiveram menções.'}`))}
       ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', info('Menções', `Soma das vezes que cada causa foi escolhida: ${fmt(mencoes)}. Como uma pessoa pode escolher mais do que uma causa, este número não é o número de pessoas${g ? ` (que é ${fmt(g.total)})` : ''}. A % de cada causa na tabela é calculada sobre as pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, por isso as % podem somar mais de 100%.`))}
-      ${kpi('Abaixo do objetivo', fmt(abaixo.length), abaixo.length ? 'causas com NPS abaixo do objetivo' : 'nenhuma causa', info('Abaixo do objetivo', `Causas com ${LIM} ou mais menções cujo NPS fica abaixo do objetivo da marca (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} menções)`).join('; ')}.` : 'Neste Excel nenhuma causa está abaixo.'} Não contam "Outra" nem "Sem sugestões", nem causas com menos de ${LIM} menções, porque com tão poucas o NPS muda muito.`))}
+      ${kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(causasFiaveis(cs).length)}`, abaixo.length ? 'causas com NPS abaixo do objetivo' : 'nenhuma causa', info('Abaixo do objetivo', `Causas com ${LIM} ou mais menções cujo NPS fica abaixo do objetivo da marca (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} menções)`).join('; ')}.` : 'Neste Excel nenhuma causa está abaixo.'} Não contam "Outra" nem "Sem sugestões", nem causas com menos de ${LIM} menções, porque com tão poucas o NPS muda muito.`))}
     </div>
     <section class="card" aria-labelledby="h-comp">
       <div class="card-head">
@@ -80,11 +84,10 @@ export function html(rec, meta) {
       <div class="card-head"><h3 id="h-mat">Onde atuar primeiro ${info('Onde atuar primeiro', `Cada ponto é uma causa com menções. Para a direita: mais menções. Para baixo: pior NPS. A linha amarela é o objetivo da marca (${meta})${g ? ` e a linha cinzenta o NPS de quem respondeu (${fmt(g.nps)})` : ''}. Os pontos vermelhos estão abaixo do objetivo. As causas mais à direita e mais abaixo são muito referidas e estão mal avaliadas: é por aí que vale a pena começar.`)}</h3>
         <div class="note">Linha amarela: objetivo (${meta}). Pontos a vermelho estão abaixo dele.</div>${btnPptx('mat')}</div>
       <div id="ch-mat" class="chart" role="img" aria-label="Menções e NPS por causa"></div>
-      <div class="legend" id="lg-mat" style="margin:0 0 10px"></div>
     </section>
     <section class="card" aria-labelledby="h-tab" style="padding-bottom:16px">
       <div class="card-head" style="margin-bottom:10px">
-        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto: Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%. Clica no título de uma coluna para ordenar.`)}</h3>
+        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto: o peso da causa (Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
@@ -96,7 +99,9 @@ export function html(rec, meta) {
           <th scope="col" class="r"><button data-sort="nps">NPS ${icon('sort')}</button></th>
           <th scope="col" class="r"><button data-sort="total">Menções ${icon('sort')}</button></th>
           <th scope="col">Detratores · Neutros · Promotores</th>
-          <th scope="col"><button data-sort="quota">% das respostas ${icon('sort')}</button></th>
+          <th scope="col" class="r"><button data-sort="quota">% das respostas ${icon('sort')}</button></th>
+          <th scope="col"><button data-sort="quota">Impacto ${icon('sort')}</button> ${info('Impacto', IMPACTO_TIP)}</th>
+          <th scope="col" class="r"><button data-sort="impNps">Impacto no NPS ${icon('sort')}</button> ${info('Impacto no NPS', IMPNPS_TIP(g))}</th>
         </tr></thead>
         <tbody></tbody>
       </table></div>
@@ -121,15 +126,19 @@ export function linhas(cs, meta, pior, extra = () => '') {
       <td class="r muted">–</td>
       <td class="r num">0</td>
       <td><div class="minibar vazia" aria-hidden="true"></div></td>
-      <td><span class="muted num">0%</span></td>
+      <td class="r"><span class="muted num">0%</span></td>
+      <td class="muted">–</td>
+      <td class="r muted">–</td>
     </tr>` : `
     <tr class="${c.amostraPequena ? 'is-pequena' : ''}">
       <td><span class="name">${esc(c.nome)}</span>${c.amostraPequena ? ` <span class="badge mid">poucas menções ${def('amostra')}</span>` : ''}</td>${extra(c)}
       <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? `Abaixo do objetivo (${meta})` : `No objetivo (${meta}) ou acima`}">${fmt(c.nps)}</span></td>
       <td class="r num">${fmt(c.total)}</td>
       <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>
-      <td><span class="badge ${c.impacto === 'Alto' ? 'bad' : c.impacto === 'Médio' ? 'mid' : ''}">${c.impacto}</span> <span class="muted num">${fmt(c.quota, 1)}%</span></td>
-    </tr>`).join('') || `<tr><td colspan="${6}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
+ <td class="r"><span class="muted num">${fmt(c.quota, 1)}%</span></td>
+      <td><span class="badge ${c.impacto === 'Alto' ? 'bad' : c.impacto === 'Médio' ? 'mid' : ''}" title="${esc(IMPACTO_TIP)}">${c.impacto}</span></td>
+      <td class="r num ${c.impNps == null ? 'muted' : c.impNps < 0 ? 'neg' : 'pos'}">${c.impNps == null ? '–' : um(c.impNps)}</td>
+    </tr>`).join('') || `<tr><td colspan="${8}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
 }
 
 export function mount(rec, brand, meta) {
@@ -182,7 +191,6 @@ export function mount(rec, brand, meta) {
     }],
   }), 340);
 
-  document.getElementById('lg-mat').innerHTML = comM.map(c => `<span><i style="background:${c.nps < meta ? CORES.det : CORES.pro};border-radius:50%"></i>${esc(c.nome)} <b class="num">${fmt(c.nps)}</b></span>`).join('');
 
   // Tabela: ordenar e procurar
   const tbody = document.querySelector('#tbl-causas tbody');
@@ -191,6 +199,7 @@ export function mount(rec, brand, meta) {
     const lista = cs.filter(c => c.nome.toLowerCase().includes(q)).sort((a, b2) => {
       if (a.zero !== b2.zero) return a.zero - b2.zero;
       const x = a[chave], y = b2[chave];
+      if (x == null || y == null) return (x == null) - (y == null);
       return (typeof x === 'string' ? x.localeCompare(y, 'pt') : x - y) * dir;
     });
     tbody.innerHTML = linhas(lista, meta, dz.pior);
@@ -221,7 +230,7 @@ export const graficoMatriz = (b, brand, todas, meta, cs = todas.filter(c => !c.z
   showValAxisTitle: true, valAxisTitle: `NPS (meta ${meta})`, showCatAxisTitle: true, catAxisTitle: 'Menções', valAxisMinVal: -100, valAxisMaxVal: 100 });
 
 export const tabelaPptx = (b, brand, cs, meta, comDriver = false) => (s) => {
-  const cab = ['Causa', ...(comDriver ? ['Driver'] : []), 'NPS', 'Menções', 'Detratores', 'Neutros', 'Promotores', '% das respostas'];
+  const cab = ['Causa', ...(comDriver ? ['Driver'] : []), 'NPS', 'Menções', 'Detratores', 'Neutros', 'Promotores', '% das respostas', 'Impacto no NPS'];
   const st = { fontFace: b.fontFace, fontSize: 10, color: '1A1A1A', valign: 'middle' };
   const linhasT = cs.map(c => [
     { text: c.nome, options: st }, ...(comDriver ? [{ text: c.driver, options: st }] : []),
@@ -229,11 +238,12 @@ export const tabelaPptx = (b, brand, cs, meta, comDriver = false) => (s) => {
     { text: fmt(c.total), options: { ...st, align: 'right' } },
     { text: `${fmt(c.pctD)}%`, options: { ...st, align: 'right' } }, { text: `${fmt(c.pctN)}%`, options: { ...st, align: 'right' } }, { text: `${fmt(c.pctP)}%`, options: { ...st, align: 'right' } },
     { text: `${fmt(c.quota, 1)}%`, options: { ...st, align: 'right' } },
+    { text: c.impNps == null ? '–' : um(c.impNps), options: { ...st, align: 'right' } },
   ]);
   // Estilo do template claro do Grupo Brisa: cabeçalho verde sem fundo, linhas alternadas em verde-lima claro
   const zebra = linhasT.map((l, i) => (i % 2 ? l : l.map(c => ({ ...c, options: { ...c.options, fill: { color: TPL.limaClaro } } }))));
   s.addTable([cab.map(t => ({ text: t, options: { ...st, bold: true, color: TPL.verde, border: [{ type: 'solid', pt: 1, color: TPL.lima }, { type: 'none' }, { type: 'solid', pt: 1, color: TPL.lima }, { type: 'none' }] } })), ...zebra],
-    { x: b.x, y: b.y, w: b.w, h: 5.3, colW: comDriver ? [3.6, 1.8, 0.9, 1.1, 1.2, 1.2, 1.2, 1.33] : [4.4, 1.1, 1.3, 1.4, 1.4, 1.4, 1.33], fontFace: b.fontFace, border: { type: 'none' }, rowH: 0.28, autoPage: linhasT.length > 16, autoPageRepeatHeader: true, autoPageSlideStartY: 1.45 });
+    { x: b.x, y: b.y, w: b.w, h: 5.3, colW: comDriver ? [3.2, 1.6, 0.8, 1.0, 1.0, 1.0, 1.1, 1.2, 1.33] : [4.0, 0.9, 1.1, 1.2, 1.2, 1.2, 1.3, 1.33], fontFace: b.fontFace, border: { type: 'none' }, rowH: 0.28, autoPage: linhasT.length > 16, autoPageRepeatHeader: true, autoPageSlideStartY: 1.45 });
 };
 
 export function exportar(rec, brand, meta) {
@@ -246,7 +256,7 @@ export function exportar(rec, brand, meta) {
       ...(g ? [{ rot: 'NPS de quem respondeu', val: fmt(g.nps), det: `${fmt(g.total)} pessoas · meta ${meta}` }] : []),
       { rot: 'Causas com menções', val: fmt(cs.filter(c => !c.zero).length), det: `de ${fmt(cs.length)} opções` },
       { rot: 'Menções', val: fmt(cs.reduce((a, c) => a + c.total, 0)), det: 'uma pessoa pode escolher várias' },
-      { rot: 'Abaixo do objetivo', val: fmt(abaixo.length), det: abaixo.map(c => c.nome).join(', ') || 'nenhuma causa' },
+      { rot: 'Abaixo do objetivo', val: `${fmt(abaixo.length)}/${fmt(causasFiaveis(cs).length)}`, det: abaixo.map(c => c.nome).join(', ') || 'nenhuma causa' },
     ],
     resumo: [textoDe(resumo(rec, meta).texto)],
     filtros: rec.data.filtros,
