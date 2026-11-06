@@ -1,10 +1,10 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261106-1259';
-import { icon } from '../icons.js?v=20261106-1259';
-import { formatarPeriodo } from '../excel.js?v=20261106-1259';
-import * as C from './causas.js?v=20261106-1259';
+import { esc } from '../ui.js?v=20261106-1307';
+import { icon } from '../icons.js?v=20261106-1307';
+import { formatarPeriodo } from '../excel.js?v=20261106-1307';
+import * as C from './causas.js?v=20261106-1307';
 
 const TODOS = '*';
 export const multi = true;
@@ -42,12 +42,12 @@ export function preparar(rec) {
   return { ...rec, fileName: um ? um.fileName : `${fs.length} Excels`, data: { ...data, ficheiros: fs, sel } };
 }
 
-// Escolher o driver: dropdown no topo da tab (vale para o resumo, os gráficos e a tabela), a começar em "Todos"
+// Escolher o driver: dropdown por baixo dos indicadores (vale para o resumo, os gráficos e a tabela), a começar em "Todos"
 function seletor(rec) {
   const fs = rec.data.ficheiros;
   if (fs.length < 2) return '';
   const ops = [[TODOS, `Todos os drivers (${fs.length})`], ...fs.map(f => [f.driver, f.driver])];
-  return `<div class="vistas" role="group" aria-label="Escolher driver"><span class="vistas-rot">Driver</span><label class="sr-only" for="sel-driver">Escolher driver</label><select id="sel-driver" class="vista-sel" data-act="vista">${ops.map(([v, t]) => `<option value="${esc(v)}"${rec.data.sel === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><span class="muted">Aplica-se a todos os resultados desta tab.</span></div>`;
+  return `<div class="vistas" role="group" aria-label="Escolher driver"><span class="vistas-rot">Driver</span><label class="sr-only" for="sel-driver">Escolher driver</label><select id="sel-driver" class="vista-sel" data-act="vista">${ops.map(([v, t]) => `<option value="${esc(v)}"${rec.data.sel === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></div>`;
 }
 
 export const chips = rec => C.chips(rec);
@@ -58,7 +58,7 @@ export function resumo(rec, meta) {
   return r;
 }
 
-export const html = (rec, meta) => seletor(rec) + C.html(rec, meta);
+export const html = (rec, meta) => C.html(rec, meta, seletor(rec));
 export const mount = (rec, brand, meta) => C.mount(rec, brand, meta);
 export const exportar = (rec, brand, meta) => C.exportar(rec, brand, meta);
 export const nomeFicheiro = f => f.driver;

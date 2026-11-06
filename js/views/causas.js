@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1259';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1259';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1259';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1259';
-import { icon } from '../icons.js?v=20261106-1259';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1307';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1307';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261106-1307';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1307';
+import { icon } from '../icons.js?v=20261106-1307';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -56,7 +56,7 @@ export function resumo(rec, meta) {
   };
 }
 
-export function html(rec, meta, ferramentas = '') {
+export function html(rec, meta, depoisKpis = '') {
   const cs = todasCausas(rec.data);
   const nMenc = cs.filter(c => !c.zero).length;
   const g = npsGlobal(rec.data);
@@ -72,6 +72,7 @@ export function html(rec, meta, ferramentas = '') {
       ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', info('Menções', `Soma das vezes que cada causa foi escolhida: ${fmt(mencoes)}. Como uma pessoa pode escolher mais do que uma causa, este número não é o número de pessoas${g ? ` (que é ${fmt(g.total)})` : ''}. A % de cada causa na tabela é calculada sobre as pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, por isso as % podem somar mais de 100%.`))}
       ${kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(causasFiaveis(cs).length)}`, abaixo.length ? 'causas com NPS abaixo do objetivo' : 'nenhuma causa', info('Abaixo do objetivo', `Causas com ${LIM} ou mais menções cujo NPS fica abaixo do objetivo da marca (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} menções)`).join('; ')}.` : 'Neste Excel nenhuma causa está abaixo.'} Não contam "Outra" nem "Sem sugestões", nem causas com menos de ${LIM} menções, porque com tão poucas o NPS muda muito.`))}
     </div>
+    ${depoisKpis}
     <section class="card" aria-labelledby="h-comp">
       <div class="card-head">
         <h3 id="h-comp">Quem escolheu cada causa ${info('Quem escolheu cada causa', 'Uma barra por causa. Cada barra é 100% das pessoas que escolheram essa causa, dividida em detratores (vermelho, notas 0 a 6), neutros (cinzento, 7 e 8) e promotores (verde, 9 e 10). Por baixo do nome estão as menções e o NPS da causa. As causas vão da mais referida para a menos referida; as que tiveram 0 menções ficam no fim, sem barra.')}</h3>
@@ -89,7 +90,6 @@ export function html(rec, meta, ferramentas = '') {
       <div class="card-head" style="margin-bottom:10px">
         <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto: o peso da causa (Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
-          ${ferramentas}
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
         </div>
@@ -132,7 +132,7 @@ export function linhas(cs, meta, pior, extra = () => '') {
       <td class="r muted">–</td>
     </tr>` : `
     <tr class="${c.amostraPequena ? 'is-pequena' : ''}">
-      <td><span class="name">${esc(c.nome)}</span>${c.amostraPequena ? ` <span class="badge mid">poucas menções ${def('amostra')}</span>` : ''}</td>${extra(c)}
+      <td><span class="name">${esc(c.nome)}</span></td>${extra(c)}
       <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? `Abaixo do objetivo (${meta})` : `No objetivo (${meta}) ou acima`}">${fmt(c.nps)}</span></td>
       <td class="r num">${fmt(c.total)}</td>
       <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>

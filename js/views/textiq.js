@@ -1,11 +1,11 @@
 // Tipo "Text iQ": média da recomendação (0 a 10) de quem mencionou cada tema nas sugestões,
 // comparada com quem não o mencionou (linhas CHECKED / UNCHECKED do Stats iQ).
 // Serve para Topics, Causa Raiz (Text iQ), Drivers e Subtopics. Não é NPS: é a média das notas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1259';
-import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1259';
-import { esc, def } from '../ui.js?v=20261106-1259';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1259';
-import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1259';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1307';
+import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1307';
+import { esc } from '../ui.js?v=20261106-1307';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1307';
+import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1307';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'tema', varios: 'temas', col: 'Tema' };
@@ -102,7 +102,7 @@ export function mount(rec, brand, meta, tab) {
   ligarTabela('tab', ts, t => t.zero ? `
     <tr class="is-zero"><td><span class="name">${esc(t.nome)}</span></td><td class="r num">0</td><td class="r muted num">0%</td><td class="r muted">–</td><td class="r muted">–</td></tr>` : `
     <tr class="${t.amostraPequena ? 'is-pequena' : ''}">
-      <td><span class="name">${esc(t.nome)}</span>${t.amostraPequena ? ` <span class="badge mid">poucas menções ${def('amostra')}</span>` : ''}</td>
+      <td><span class="name">${esc(t.nome)}</span></td>
       <td class="r num">${fmt(t.total)}</td>
       <td class="r muted num">${fmt(t.pct, 1)}%</td>
       <td class="r"><span class="badge ${t.mediaC < rec.data.media ? 'bad' : 'good'} num">${m1(t.mediaC)}</span></td>
