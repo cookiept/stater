@@ -1,7 +1,7 @@
 // Arrastar gráficos e tabelas para mudar a ordem dentro da tab. A ordem fica guardada neste browser,
 // por tab, e o PowerPoint segue-a. Cada cartão tem uma pega (também funciona com as setas do teclado).
-import { icon } from './icons.js?v=20261106-1129';
-import { ordem, guardarOrdem } from './store.js?v=20261106-1129';
+import { icon } from './icons.js?v=20261106-1137';
+import { ordem, guardarOrdem } from './store.js?v=20261106-1137';
 
 const idDe = card => (card.getAttribute('aria-labelledby') || '').replace(/^h-/, '');
 const cartoes = raiz => [...raiz.querySelectorAll('section.card[aria-labelledby]')];
@@ -28,7 +28,6 @@ export function ligarArrastar(raiz, brandId, tabId) {
   if (!raiz) return;
   aplicar(raiz, ordem(brandId, tabId));
   const guardar = () => guardarOrdem(brandId, tabId, cartoes(raiz).map(idDe));
-  let aMover = null;
 
   for (const card of cartoes(raiz)) {
     const irmaos = () => [...card.parentElement.children].filter(c => c.matches('section.card[aria-labelledby]'));
@@ -36,21 +35,48 @@ export function ligarArrastar(raiz, brandId, tabId) {
     const head = card.querySelector('.card-head');
     if (!head || head.querySelector('.pega')) continue;
     const titulo = card.querySelector('h3')?.textContent.trim() || 'cartão';
-    head.insertAdjacentHTML('afterbegin', `<span class="pega" role="button" tabindex="0" draggable="true" aria-label="Mudar a ordem de ${titulo.replace(/"/g, '')}" title="Arrastar para mudar a ordem (ou setas do teclado)">${icon('grip')}</span>`);
+    head.insertAdjacentHTML('afterbegin', `<span class="pega" role="button" tabindex="0" aria-label="Mudar a ordem de ${titulo.replace(/"/g, '')}" title="Arrastar para mudar a ordem (ou setas do teclado)">${icon('grip')}</span>`);
     const pega = head.querySelector('.pega');
 
-    pega.addEventListener('dragstart', e => {
-      aMover = card;
+    // Rato e toque: carregar na pega e arrastar o cartão para cima ou para baixo
+    pega.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      pega.setPointerCapture(e.pointerId);
       card.classList.add('a-mover');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', idDe(card));
-      try { e.dataTransfer.setDragImage(card, 24, 24); } catch { /* browser antigo */ }
-    });
-    pega.addEventListener('dragend', () => {
-      card.classList.remove('a-mover');
-      raiz.querySelectorAll('.alvo-cima,.alvo-baixo').forEach(c => c.classList.remove('alvo-cima', 'alvo-baixo'));
-      aMover = null;
-      guardar();
+      document.body.classList.add('a-arrastar');
+      let alvo = null, cima = true, y = e.clientY, x = e.clientX, ativo = true;
+      const limpar = () => raiz.querySelectorAll('.alvo-cima,.alvo-baixo').forEach(c => c.classList.remove('alvo-cima', 'alvo-baixo'));
+      const procurar = () => {
+        limpar();
+        alvo = irmaos().filter(c => c !== card).find(c => { const r = c.getBoundingClientRect(); return y >= r.top && y <= r.bottom && x >= r.left && x <= r.right; }) || null;
+        if (!alvo) return;
+        const r = alvo.getBoundingClientRect();
+        cima = card.parentElement.classList.contains('grid-2') ? x < r.left + r.width / 2 : y < r.top + r.height / 2;
+        alvo.classList.add(cima ? 'alvo-cima' : 'alvo-baixo');
+      };
+      // Desliza a página quando o rato chega perto do topo ou do fundo
+      const rolar = () => {
+        if (!ativo) return;
+        const m = 70, v = y < m ? -(m - y) / 3 : y > innerHeight - m ? (y - innerHeight + m) / 3 : 0;
+        if (v) { scrollBy(0, v); procurar(); }
+        requestAnimationFrame(rolar);
+      };
+      requestAnimationFrame(rolar);
+      const mover = ev => { x = ev.clientX; y = ev.clientY; procurar(); };
+      const largar = () => {
+        ativo = false;
+        pega.removeEventListener('pointermove', mover);
+        pega.removeEventListener('pointerup', largar);
+        pega.removeEventListener('pointercancel', largar);
+        if (alvo) { if (cima) alvo.before(card); else alvo.after(card); guardar(); }
+        limpar();
+        card.classList.remove('a-mover');
+        document.body.classList.remove('a-arrastar');
+      };
+      pega.addEventListener('pointermove', mover);
+      pega.addEventListener('pointerup', largar);
+      pega.addEventListener('pointercancel', largar);
     });
     // Teclado: setas para cima e para baixo
     pega.addEventListener('keydown', e => {
@@ -62,22 +88,6 @@ export function ligarArrastar(raiz, brandId, tabId) {
       if (e.key === 'ArrowUp') cs[j].before(card); else cs[j].after(card);
       pega.focus();
       guardar();
-    });
-
-    card.addEventListener('dragover', e => {
-      if (!aMover || aMover === card || aMover.parentElement !== card.parentElement) return;
-      e.preventDefault();
-      const r = card.getBoundingClientRect();
-      const lado = card.parentElement.classList.contains('grid-2') ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2;
-      card.classList.toggle('alvo-cima', lado);
-      card.classList.toggle('alvo-baixo', !lado);
-    });
-    card.addEventListener('dragleave', e => { if (!card.contains(e.relatedTarget)) card.classList.remove('alvo-cima', 'alvo-baixo'); });
-    card.addEventListener('drop', e => {
-      if (!aMover || aMover === card || aMover.parentElement !== card.parentElement) return;
-      e.preventDefault();
-      if (card.classList.contains('alvo-cima')) card.before(aMover); else card.after(aMover);
-      card.classList.remove('alvo-cima', 'alvo-baixo');
     });
   }
 }

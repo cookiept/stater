@@ -1,12 +1,12 @@
 // Tab "Todos ao molho" (Tabela única de causas): junta as causas raiz de todos os drivers numa só tabela.
 // Cada driver é um Excel "Relate" de Group NPS com a causa raiz desse driver; carregam-se vários de uma vez.
-import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261106-1129';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1129';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1129';
-import { icon } from '../icons.js?v=20261106-1129';
-import { formatarPeriodo } from '../excel.js?v=20261106-1129';
-import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261106-1129';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-1129';
+import { CORES, enriquecerCausas, comZeros, fmt, sinal, destaques, causasFiaveis } from '../stats.js?v=20261106-1137';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1137';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1137';
+import { icon } from '../icons.js?v=20261106-1137';
+import { formatarPeriodo } from '../excel.js?v=20261106-1137';
+import { npsGlobal, destaquesHtml, linhas, tabelaPptx } from './causas.js?v=20261106-1137';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-1137';
 
 export const multi = true;
 
@@ -85,7 +85,7 @@ export function html(rec, meta) {
   return `
     <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       ${kpi('Drivers', fmt(ds.length), dAbaixo.length ? `${dAbaixo.length} abaixo da meta` : `meta ${meta}`, def('driver'), true)}
-      ${kpi('Causas com menções', fmt(cs.filter(c => !c.zero).length), `de ${fmt(cs.length)} opções em todos os drivers`, def('causa'))}
+      ${kpi('Causas com menções', `${fmt(cs.filter(c => !c.zero).length)}/${fmt(cs.length)}`, 'opções em todos os drivers', def('causa'))}
       ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', def('mencoes'))}
       ${kpi('Causas abaixo da meta', fmt(abaixo.length), 'com 30 ou mais menções', def('meta'))}
     </div>
@@ -195,7 +195,7 @@ export function exportar(rec, brand, meta) {
   return {
     kpis: [
       { rot: 'Drivers', val: fmt(rec.data.ficheiros.length), det: `meta ${meta}` },
-      { rot: 'Causas com menções', val: fmt(cs.filter(c => !c.zero).length), det: `de ${fmt(cs.length)} opções em todos os drivers` },
+      { rot: 'Causas com menções', val: `${fmt(cs.filter(c => !c.zero).length)}/${fmt(cs.length)}`, det: 'opções em todos os drivers' },
       { rot: 'Menções', val: fmt(cs.reduce((a, c) => a + c.total, 0)), det: 'uma pessoa pode escolher várias' },
       { rot: 'Causas abaixo da meta', val: fmt(abaixo.length), det: 'com 30 ou mais menções' },
     ],

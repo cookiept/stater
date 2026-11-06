@@ -1,15 +1,15 @@
 // Overview do Grupo Brisa: cartões por marca, gráfico NPS vs objetivo e edição dos objetivos
-import { BRANDS, GROUP } from './brands.js?v=20261106-1129';
-import { icon } from './icons.js?v=20261106-1129';
-import { logo } from './logos.js?v=20261106-1129';
-import { esc, info, def, toast } from './ui.js?v=20261106-1129';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1129';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261106-1129';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261106-1129';
-import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261106-1129';
-import { ativa } from './analises.js?v=20261106-1129';
-import { tileVars } from './layout.js?v=20261106-1129';
-import { menuExportar } from './painel.js?v=20261106-1129';
+import { BRANDS, GROUP } from './brands.js?v=20261106-1137';
+import { icon } from './icons.js?v=20261106-1137';
+import { logo } from './logos.js?v=20261106-1137';
+import { esc, info, def, toast } from './ui.js?v=20261106-1137';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1137';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261106-1137';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261106-1137';
+import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261106-1137';
+import { ativa } from './analises.js?v=20261106-1137';
+import { tileVars } from './layout.js?v=20261106-1137';
+import { menuExportar } from './painel.js?v=20261106-1137';
 
 // Janela "Objetivos de NPS". depois() corre quando se guarda.
 export function editarMetas(depois) {
@@ -67,7 +67,7 @@ export function overview() {
     </section>
     <div class="ov-bar">
       <h2>Marcas</h2>
-      <span class="muted">${comDados.length} de ${BRANDS.length} com dados${totalResp ? ` · ${fmt(totalResp)} respostas` : ''}</span>
+      <span class="muted">${comDados.length}/${BRANDS.length} com dados${totalResp ? ` · ${fmt(totalResp)} respostas` : ''}</span>
       <span class="sep"></span>
       ${dataMetas() ? `<span class="muted">Objetivos atualizados a ${formatarData(dataMetas())}</span>` : ''}
       <button class="btn btn-secondary btn-sm" data-act="metas">${icon('pencil')} Editar objetivos</button>

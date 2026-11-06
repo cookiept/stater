@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1129';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1129';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1129';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1129';
-import { icon } from '../icons.js?v=20261106-1129';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1137';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1137';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1137';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1137';
+import { icon } from '../icons.js?v=20261106-1137';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -45,7 +45,7 @@ export function resumo(rec, meta) {
   const maiorAbaixo = [...abaixo].sort((x, y) => y.total - x.total)[0];
   partes.push(!abaixo.length ? 'Nenhuma causa com volume suficiente está abaixo do objetivo.'
     : abaixo.length === fiaveis.length && abaixo.length > 1 ? `Todas as <strong>${abaixo.length}</strong> causas com ${LIM} ou mais menções têm NPS abaixo do objetivo.`
-    : `${abaixo.length === 1 ? 'Uma causa tem' : `<strong>${abaixo.length}</strong> de ${fiaveis.length} causas têm`} NPS abaixo do objetivo${maiorAbaixo !== maior ? `; a mais referida delas é <strong>${esc(maiorAbaixo.nome)}</strong>` : ''}.`);
+    : `${abaixo.length === 1 ? 'Uma causa tem' : `<strong>${abaixo.length}/${fiaveis.length}</strong> causas têm`} NPS abaixo do objetivo${maiorAbaixo !== maior ? `; a mais referida delas é <strong>${esc(maiorAbaixo.nome)}</strong>` : ''}.`);
   return {
     tom: g && g.nps < meta ? 'bad' : 'good',
     texto: partes.join(' '),
@@ -68,7 +68,7 @@ export function html(rec, meta) {
   return `
     <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · objetivo ${meta}`, info('NPS de quem respondeu', `NPS de todas as ${fmt(g.total)} pessoas que responderam a esta pergunta: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Vem do tamanho de cada grupo (Sample Size) no Excel, por isso conta pessoas e não menções. O objetivo da marca é ${meta}: ${g.nps >= meta ? `está ${fmt(g.nps - meta)} pontos acima` : `está ${fmt(meta - g.nps)} pontos abaixo`}.`), true) : ''}
-      ${kpi('Causas com menções', fmt(nMenc), `de ${fmt(cs.length)} opções`, info('Causas com menções', `${fmt(nMenc)} das ${fmt(cs.length)} causas possíveis foram escolhidas pelo menos uma vez. ${cs.length - nMenc ? `As outras ${fmt(cs.length - nMenc)} tiveram 0 menções e aparecem no fim do gráfico e da tabela, a cinzento claro.` : 'Todas as causas tiveram menções.'}`))}
+      ${kpi('Causas com menções', `${fmt(nMenc)}/${fmt(cs.length)}`, 'opções escolhidas pelo menos uma vez', info('Causas com menções', `${fmt(nMenc)} das ${fmt(cs.length)} causas possíveis foram escolhidas pelo menos uma vez. ${cs.length - nMenc ? `As outras ${fmt(cs.length - nMenc)} tiveram 0 menções e aparecem no fim do gráfico e da tabela, a cinzento claro.` : 'Todas as causas tiveram menções.'}`))}
       ${kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher várias', info('Menções', `Soma das vezes que cada causa foi escolhida: ${fmt(mencoes)}. Como uma pessoa pode escolher mais do que uma causa, este número não é o número de pessoas${g ? ` (que é ${fmt(g.total)})` : ''}. A % de cada causa na tabela é calculada sobre as pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, por isso as % podem somar mais de 100%.`))}
       ${kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(causasFiaveis(cs).length)}`, abaixo.length ? 'causas com NPS abaixo do objetivo' : 'nenhuma causa', info('Abaixo do objetivo', `Causas com ${LIM} ou mais menções cujo NPS fica abaixo do objetivo da marca (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} menções)`).join('; ')}.` : 'Neste Excel nenhuma causa está abaixo.'} Não contam "Outra" nem "Sem sugestões", nem causas com menos de ${LIM} menções, porque com tão poucas o NPS muda muito.`))}
     </div>
@@ -254,7 +254,7 @@ export function exportar(rec, brand, meta) {
   return {
     kpis: [
       ...(g ? [{ rot: 'NPS de quem respondeu', val: fmt(g.nps), det: `${fmt(g.total)} pessoas · meta ${meta}` }] : []),
-      { rot: 'Causas com menções', val: fmt(cs.filter(c => !c.zero).length), det: `de ${fmt(cs.length)} opções` },
+      { rot: 'Causas com menções', val: `${fmt(cs.filter(c => !c.zero).length)}/${fmt(cs.length)}`, det: 'opções escolhidas pelo menos uma vez' },
       { rot: 'Menções', val: fmt(cs.reduce((a, c) => a + c.total, 0)), det: 'uma pessoa pode escolher várias' },
       { rot: 'Abaixo do objetivo', val: `${fmt(abaixo.length)}/${fmt(causasFiaveis(cs).length)}`, det: abaixo.map(c => c.nome).join(', ') || 'nenhuma causa' },
     ],

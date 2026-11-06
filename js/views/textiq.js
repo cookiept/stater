@@ -1,11 +1,11 @@
 // Tipo "Text iQ": média da recomendação (0 a 10) de quem mencionou cada tema nas sugestões,
 // comparada com quem não o mencionou (linhas CHECKED / UNCHECKED do Stats iQ).
 // Serve para Topics, Causa Raiz (Text iQ), Drivers e Subtopics. Não é NPS: é a média das notas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1129';
-import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1129';
-import { esc, def } from '../ui.js?v=20261106-1129';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1129';
-import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1129';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1137';
+import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1137';
+import { esc, def } from '../ui.js?v=20261106-1137';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1137';
+import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1137';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'tema', varios: 'temas', col: 'Tema' };
@@ -37,7 +37,7 @@ export function resumo(rec, meta, tab) {
   const partes = [`Em <strong>${fmt(rec.data.total)}</strong> respostas, a média da recomendação foi <strong>${m1(media)}</strong> em 10.`];
   if (mais) partes.push(`O ${T.um} mais mencionado é <strong>${esc(mais.nome)}</strong> (${fmt(mais.total)} menções, ${fmt(mais.pct, 1)}% das respostas), com média <strong>${m1(mais.mediaC)}</strong>.`);
   if (pior && pior.dif < 0) partes.push(`Quem menciona <strong>${esc(pior.nome)}</strong> dá em média <strong>${fmt(-pior.dif, 1)}</strong> pontos menos do que quem não menciona (${m1(pior.mediaC)} contra ${m1(pior.mediaU)}).`);
-  partes.push(abaixo.length ? `<strong>${abaixo.length}</strong> de ${f.length} ${f.length === 1 ? T.um : T.varios} com ${LIM} ou mais menções ${abaixo.length === 1 ? 'fica' : 'ficam'} abaixo da média geral.` : `Nenhum ${T.um} com ${LIM} ou mais menções fica abaixo da média geral.`);
+  partes.push(abaixo.length ? `<strong>${abaixo.length}/${f.length}</strong> ${f.length === 1 ? T.um : T.varios} com ${LIM} ou mais menções ${abaixo.length === 1 ? 'fica' : 'ficam'} abaixo da média geral.` : `Nenhum ${T.um} com ${LIM} ou mais menções fica abaixo da média geral.`);
   return {
     tom: pior && pior.dif < -1 ? 'bad' : 'good',
     texto: partes.join(' '),
@@ -58,7 +58,7 @@ export function html(rec, meta, tab) {
   return `
     ${kpis([
       kpi('Média da recomendação', m1(media), `de 0 a 10 · ${fmt(rec.data.total)} respostas`, `Média das notas de 0 a 10 de todas as ${fmt(rec.data.total)} respostas: ${fmt(media, 2)}. Não é o NPS: é a média simples das notas.`, true),
-      kpi('Com menções', fmt(comM.length), `de ${fmt(ts.length)} no Excel`, `${fmt(comM.length)} dos ${fmt(ts.length)} ${T.varios} foram mencionados pelo menos uma vez nas sugestões. ${ts.length - comM.length ? `Os outros ${ts.length - comM.length} aparecem no fim, a cinzento.` : ''}`),
+      kpi('Com menções', `${fmt(comM.length)}/${fmt(ts.length)}`, 'mencionados pelo menos uma vez', `${fmt(comM.length)} dos ${fmt(ts.length)} ${T.varios} foram mencionados pelo menos uma vez nas sugestões. ${ts.length - comM.length ? `Os outros ${ts.length - comM.length} aparecem no fim, a cinzento.` : ''}`),
       kpi('Menções', fmt(mencoes), 'uma pessoa pode mencionar vários', `Soma das menções de todos os ${T.varios}: ${fmt(mencoes)}. Uma resposta pode mencionar mais do que um ${T.um}.`),
       kpi('Abaixo da média', fmt(abaixo.length), abaixo.length ? `${T.varios} com média abaixo de ${m1(media)}` : `nenhum ${T.um}`, `${T.col}s com ${LIM} ou mais menções em que a média de quem os mencionou fica abaixo da média geral (${m1(media)}). Não contam "Outros" nem "Sem sugestões".`),
     ])}
@@ -117,7 +117,7 @@ export function exportar(rec, brand, meta, tab) {
   return {
     kpis: [
       { rot: 'Média da recomendação', val: m1(rec.data.media), det: `de 0 a 10 · ${fmt(rec.data.total)} respostas` },
-      { rot: 'Com menções', val: fmt(ts.filter(t => !t.zero).length), det: `de ${fmt(ts.length)}` },
+      { rot: 'Com menções', val: `${fmt(ts.filter(t => !t.zero).length)}/${fmt(ts.length)}`, det: 'mencionados pelo menos uma vez' },
     ],
     resumo: [textoDe(resumo(rec, meta, tab).texto)],
     filtros: rec.data.filtros,

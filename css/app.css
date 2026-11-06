@@ -830,3 +830,5 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .grid-2 > .card.alvo-baixo { box-shadow: 3px 0 0 0 var(--brand), var(--shadow-1); }
 .menu-painel .repor { align-self: flex-start; margin-top: 4px; }
 @media print { .card-head .pega { display: none; } }
+.card-head .pega { touch-action: none; }
+body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: none; }
