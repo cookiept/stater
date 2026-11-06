@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1307';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1307';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261106-1307';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1307';
-import { icon } from '../icons.js?v=20261106-1307';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1317';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1317';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261106-1317';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1317';
+import { icon } from '../icons.js?v=20261106-1317';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -137,7 +137,7 @@ export function linhas(cs, meta, pior, extra = () => '') {
       <td class="r num">${fmt(c.total)}</td>
       <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>
  <td class="r"><span class="muted num">${fmt(c.quota, 1)}%</span></td>
-      <td><span class="badge ${c.impacto === 'Alto' ? 'bad' : c.impacto === 'Médio' ? 'mid' : ''}" title="${esc(IMPACTO_TIP)}">${c.impacto}</span></td>
+      <td><span class="badge" title="${esc(IMPACTO_TIP)}">${c.impacto}</span></td>
       <td class="r num ${c.impNps == null ? 'muted' : c.impNps < 0 ? 'neg' : 'pos'}">${c.impNps == null ? '–' : um(c.impNps)}</td>
     </tr>`).join('') || `<tr><td colspan="${8}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
 }
