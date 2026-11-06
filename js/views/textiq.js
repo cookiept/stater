@@ -1,11 +1,11 @@
 // Tipo "Text iQ": média da recomendação (0 a 10) de quem mencionou cada tema nas sugestões,
 // comparada com quem não o mencionou (linhas CHECKED / UNCHECKED do Stats iQ).
 // Serve para Topics, Causa Raiz (Text iQ), Drivers e Subtopics. Não é NPS: é a média das notas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1358';
-import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1358';
-import { esc } from '../ui.js?v=20261106-1358';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1358';
-import { kpi, kpis, cartao, alternar, ligarAlternar, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1358';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261106-1418';
+import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261106-1418';
+import { esc } from '../ui.js?v=20261106-1418';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1418';
+import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261106-1418';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'tema', varios: 'temas', col: 'Tema' };
@@ -62,7 +62,7 @@ export function html(rec, meta, tab) {
       kpi('Menções', fmt(mencoes), 'uma pessoa pode mencionar vários', `Soma das menções de todos os ${T.varios}: ${fmt(mencoes)}. Uma resposta pode mencionar mais do que um ${T.um}.`),
       kpi('Abaixo da média', fmt(abaixo.length), abaixo.length ? `${T.varios} com média abaixo de ${m1(media)}` : `nenhum ${T.um}`, `${T.col}s com ${LIM} ou mais menções em que a média de quem os mencionou fica abaixo da média geral (${m1(media)}). Não contam "Outros" nem "Sem sugestões".`),
     ])}
-    ${cartao('med', `Média de quem mencionou cada ${T.um}`, `Uma barra por ${T.um}: a média das notas (0 a 10) de quem o mencionou. Vermelho: abaixo da média geral (${m1(media)}, linha cinzenta). Verde: igual ou acima. Por baixo do nome estão as menções e a diferença face a quem não o mencionou. "Mais mencionados" ordena do mais mencionado para o menos. "Maior descida" começa pelo que mais baixa a nota (a diferença mais negativa).`, { legenda: alternar('med', [['total', 'Mais mencionados'], ['dif', 'Maior descida']], 'total', 'Ordenar') })}
+    ${cartao('med', `Média de quem mencionou cada ${T.um}`, `Uma barra por ${T.um}: a média das notas (0 a 10) de quem o mencionou. Vermelho: abaixo da média geral (${m1(media)}, linha cinzenta). Verde: igual ou acima. Por baixo do nome estão as menções e a diferença face a quem não o mencionou. Em "Ordenar", "Mais mencionados" vai do mais mencionado para o menos e "Maior descida" começa pelo que mais baixa a nota (a diferença mais negativa).`, { legenda: `<label class="ordenar">Ordenar: <select id="sel-med" class="vista-sel"><option value="total" selected>Mais mencionados</option><option value="dif">Maior descida</option></select></label>` })}
     ${cartao('mat', 'Onde atuar primeiro', `Cada ponto é um ${T.um} com menções. Para a direita: mais menções. Para baixo: quem o menciona dá notas mais baixas do que quem não o menciona (diferença em pontos, de 0 a 10). Os ${T.varios} mais à direita e mais abaixo pesam mais e baixam mais a recomendação.`)}
     ${tabelaHtml('tab', 'Tabela', `Uma linha por ${T.um}. Menções: quantas respostas o mencionaram. % das respostas: menções a dividir por todas as respostas (${fmt(rec.data.total)}). Média: média das notas de quem o mencionou. Diferença: essa média menos a de quem não o mencionou (negativo = baixa a recomendação). Clica no título de uma coluna para ordenar.`,
       [{ k: 'nome', rot: T.col }, { k: 'total', rot: 'Menções', r: true }, { k: 'pct', rot: '% das respostas', r: true }, { k: 'mediaC', rot: 'Média', r: true }, { k: 'dif', rot: 'Diferença', r: true }], (T.um.length > 14 ? 'Procurar' : `Procurar ${T.um}`))}`;
@@ -81,7 +81,7 @@ export function mount(rec, brand, meta, tab) {
         tooltip: t => `<b>${esc(t.nome)}</b><br>${t.zero ? '0 menções' : `Média ${m1(t.mediaC)} · ${fmt(t.total)} menções<br>Quem não mencionou: ${m1(t.mediaU)} (${dif1(t.dif)})`}` });
   };
   med('total');
-  ligarAlternar('med', med);
+  document.getElementById('sel-med')?.addEventListener('change', e => med(e.target.value));
 
   const comM = ts.filter(t => !t.zero && t.dif != null);
   const maxX = Math.ceil(Math.max(...comM.map(t => t.total)) * 1.15);
