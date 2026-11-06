@@ -1,9 +1,64 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261106-1137';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261106-1137';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261106-1137';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-1137';
-import { icon } from '../icons.js?v=20261106-1137';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261106-1230';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261106-1230';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261106-1230';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261106-1230';
+import { icon } from '../icons.js?v=20261106-1230';
+
+// ---------- Período e comparação (só com o Excel de respostas, que traz a data de cada resposta) ----------
+const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const nomeMes = m => `${MES[+m.slice(5, 7) - 1]} ${m.slice(0, 4)}`;
+const curtoMes = m => MES[+m.slice(5, 7) - 1];
+const somaMes = (m, n) => { const d = new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1 + n, 1)); return d.toISOString().slice(0, 7); };
+const fimMes = m => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).toISOString().slice(0, 10);
+const rotPeriodo = (de, ate) => (de === ate ? nomeMes(de) : `${nomeMes(de).replace(de.slice(0, 4) === ate.slice(0, 4) ? ` ${de.slice(0, 4)}` : '', '')} – ${nomeMes(ate)}`);
+const COMP = { ant: 'Período anterior', homo: 'Mesmo período do ano anterior', nada: 'Sem comparação' };
+
+function porMes(dias) {
+  const m = {};
+  for (const [d, cs] of Object.entries(dias)) { const k = d.slice(0, 7); m[k] ||= Array(11).fill(0); cs.forEach((n, i) => { m[k][i] += n; }); }
+  return m;
+}
+const somar = (mm, de, ate) => {
+  const t = Array(11).fill(0);
+  let tem = false;
+  for (const [k, cs] of Object.entries(mm)) if (k >= de && k <= ate) { tem = true; cs.forEach((n, i) => { t[i] += n; }); }
+  return tem ? t : null;
+};
+
+// Aplica o período escolhido (data.sel = "de|ate|comp") às contagens que o resto da tab usa
+export function preparar(rec) {
+  const d = rec.data;
+  if (!d.dias) return rec;
+  const mm = porMes(d.dias);
+  const meses = Object.keys(mm).sort();
+  let [de, ate, comp] = (d.sel || '').split('|');
+  if (!meses.includes(de)) de = meses[0];
+  if (!meses.includes(ate)) ate = meses[meses.length - 1];
+  if (de > ate) [de, ate] = [ate, de];
+  if (!COMP[comp]) comp = 'ant';
+  const n = meses.indexOf(ate) - meses.indexOf(de) + 1;
+  const cDe = comp === 'homo' ? somaMes(de, -12) : somaMes(de, -n), cAte = comp === 'homo' ? somaMes(ate, -12) : somaMes(de, -1);
+  const contagensComp = comp === 'nada' ? null : somar(mm, cDe, cAte);
+  const ultimoDia = Object.keys(d.dias).sort().pop(), primeiroDia = Object.keys(d.dias).sort()[0];
+  const parcial = m => (m === ultimoDia.slice(0, 7) && ultimoDia < fimMes(m)) || (m === primeiroDia.slice(0, 7) && primeiroDia.slice(8) !== '01');
+  return { ...rec, data: { ...d, contagens: somar(mm, de, ate), periodo: { inicio: de === primeiroDia.slice(0, 7) ? primeiroDia : `${de}-01`, fim: ate === ultimoDia.slice(0, 7) ? ultimoDia : fimMes(ate) },
+    mensal: { meses: meses.map(m => ({ m, c: mm[m], parcial: parcial(m) })), de, ate, comp, cDe, cAte, contagensComp, rot: rotPeriodo(de, ate), rotComp: contagensComp ? rotPeriodo(cDe, cAte) : null, sel: `${de}|${ate}|${comp}` } } };
+}
+
+function seletorPeriodo(M) {
+  const op = (v, t, on) => `<option value="${esc(v)}"${on ? ' selected' : ''}>${esc(t)}</option>`;
+  const ms = M.meses.map(x => x.m);
+  return `<div class="vistas periodo-sel" role="group" aria-label="Período em análise">
+    <span class="vistas-rot">Período</span>
+    <label class="sr-only" for="p-de">Desde</label><select id="p-de" class="vista-sel" data-act="vista">${ms.map(m => op(`${m}|${M.ate}|${M.comp}`, nomeMes(m), m === M.de)).join('')}</select>
+    <span class="muted">até</span>
+    <label class="sr-only" for="p-ate">Até</label><select id="p-ate" class="vista-sel" data-act="vista">${ms.map(m => op(`${M.de}|${m}|${M.comp}`, nomeMes(m) + (M.meses.find(x => x.m === m).parcial ? ' (incompleto)' : ''), m === M.ate)).join('')}</select>
+    <span class="vistas-rot" style="margin-left:12px">Comparar com</span>
+    <label class="sr-only" for="p-comp">Comparar com</label><select id="p-comp" class="vista-sel" data-act="vista">${Object.entries(COMP).map(([k, t]) => op(`${M.de}|${M.ate}|${k}`, t, k === M.comp)).join('')}</select>
+    ${M.comp !== 'nada' ? `<span class="muted">${M.rotComp ? esc(M.rotComp) : 'sem dados para esse período'}</span>` : ''}
+  </div>`;
+}
 
 const estadoMeta = (nps, meta) => (nps > meta ? 'Acima do objetivo' : nps === meta ? 'No objetivo' : 'Abaixo do objetivo');
 
@@ -31,9 +86,12 @@ export function resumo(rec, meta) {
     : 'redução de detratores e da conversão de clientes neutros em promotores';
   const avaliacao = r.nps >= meta ? 'positiva' : 'negativa';
   const comparacao = r.nps > meta ? 'acima do objetivo' : r.nps === meta ? 'em linha com o objetivo' : 'abaixo do objetivo';
+  const M = rec.data.mensal;
+  const rc = M?.contagensComp ? resumoNps(M.contagensComp) : null;
+  const compTxt = rc ? ` Face a ${esc(M.rotComp)} (NPS ${fmt(rc.nps)}), o NPS ${r.nps > rc.nps ? `subiu <strong>${fmt(r.nps - rc.nps)}</strong> ${r.nps - rc.nps === 1 ? 'ponto' : 'pontos'}` : r.nps < rc.nps ? `desceu <strong>${fmt(rc.nps - r.nps)}</strong> ${rc.nps - r.nps === 1 ? 'ponto' : 'pontos'}` : 'ficou igual'}.` : '';
   return {
     tom: r.nps >= meta ? 'good' : 'bad',
-    texto: `Com base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.`,
+    texto: `${M ? `Em <strong>${esc(M.rot)}</strong>, com` : 'Com'} base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.${compTxt}`,
     factos: [
       { valor: `${fmt(p6D)}%`, rot: 'do total de detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${fmt(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
       { valor: `${fmt(p8N)}%`, rot: 'do total de neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${fmt(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
@@ -61,11 +119,15 @@ export function html(rec, meta) {
     detratores: `Quem deu de 0 a 6: ${fmt(r.d)} pessoas. ${fmt(r.d)} a dividir pelas ${fmt(r.total)} respostas dá ${pct(r.pctD)}. Por nota: ${[0, 1, 2, 3, 4, 5, 6].map(i => `${i}: ${fmt(c[i])}`).join(' · ')}. São os clientes que não nos recomendam.`,
     media: `Soma de todas as notas a dividir pelas ${fmt(r.total)} respostas: ${fmt(r.media, 2)} em 10. A nota mais dada foi ${r.moda} (${fmt(c[r.moda])} pessoas). O desvio padrão (${fmt(r.dp, 2)}) mostra quanto as notas se afastam da média: quanto maior, mais divididas estão as opiniões.`,
   };
-  const avisos = [];
+  const M = rec.data.mensal;
+  const rc = M?.contagensComp ? resumoNps(M.contagensComp) : null;
+  const delta = rc ? r.nps - rc.nps : null;
+  const detNps = `Objetivo ${meta}${rc ? ` · <span class="delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}">${delta > 0 ? '▲' : delta < 0 ? '▼' : '='} ${delta > 0 ? '+' : ''}${fmt(delta)}</span> vs ${fmt(rc.nps)}` : ''}`;
+  if (rc) tips.nps += ` Comparação: em ${M.rotComp} o NPS foi ${fmt(rc.nps)} (${fmt(rc.total)} respostas), por isso ${delta > 0 ? `subiu ${fmt(delta)}` : delta < 0 ? `desceu ${fmt(-delta)}` : 'ficou igual'}.`;
   return `
-    ${avisos.join('')}
+    ${M ? seletorPeriodo(M) : ''}
     <div class="kpis">
-      ${kpi('NPS', fmt(r.nps), `Objetivo ${meta}`, tips.nps, true)}
+      ${kpi('NPS', fmt(r.nps), detNps, tips.nps, true)}
       ${kpi('Respostas', fmt(r.total), r.total < LIMITES.poucasRespostas ? 'poucas respostas' : 'notas de 0 a 10', tips.respostas)}
       ${kpi('Promotores', pct(r.pctP), `${fmt(r.p)} pessoas deram 9 ou 10`, tips.promotores)}
       ${kpi('Neutros', pct(r.pctN), `${fmt(r.n)} pessoas deram 7 ou 8`, tips.neutros)}
@@ -95,12 +157,19 @@ export function html(rec, meta) {
         <div id="ch-dist" class="chart" role="img" aria-label="Distribuição das notas de 0 a 10"></div>
       </section>
     </div>
-    <section class="card ficticio" aria-labelledby="h-mes">
+    ${M ? `<section class="card" aria-labelledby="h-mes">
       <div class="card-head">
-        <h3 id="h-mes">NPS por mês ${info('NPS por mês', `Dados fictícios. O Excel atual não traz o mês de cada resposta, por isso os valores foram inventados à volta do NPS real (${fmt(r.nps)}) só para mostrar como o gráfico vai ficar. A linha amarela é o objetivo (${meta}). Quando o Excel trouxer meses, cada ponto passa a ser o NPS desse mês.`)}</h3>
+        <h3 id="h-mes">NPS por mês ${info('NPS por mês', `NPS de cada mês, calculado a partir da data e da nota de cada resposta do Excel. A faixa azul é o período escolhido (${M.rot})${M.rotComp ? ` e a cinzenta o período de comparação (${M.rotComp})` : ''}. A linha amarela é o objetivo (${meta}). Os meses marcados com * estão incompletos. Passa o rato por um ponto para ver as respostas desse mês.`)}</h3>
+        <div class="note">Linha amarela: objetivo (${meta}).${M.meses.some(x => x.parcial) ? ' * mês incompleto.' : ''}</div>${btnPptx('mes')}
       </div>
-      <div class="aviso-ficticio">${icon('info')}<div><b>Dados fictícios</b> O Excel atual não traz meses. Este gráfico só mostra como vai ficar.</div></div>
+      <div id="ch-mes" class="chart" role="img" aria-label="NPS por mês"></div>
+    </section>` : `<section class="card ficticio" aria-labelledby="h-mes">
+      <div class="card-head">
+        <h3 id="h-mes">NPS por mês ${info('NPS por mês', `Dados fictícios. Este Excel não traz o mês de cada resposta, por isso os valores foram inventados à volta do NPS real (${fmt(r.nps)}) só para mostrar como o gráfico vai ficar. Para ver o NPS real de cada mês, carrega a exportação das respostas (Start Date e nota do NPS).`)}</h3>
+      </div>
+      <div class="aviso-ficticio">${icon('info')}<div><b>Dados fictícios</b> Para ver os meses reais, carrega a exportação das respostas do Qualtrics (Start Date e nota do NPS).</div></div>
       <div class="chart-ficticio"><div id="ch-mes" class="chart" role="img" aria-label="NPS por mês com dados fictícios"></div><span class="marca-agua" aria-hidden="true">Dados fictícios</span></div>
+    `}
     </section>`;
 }
 
@@ -175,6 +244,32 @@ export function mount(rec, brand, meta) {
     }],
   }), 300);
 
+  const M = rec.data.mensal;
+  if (M) {
+    const xs = M.meses.map(x => `${curtoMes(x.m)}${x.parcial ? '*' : ''}${x.m.slice(5) === '01' || x === M.meses[0] ? `\n${x.m.slice(0, 4)}` : ''}`);
+    const rs = M.meses.map(x => resumoNps(x.c));
+    const faixa = (de, ate, cor, nome) => { const i = M.meses.findIndex(x => x.m >= de), j = M.meses.map(x => x.m <= ate).lastIndexOf(true); return i >= 0 && j >= i ? [[{ xAxis: i, name: nome, itemStyle: { color: cor } }, { xAxis: j }]] : []; };
+    desenhar(document.getElementById('ch-mes'), junta(b, {
+      grid: { left: 4, right: 16, top: 34, bottom: 4, containLabel: true },
+      tooltip: { trigger: 'axis', formatter: p => { const i = p[0].dataIndex, x = M.meses[i], q = rs[i]; return `<b>${nomeMes(x.m)}</b>${x.parcial ? ' (incompleto)' : ''}<br>NPS ${fmt(q.nps)} · ${fmt(q.total)} respostas<br>${fmt(q.pctP, 1)}% promotores · ${fmt(q.pctD, 1)}% detratores`; } },
+      xAxis: { type: 'category', boundaryGap: true, data: xs, ...EIXO_CAT, axisLine: { show: true, lineStyle: { color: '#e6e6e6' } } },
+      yAxis: { type: 'value', min: Math.min(0, Math.floor((Math.min(...rs.map(q => q.nps), meta) - 10) / 10) * 10), max: 100, interval: 20, ...EIXO_VAL },
+      series: [{
+        type: 'line', smooth: 0.3, data: rs.map(q => q.nps), symbol: 'circle', symbolSize: 9,
+        lineStyle: { width: 3, color: CORES.pro },
+        itemStyle: { color: '#fff', borderColor: CORES.pro, borderWidth: 2 },
+        areaStyle: { color: grad('rgba(34,160,59,.20)', 'rgba(34,160,59,0)') },
+        label: { show: true, position: 'top', distance: 8, ...ROTULO },
+        markArea: { silent: true, label: { color: '#494949', fontSize: 12, position: 'insideTop', distance: 4 }, data: [
+          ...faixa(M.de, M.ate, 'rgba(20,120,156,.10)', 'Período'),
+          ...(M.rotComp ? faixa(M.cDe, M.cAte, 'rgba(0,0,0,.05)', 'Comparação') : []),
+        ] },
+        markLine: { symbol: 'none', silent: true, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 },
+          label: { formatter: `Objetivo ${meta}`, position: 'insideEndTop', ...ETIQ_META }, data: [{ yAxis: meta }] },
+      }],
+    }), 280);
+    return;
+  }
   // Exemplo fictício: meses à volta do valor real, em linha com área e a meta
   const meses = ['set', 'out', 'nov', 'dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago'];
   const desvios = [-7, -4, -6, -2, -5, -1, 1, -3, 2, 0, 3, 1];
@@ -204,7 +299,7 @@ export function exportar(rec, brand, meta) {
   const pct = v => Math.round((v / r.total) * 1000) / 10;
   return {
     kpis: [
-      { rot: 'NPS', val: fmt(r.nps), det: `Objetivo ${meta}` },
+      { rot: 'NPS', val: fmt(r.nps), det: `Objetivo ${meta}${rec.data.mensal?.contagensComp ? ` · ${r.nps - resumoNps(rec.data.mensal.contagensComp).nps >= 0 ? '+' : ''}${fmt(r.nps - resumoNps(rec.data.mensal.contagensComp).nps)} vs ${rec.data.mensal.rotComp}` : ''}` },
       { rot: 'Respostas', val: fmt(r.total), det: 'notas de 0 a 10' },
       { rot: 'Promotores', val: `${fmt(r.pctP, 1)}%`, det: `${fmt(r.p)} pessoas` },
       { rot: 'Neutros', val: `${fmt(r.pctN, 1)}%`, det: `${fmt(r.n)} pessoas` },
@@ -214,6 +309,10 @@ export function exportar(rec, brand, meta) {
     resumo: [textoDe(resumo(rec, meta).texto)],
     filtros: rec.data.filtros,
     graficos: [
+      ...(rec.data.mensal ? [{ id: 'mes', titulo: 'NPS por mês', desenhar: (s, p) => s.addChart(p.ChartType.line, [
+        { name: 'NPS', labels: rec.data.mensal.meses.map(x => nomeMes(x.m) + (x.parcial ? '*' : '')), values: rec.data.mensal.meses.map(x => resumoNps(x.c).nps) },
+        { name: `Objetivo ${meta}`, labels: rec.data.mensal.meses.map(x => nomeMes(x.m)), values: rec.data.mensal.meses.map(() => meta) },
+      ], { ...b, chartColors: [hex(CORES.pro), hex(CORES.ama)], lineSize: 2, lineDataSymbol: 'circle', lineDataSymbolSize: 7, showValue: true, dataLabelPosition: 't', showLegend: true, legendPos: 'b', valAxisMinVal: -100, valAxisMaxVal: 100 }) }] : []),
       {
         id: 'gauge', titulo: 'NPS face ao objetivo',
         desenhar: (s, p) => {
@@ -242,5 +341,5 @@ export function exportar(rec, brand, meta) {
 // Texto do Stater v10, sem alterações
 export const importar = {
   titulo: 'Como importar os dados de NPS',
-  texto: 'No Stats iQ, selecione a variável principal "(Numeric) NPS" e execute a opção "Describe". Em seguida, exporte a tabela para Excel.',
+  texto: 'No Stats iQ, selecione a variável principal "(Numeric) NPS" e execute a opção "Describe". Em seguida, exporte a tabela para Excel. Para ver o NPS por mês, use antes a exportação das respostas (Data & Analysis, só com a data e a nota do NPS).',
 };

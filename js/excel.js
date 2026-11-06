@@ -143,6 +143,7 @@ export const TIPOS = {
   csat: { nome: 'Relate de Group NPS com um CSAT', analises: ['csat-grupos'] },
   regressao: { nome: 'Regressão (importância relativa)', analises: ['regressao'] },
   pivot: { nome: 'Pivot Table de Group NPS por driver e área', analises: ['breakdown'] },
+  respostas: { nome: 'Exportação das respostas (data e nota do NPS)', analises: ['nps'] },
 };
 
 // Que análise é este Excel? Vê a estrutura, não o nome do ficheiro.
@@ -150,6 +151,7 @@ export function identificar(rows) {
   const topo = rows.slice(0, 12).flat().map(texto).join(' \n ');
   const tudo = rows.slice(0, 80).flat().map(texto).join(' \n ');
   if (/^pivot table result/i.test(texto(rows[0]?.[0]))) return 'pivot';
+  if (colunasRespostas(rows)) return 'respostas';
   if (linhaCom(rows, /^is checked\??$/i) >= 0 || /\b(level 1|level 2|topic hierarchy)\b/i.test(topo)) return 'textiq';
   if (/relative importance/i.test(tudo)) return 'regressao';
   const cs = lerCounts(rows);
@@ -161,9 +163,60 @@ export function identificar(rows) {
   return null;
 }
 
+// ---------- Respostas exportadas do Data & Analysis (uma linha por resposta: Start Date + nota 0–10) ----------
+// Cabeçalho na 1.ª linha (StartDate, QID1, …); a 2.ª (e às vezes a 3.ª, ImportId) são textos das perguntas.
+function colunasRespostas(rows) {
+  const cab = (rows[0] || []).map(lower);
+  const iData = cab.findIndex(c => /^start ?date$/.test(c) || c === 'startdate');
+  if (iData < 0) return null;
+  const amostra = rows.slice(1, 400).filter(Boolean);
+  let melhor = -1, mais = 0;
+  cab.forEach((c, i) => {
+    if (i === iData || /group|grupo/.test(c)) return;
+    const n = amostra.filter(r => { const v = inteiro(r[i]); return v != null && v >= 0 && v <= 10; }).length;
+    if (n > mais) { mais = n; melhor = i; }
+  });
+  return melhor >= 0 && mais >= amostra.length * 0.5 ? { iData, iNota: melhor } : null;
+}
+
+// Dia da resposta (AAAA-MM-DD), como o Qualtrics o escreve (fuso da conta, igual ao Stats iQ)
+function diaDe(v) {
+  if (typeof v === 'number' && v > 20000) { // número de série do Excel
+    const d = new Date(Math.round((Math.floor(v) - 25569) * 864e5));
+    return d.toISOString().slice(0, 10);
+  }
+  const s = texto(v);
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); // M/D/AAAA (formato dos EUA)
+  if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  return null;
+}
+
+// Junta as respostas por dia: { 'AAAA-MM-DD': [n0, …, n10] }. Só ficam no browser estas contagens.
+export function parseRespostas(rows) {
+  const col = colunasRespostas(rows);
+  if (!col) throw new FicheiroErrado('Não encontrei as colunas "Start Date" e a nota do NPS (0 a 10).', ['A coluna Start Date', 'A coluna com a nota do NPS (0 a 10)']);
+  const dias = {};
+  let semNota = 0;
+  for (const r of rows.slice(1)) {
+    if (!r) continue;
+    const dia = diaDe(r[col.iData]), nota = inteiro(r[col.iNota]);
+    if (!dia) continue; // linhas do cabeçalho (texto da pergunta, ImportId)
+    if (nota == null || nota < 0 || nota > 10) { semNota++; continue; }
+    (dias[dia] ||= Array(11).fill(0))[nota]++;
+  }
+  const ks = Object.keys(dias).sort();
+  if (!ks.length) throw new FicheiroErrado('O Excel não tem respostas com data e nota de 0 a 10.', ['Linhas com Start Date e a nota do NPS']);
+  const contagens = Array(11).fill(0);
+  for (const k of ks) dias[k].forEach((n, i) => { contagens[i] += n; });
+  return { contagens, dias, semNota, periodo: { inicio: ks[0], fim: ks[ks.length - 1] }, filtros: [], pergunta: texto(rows[1]?.[col.iNota]) };
+}
+
 // ---------- NPS: distribuição 0–10 (Stats iQ "Describe" de NPS numérico) ----------
 export function parseNps(rows) {
   const tipo = identificar(rows);
+  if (tipo === 'respostas') return parseRespostas(rows);
   if (tipo && tipo !== 'nps')
     throw new FicheiroErrado(`Este Excel é um ${TIPOS[tipo].nome}. Nesta tab entra o Describe do NPS (notas de 0 a 10).`, ['A tabela "Count of NPS" com as notas de 0 a 10']);
   const contagens = Array(11).fill(null);
