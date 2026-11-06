@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1230';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1230';
-import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1230';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1230';
-import { icon } from '../icons.js?v=20261106-1230';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261106-1250';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261106-1250';
+import { info, esc, def, btnPptx, faixa } from '../ui.js?v=20261106-1250';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261106-1250';
+import { icon } from '../icons.js?v=20261106-1250';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -56,7 +56,7 @@ export function resumo(rec, meta) {
   };
 }
 
-export function html(rec, meta) {
+export function html(rec, meta, ferramentas = '') {
   const cs = todasCausas(rec.data);
   const nMenc = cs.filter(c => !c.zero).length;
   const g = npsGlobal(rec.data);
@@ -89,6 +89,7 @@ export function html(rec, meta) {
       <div class="card-head" style="margin-bottom:10px">
         <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto: o peso da causa (Alto a partir de 15%, Médio de 5% a 14,9%, Baixo abaixo de 5%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
+          ${ferramentas}
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
         </div>
