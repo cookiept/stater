@@ -2,13 +2,13 @@
 // (área de conforto, centro de inspeção…). Cada Excel vem filtrado no Stats iQ por uma área; o Stater lê esse
 // filtro, dá o nome à área e junta tudo. Mostra "Todas" (soma de todos os Excels) ou uma área de cada vez,
 // mais uma tabela cruzada área × driver. O resto da página é a vista "NPS por grupo" (grupos.js).
-import { npsDe, fmt, LIMITES } from '../stats.js?v=20261106-1439';
-import { esc } from '../ui.js?v=20261106-1439';
-import { icon } from '../icons.js?v=20261106-1439';
-import { formatarPeriodo } from '../excel.js?v=20261106-1439';
-import { baseGrafico } from '../export.js?v=20261106-1439';
-import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261106-1439';
-import * as G from './grupos.js?v=20261106-1439';
+import { npsDe, fmt, LIMITES } from '../stats.js?v=20261106-1509';
+import { esc } from '../ui.js?v=20261106-1509';
+import { icon } from '../icons.js?v=20261106-1509';
+import { formatarPeriodo } from '../excel.js?v=20261106-1509';
+import { baseGrafico } from '../export.js?v=20261106-1509';
+import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261106-1509';
+import * as G from './grupos.js?v=20261106-1509';
 
 const LIM = LIMITES.amostraPequena;
 const TODAS = '*';
