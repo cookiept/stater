@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1325';
-import { esc, def } from '../ui.js?v=20261106-1325';
-import { ordemEscala } from '../excel.js?v=20261106-1325';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1325';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1325';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1339';
+import { esc, def, info, btnPptx } from '../ui.js?v=20261106-1339';
+import { ordemEscala } from '../excel.js?v=20261106-1339';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1339';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1339';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -67,6 +67,24 @@ const colunasTab = (T, multi, temMedia, meta) => [{ k: 'nome', rot: T.col }, { k
 
 const sub = (c, multi) => (c.zero ? `0 ${multi ? 'menções' : 'respostas'}` : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`);
 
+// Um só cartão com os dois gráficos (NPS de cada um ou detratores/neutros/promotores) e um botão para trocar
+function graficoDuplo(rec, meta, T, multi) {
+  const tipNps = `NPS: uma barra por ${T.um}, com o NPS de quem ${multi ? 'o escolheu' : 'está nesse ' + T.um} (de −100 a 100). Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. A linha amarela é o objetivo. Por baixo do nome estão as respostas. ${itens(rec.data).ordem ? 'Os valores seguem a ordem da escala.' : `Os ${T.varios} vão do que tem mais respostas para o que tem menos.`}`;
+  const tipComp = `Detratores · Neutros · Promotores: cada barra é 100% de quem ${multi ? 'escolheu' : 'está em'} esse ${T.um}, dividida em detratores (vermelho, notas 0 a 6), neutros (cinzento, 7 e 8) e promotores (verde, 9 e 10).`;
+  const titulo = `NPS por ${T.um}`;
+  return `<section class="card" aria-labelledby="h-nps">
+    <div class="card-head"><h3 id="h-nps">${esc(titulo)} ${info(titulo, `${tipNps} O botão ao lado troca para ${tipComp}`)}</h3>
+      <div class="tbl-tools" style="margin-left:auto">
+        <div class="note" data-modo="nps">Linha amarela: objetivo (${meta}).</div>
+        <div class="legend" data-modo="comp" hidden style="margin:0">${LEGENDA_DNP}</div>
+        ${alternar('graf', [['nps', 'NPS'], ['comp', 'Detratores · Neutros · Promotores']], 'nps', 'Mostrar o gráfico em')}
+        ${btnPptx('nps')}
+      </div></div>
+    <div id="ch-nps" class="chart" data-modo="nps" role="img" aria-label="NPS por ${esc(T.um)}"></div>
+    <div id="ch-comp" class="chart" data-modo="comp" hidden role="img" aria-label="Detratores, neutros e promotores por ${esc(T.um)}"></div>
+  </section>`;
+}
+
 export function html(rec, meta, tab) {
   const T = termos(tab);
   const { todos } = itens(rec.data);
@@ -86,9 +104,7 @@ export function html(rec, meta, tab) {
         : kpi('Com respostas', `${fmt(comResp.length)}/${fmt(todos.length)}`, T.varios, ''),
       kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(fiaveis(todos).length)}`, abaixo.length ? `${T.varios} com NPS abaixo de ${meta}` : `nenhum ${T.um}`, `${T.varios[0].toUpperCase() + T.varios.slice(1)} com ${LIM} ou mais respostas cujo NPS fica abaixo do objetivo (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} respostas)`).join('; ')}.` : 'Neste Excel nenhum está abaixo.'}`),
     ])}
-    ${cartao('nps', `NPS por ${T.um}`, `Uma barra por ${T.um}, com o NPS de quem ${multi ? 'o escolheu' : 'está nesse ' + T.um} (de −100 a 100). Verde: no objetivo (${meta}) ou acima. Vermelho: abaixo. A linha amarela é o objetivo. Por baixo do nome estão as respostas. ${itens(rec.data).ordem ? 'Os valores seguem a ordem da escala.' : `Os ${T.varios} vão do que tem mais respostas para o que tem menos.`}`,
-      { nota: `Linha amarela: objetivo (${meta}).`, aria: `NPS por ${T.um}` })}
-    ${cartao('comp', `Quem respondeu em cada ${T.um}`, `Cada barra é 100% de quem ${multi ? 'escolheu' : 'está em'} esse ${T.um}, dividida em detratores (vermelho, notas 0 a 6), neutros (cinzento, 7 e 8) e promotores (verde, 9 e 10).`, { legenda: LEGENDA_DNP })}
+    ${graficoDuplo(rec, meta, T, multi)}
     ${tabelaHtml('tab', 'Tabela', `Uma linha por ${T.um}. NPS: % promotores − % detratores (vermelho se abaixo do objetivo, ${meta}). Face ao objetivo: quantos pontos o NPS está acima (+) ou abaixo (−) do objetivo. ${multi ? 'Menções' : 'Respostas'}: quantas pessoas. Detratores, neutros e promotores: o botão "%" mostra a parte de cada grupo e o botão "Pessoas" mostra quantas são. % das respostas: das ${fmt(geral(rec.data).total)} pessoas que responderam ao NPS, quantas ${multi ? 'escolheram' : 'estão em'} este ${T.um}${multi ? ' (uma pessoa pode escolher vários, por isso somam mais de 100%)' : ''}.${temMedia ? ' Nota média: a média das notas de 0 a 10.' : ''} Clica no título de uma coluna para ordenar.`,
       colunasTab(T, multi, temMedia, meta), (T.um.length > 14 ? 'Procurar' : `Procurar ${T.um}`), alternar('tab', [['pct', '%'], ['n', 'Pessoas']], 'pct', 'Mostrar detratores, neutros e promotores em'))}`;
 }
@@ -103,6 +119,11 @@ export function mount(rec, brand, meta, tab) {
     { min: -100, max: 100, linha: { valor: meta, rotulo: `Objetivo ${meta}` },
       tooltip: c => `<b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} ${multi ? 'menções' : 'respostas'}${c.media != null ? `<br>Nota média ${fmt(c.media, 1)}` : ''}${c.amostraPequena ? `<br><i>Menos de ${LIM} respostas</i>` : ''}` });
   composicao(document.getElementById('ch-comp'), brand, comSub);
+  ligarAlternar('graf', v => {
+    const card = document.querySelector('[aria-labelledby="h-nps"]');
+    card.querySelectorAll('[data-modo]').forEach(el => { el.hidden = el.dataset.modo !== v; });
+    card.querySelector('.exp')?.setAttribute('data-exp', v);
+  });
   let modo = 'pct';
   const valores = () => comSub.forEach(c => Object.assign(c, modo === 'n' ? { vD: c.d, vN: c.n, vP: c.p } : { vD: c.pctD, vN: c.pctN, vP: c.pctP }, { dif: c.zero ? null : c.nps - meta }));
   const dnp = v => `<td class="r num">${modo === 'n' ? fmt(v) : `${fmt(v)}%`}</td>`;

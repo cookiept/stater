@@ -1,15 +1,15 @@
 // Overview do Grupo Brisa: cartões por marca, gráfico NPS vs objetivo e edição dos objetivos
-import { BRANDS, GROUP } from './brands.js?v=20261106-1325';
-import { icon } from './icons.js?v=20261106-1325';
-import { logo } from './logos.js?v=20261106-1325';
-import { esc, info, def, toast } from './ui.js?v=20261106-1325';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1325';
-import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261106-1325';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261106-1325';
-import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261106-1325';
-import { ativa } from './analises.js?v=20261106-1325';
-import { tileVars } from './layout.js?v=20261106-1325';
-import { menuExportar } from './painel.js?v=20261106-1325';
+import { BRANDS, GROUP } from './brands.js?v=20261106-1339';
+import { icon } from './icons.js?v=20261106-1339';
+import { logo } from './logos.js?v=20261106-1339';
+import { esc, info, def, toast } from './ui.js?v=20261106-1339';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1339';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corMeta } from './stats.js?v=20261106-1339';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from './charts.js?v=20261106-1339';
+import { store, meta, dataMetas, guardarMetas } from './store.js?v=20261106-1339';
+import { ativa } from './analises.js?v=20261106-1339';
+import { tileVars } from './layout.js?v=20261106-1339';
+import { menuExportar } from './painel.js?v=20261106-1339';
 
 // Janela "Objetivos de NPS". depois() corre quando se guarda.
 export function editarMetas(depois) {
