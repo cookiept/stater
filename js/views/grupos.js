@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1418';
-import { esc, def } from '../ui.js?v=20261106-1418';
-import { ordemEscala } from '../excel.js?v=20261106-1418';
-import { baseGrafico, textoDe } from '../export.js?v=20261106-1418';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1418';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261106-1439';
+import { esc } from '../ui.js?v=20261106-1439';
+import { ordemEscala } from '../excel.js?v=20261106-1439';
+import { baseGrafico, textoDe } from '../export.js?v=20261106-1439';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261106-1439';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -110,7 +110,7 @@ export function mount(rec, brand, meta, tab) {
   const pintar = ligarTabela('tab', comSub, c => c.zero ? `
     <tr class="is-zero"><td><span class="name">${esc(c.nome)}</span></td><td class="r muted">–</td><td class="r muted">–</td><td class="r num">0</td><td class="r muted">–</td><td class="r muted">–</td><td class="r muted">–</td><td class="r muted num">0%</td>${temMedia ? '<td class="r muted">–</td>' : ''}</tr>` : `
     <tr class="${c.amostraPequena ? 'is-pequena' : ''}">
-      <td><span class="name">${esc(c.nome)}</span>${c.amostraPequena ? ` <span class="badge mid">poucas respostas ${def('amostra')}</span>` : ''}</td>
+      <td><span class="name">${esc(c.nome)}</span></td>
       <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? `Abaixo do objetivo (${meta})` : `No objetivo (${meta}) ou acima`}">${fmt(c.nps)}</span></td>
       <td class="r num ${c.dif < 0 ? 'neg' : 'pos'}">${sinal(c.dif)}</td>
       <td class="r num">${fmt(c.total)}</td>

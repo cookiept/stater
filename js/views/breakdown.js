@@ -2,13 +2,13 @@
 // (área de conforto, centro de inspeção…). Cada Excel vem filtrado no Stats iQ por uma área; o Stater lê esse
 // filtro, dá o nome à área e junta tudo. Mostra "Todas" (soma de todos os Excels) ou uma área de cada vez,
 // mais uma tabela cruzada área × driver. O resto da página é a vista "NPS por grupo" (grupos.js).
-import { npsDe, fmt, LIMITES } from '../stats.js?v=20261106-1418';
-import { esc } from '../ui.js?v=20261106-1418';
-import { icon } from '../icons.js?v=20261106-1418';
-import { formatarPeriodo } from '../excel.js?v=20261106-1418';
-import { baseGrafico } from '../export.js?v=20261106-1418';
-import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261106-1418';
-import * as G from './grupos.js?v=20261106-1418';
+import { npsDe, fmt, LIMITES } from '../stats.js?v=20261106-1439';
+import { esc } from '../ui.js?v=20261106-1439';
+import { icon } from '../icons.js?v=20261106-1439';
+import { formatarPeriodo } from '../excel.js?v=20261106-1439';
+import { baseGrafico } from '../export.js?v=20261106-1439';
+import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261106-1439';
+import * as G from './grupos.js?v=20261106-1439';
 
 const LIM = LIMITES.amostraPequena;
 const TODAS = '*';
@@ -167,7 +167,7 @@ export function mount(rec, brand, meta, tab) {
   if (rec.data.ficheiros.length < 2) return;
   const { grupos, linhas } = cruz(rec);
   ligarTabela('cruz', linhas, l => `
-    <tr class="${rec.data.sel === l.nome ? 'is-sel' : ''}"><td><span class="name">${esc(l.nome)}</span>${l.total < LIM ? ' <span class="badge mid">poucas respostas</span>' : ''}</td>${celula(l.nps, l.total, meta)}<td class="r num">${fmt(l.total)}</td>${grupos.map((_, i) => celula(l[`g${i}`], l[`n${i}`], meta)).join('')}</tr>`,
+    <tr class="${rec.data.sel === l.nome ? 'is-sel' : ''}"><td><span class="name">${esc(l.nome)}</span></td>${celula(l.nps, l.total, meta)}<td class="r num">${fmt(l.total)}</td>${grupos.map((_, i) => celula(l[`g${i}`], l[`n${i}`], meta)).join('')}</tr>`,
   { chave: 'total', ncol: grupos.length + 3, vazio: `${areaT(tab).nenhuma} com esse nome.` });
 }
 
