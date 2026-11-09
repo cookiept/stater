@@ -823,12 +823,7 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .card-head .pega:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
 .card-head .pega:active { cursor: grabbing; }
 .card-head .pega .ico { width: 16px; height: 16px; }
-.card.a-mover { opacity: .45; }
-.card.alvo-cima { box-shadow: 0 -3px 0 0 var(--brand), var(--shadow-1); }
-.card.alvo-baixo { box-shadow: 0 3px 0 0 var(--brand), var(--shadow-1); }
-.grid-2 > .card.alvo-cima { box-shadow: -3px 0 0 0 var(--brand), var(--shadow-1); }
-.grid-2 > .card.alvo-baixo { box-shadow: 3px 0 0 0 var(--brand), var(--shadow-1); }
-.menu-painel .repor { align-self: flex-start; margin-top: 4px; }
+.card.a-mover { position: relative; z-index: 40; box-shadow: 0 18px 40px rgba(16, 21, 42, .18), 0 2px 6px rgba(16, 21, 42, .08) !important; will-change: transform; }
 @media print { .card-head .pega { display: none; } }
 .card-head .pega { touch-action: none; }
 body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: none; }

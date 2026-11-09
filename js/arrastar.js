@@ -1,7 +1,7 @@
 // Arrastar gráficos e tabelas para mudar a ordem dentro da tab. A ordem fica guardada neste browser,
 // por tab, e o PowerPoint segue-a. Cada cartão tem uma pega (também funciona com as setas do teclado).
-import { icon } from './icons.js?v=20261106-1543';
-import { ordem, guardarOrdem } from './store.js?v=20261106-1543';
+import { icon } from './icons.js?v=20261109-1146';
+import { ordem, guardarOrdem } from './store.js?v=20261109-1146';
 
 const idDe = card => (card.getAttribute('aria-labelledby') || '').replace(/^h-/, '');
 const cartoes = raiz => [...raiz.querySelectorAll('section.card[aria-labelledby]')];
@@ -38,57 +38,92 @@ export function ligarArrastar(raiz, brandId, tabId) {
     head.insertAdjacentHTML('afterbegin', `<span class="pega" role="button" tabindex="0" aria-label="Mudar a ordem de ${titulo.replace(/"/g, '')}" title="Arrastar para mudar a ordem (ou setas do teclado)">${icon('grip')}</span>`);
     const pega = head.querySelector('.pega');
 
-    // Rato e toque: carregar na pega e arrastar o cartão para cima ou para baixo
+    // Rato e toque: o cartão "levanta" e segue o dedo/rato; os outros afastam-se com animação (como nos ícones do iPhone)
     pega.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       e.preventDefault();
-      pega.setPointerCapture(e.pointerId);
+      const x0 = e.clientX + scrollX, y0 = e.clientY + scrollY;
+      const top0 = card.offsetTop, left0 = card.offsetLeft;
+      let x = e.clientX, y = e.clientY, ativo = true, mudou = false;
       card.classList.add('a-mover');
       document.body.classList.add('a-arrastar');
-      let alvo = null, cima = true, y = e.clientY, x = e.clientX, ativo = true;
-      const limpar = () => raiz.querySelectorAll('.alvo-cima,.alvo-baixo').forEach(c => c.classList.remove('alvo-cima', 'alvo-baixo'));
-      const procurar = () => {
-        limpar();
-        alvo = irmaos().filter(c => c !== card).find(c => { const r = c.getBoundingClientRect(); return y >= r.top && y <= r.bottom && x >= r.left && x <= r.right; }) || null;
-        if (!alvo) return;
-        const r = alvo.getBoundingClientRect();
-        cima = card.parentElement.classList.contains('grid-2') ? x < r.left + r.width / 2 : y < r.top + r.height / 2;
-        alvo.classList.add(cima ? 'alvo-cima' : 'alvo-baixo');
+      // Segue o ponteiro, descontando o sítio novo do cartão na lista
+      const seguir = () => {
+        const dx = x + scrollX - x0 + (left0 - card.offsetLeft), dy = y + scrollY - y0 + (top0 - card.offsetTop);
+        card.style.transform = `translate(${dx}px, ${dy}px) scale(1.015)`;
       };
-      // Desliza a página quando o rato chega perto do topo ou do fundo
-      const rolar = () => {
+      // Troca de lugar quando o ponteiro passa o meio de outro cartão
+      const procurar = () => {
+        const cs = irmaos(), i = cs.indexOf(card);
+        const op = (card.offsetParent || document.body).getBoundingClientRect();
+        const px = x - op.left, py = y - op.top;
+        for (const [j, c] of cs.entries()) {
+          if (c === card) continue;
+          const l = c.offsetLeft, t = c.offsetTop, w = c.offsetWidth, h = c.offsetHeight;
+          if (px < l || px > l + w || py < t || py > t + h) continue;
+          const mesmaLinha = Math.abs(t - card.offsetTop) < 8;
+          const passou = j > i ? (mesmaLinha ? px > l + w / 2 : py > t + h / 2) : (mesmaLinha ? px < l + w / 2 : py < t + h / 2);
+          if (!passou) return;
+          mover(cs, () => (j > i ? c.after(card) : c.before(card)), card);
+          mudou = true;
+          return;
+        }
+      };
+      const passo = () => {
         if (!ativo) return;
         const m = 70, v = y < m ? -(m - y) / 3 : y > innerHeight - m ? (y - innerHeight + m) / 3 : 0;
-        if (v) { scrollBy(0, v); procurar(); }
-        requestAnimationFrame(rolar);
+        if (v) scrollBy(0, v);
+        procurar(); seguir();
+        requestAnimationFrame(passo);
       };
-      requestAnimationFrame(rolar);
-      const mover = ev => { x = ev.clientX; y = ev.clientY; procurar(); };
+      requestAnimationFrame(passo);
+      const mover_ = ev => { x = ev.clientX; y = ev.clientY; };
       const largar = () => {
         ativo = false;
-        pega.removeEventListener('pointermove', mover);
-        pega.removeEventListener('pointerup', largar);
-        pega.removeEventListener('pointercancel', largar);
-        if (alvo) { if (cima) alvo.before(card); else alvo.after(card); guardar(); }
-        limpar();
-        card.classList.remove('a-mover');
+        removeEventListener('pointermove', mover_);
+        removeEventListener('pointerup', largar);
+        removeEventListener('pointercancel', largar);
+        // Assenta no lugar novo com animação
+        card.style.transition = 'transform .22s cubic-bezier(.2,.8,.2,1)';
+        card.style.transform = '';
         document.body.classList.remove('a-arrastar');
+        setTimeout(() => { card.classList.remove('a-mover'); card.style.transition = ''; }, 230);
+        if (mudou) guardar();
       };
-      pega.addEventListener('pointermove', mover);
-      pega.addEventListener('pointerup', largar);
-      pega.addEventListener('pointercancel', largar);
+      // No window: ao mudar o cartão de sítio na página o browser larga o "pointer capture" da pega
+      addEventListener('pointermove', mover_);
+      addEventListener('pointerup', largar);
+      addEventListener('pointercancel', largar);
     });
-    // Teclado: setas para cima e para baixo
+    // Teclado: setas para cima e para baixo (com a mesma animação)
     pega.addEventListener('keydown', e => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
       e.preventDefault();
       const cs = irmaos(), i = cs.indexOf(card);
       const j = e.key === 'ArrowUp' ? i - 1 : i + 1;
       if (j < 0 || j >= cs.length) return;
-      if (e.key === 'ArrowUp') cs[j].before(card); else cs[j].after(card);
+      mover(cs, () => (e.key === 'ArrowUp' ? cs[j].before(card) : cs[j].after(card)));
       pega.focus();
       guardar();
     });
+  }
+}
+
+// Muda a ordem e anima os cartões do sítio antigo para o novo (técnica FLIP). O cartão arrastado não anima.
+function mover(cs, trocar, fixo = null) {
+  const antes = new Map(cs.map(c => [c, { l: c.offsetLeft, t: c.offsetTop }]));
+  trocar();
+  for (const c of cs) {
+    if (c === fixo) continue;
+    const a = antes.get(c), dx = a.l - c.offsetLeft, dy = a.t - c.offsetTop;
+    if (!dx && !dy) continue;
+    c.style.transition = 'none';
+    c.style.transform = `translate(${dx}px, ${dy}px)`;
+    c.getBoundingClientRect();
+    c.style.transition = 'transform .25s cubic-bezier(.2,.8,.2,1)';
+    c.style.transform = '';
+    clearTimeout(c._fim);
+    c._fim = setTimeout(() => { c.style.transition = ''; }, 260);
   }
 }
 

@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261106-1543';
-import { esc, info } from './ui.js?v=20261106-1543';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261106-1543';
-import { fmt } from './stats.js?v=20261106-1543';
-import { store, meta, ordem } from './store.js?v=20261106-1543';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261106-1543';
-import { tileVars } from './layout.js?v=20261106-1543';
+import { icon } from './icons.js?v=20261109-1146';
+import { esc, info } from './ui.js?v=20261109-1146';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261109-1146';
+import { fmt } from './stats.js?v=20261109-1146';
+import { store, meta, ordem } from './store.js?v=20261109-1146';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261109-1146';
+import { tileVars } from './layout.js?v=20261109-1146';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
