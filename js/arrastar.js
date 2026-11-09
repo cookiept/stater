@@ -1,7 +1,7 @@
 // Arrastar gráficos e tabelas para mudar a ordem dentro da tab. A ordem fica guardada neste browser,
 // por tab, e o PowerPoint segue-a. Cada cartão tem uma pega (também funciona com as setas do teclado).
-import { icon } from './icons.js?v=20261109-1146';
-import { ordem, guardarOrdem } from './store.js?v=20261109-1146';
+import { icon } from './icons.js?v=20261109-1202';
+import { ordem, guardarOrdem } from './store.js?v=20261109-1202';
 
 const idDe = card => (card.getAttribute('aria-labelledby') || '').replace(/^h-/, '');
 const cartoes = raiz => [...raiz.querySelectorAll('section.card[aria-labelledby]')];
@@ -52,22 +52,36 @@ export function ligarArrastar(raiz, brandId, tabId) {
         const dx = x + scrollX - x0 + (left0 - card.offsetLeft), dy = y + scrollY - y0 + (top0 - card.offsetTop);
         card.style.transform = `translate(${dx}px, ${dy}px) scale(1.015)`;
       };
-      // Troca de lugar quando o ponteiro passa o meio de outro cartão
+      // Troca de lugar assim que a borda da frente do cartão arrastado entra um pouco no outro
+      // (só no sentido em que o rato se está a mover, para não ficar a trocar para trás e para a frente)
+      let dirX = 0, dirY = 0, ux = x, uy = y + scrollY;
       const procurar = () => {
+        const py = y + scrollY;
+        if (Math.abs(py - uy) > 3) { dirY = Math.sign(py - uy); uy = py; }
+        if (Math.abs(x - ux) > 3) { dirX = Math.sign(x - ux); ux = x; }
         const cs = irmaos(), i = cs.indexOf(card);
-        const op = (card.offsetParent || document.body).getBoundingClientRect();
-        const px = x - op.left, py = y - op.top;
+        const op = (card.offsetParent || document.body).getBoundingClientRect(), r = card.getBoundingClientRect();
+        const vt = r.top - op.top, vb = r.bottom - op.top, vl = r.left - op.left, vr = r.right - op.left;
+        let alvo = null, depois = true;
         for (const [j, c] of cs.entries()) {
           if (c === card) continue;
           const l = c.offsetLeft, t = c.offsetTop, w = c.offsetWidth, h = c.offsetHeight;
-          if (px < l || px > l + w || py < t || py > t + h) continue;
           const mesmaLinha = Math.abs(t - card.offsetTop) < 8;
-          const passou = j > i ? (mesmaLinha ? px > l + w / 2 : py > t + h / 2) : (mesmaLinha ? px < l + w / 2 : py < t + h / 2);
-          if (!passou) return;
-          mover(cs, () => (j > i ? c.after(card) : c.before(card)), card);
-          mudou = true;
-          return;
+          if (mesmaLinha) {
+            if (vb < t || vt > t + h) continue;
+            const m = Math.min(w * 0.2, 60);
+            if (j > i && dirX > 0 && vr > l + m) { alvo = c; depois = true; }
+            else if (j < i && dirX < 0 && vl < l + w - m && !alvo) { alvo = c; depois = false; }
+          } else {
+            if (vr < l || vl > l + w) continue;
+            const m = Math.min(h * 0.15, 50);
+            if (j > i && dirY > 0 && vb > t + m) { alvo = c; depois = true; }
+            else if (j < i && dirY < 0 && vt < t + h - m && !alvo) { alvo = c; depois = false; }
+          }
         }
+        if (!alvo) return;
+        mover(cs, () => (depois ? alvo.after(card) : alvo.before(card)), card);
+        mudou = true;
       };
       const passo = () => {
         if (!ativo) return;

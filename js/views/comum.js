@@ -1,11 +1,11 @@
 // Peças partilhadas pelas vistas: números grandes, cartões de gráfico, tabela ordenável e
 // gráficos que se repetem (barras horizontais de um valor, composição detratores/neutros/promotores).
 // Uma vista nova deve montar-se com estas peças para o Stater ficar igual em todas as tabs.
-import { CORES, fmt } from '../stats.js?v=20261109-1146';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261109-1146';
-import { info, esc, btnPptx } from '../ui.js?v=20261109-1146';
-import { icon } from '../icons.js?v=20261109-1146';
-import { hex, TPL } from '../export.js?v=20261109-1146';
+import { CORES, fmt } from '../stats.js?v=20261109-1202';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261109-1202';
+import { info, esc, btnPptx } from '../ui.js?v=20261109-1202';
+import { icon } from '../icons.js?v=20261109-1202';
+import { hex, TPL } from '../export.js?v=20261109-1202';
 
 // Número grande (KPI). hero = o primeiro, em fundo escuro.
 export const kpi = (rot, val, det, tip, hero = false) => `
