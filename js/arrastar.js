@@ -1,7 +1,7 @@
 // Arrastar gráficos e tabelas para mudar a ordem dentro da tab. A ordem fica guardada neste browser,
 // por tab, e o PowerPoint segue-a. Cada cartão tem uma pega (também funciona com as setas do teclado).
-import { icon } from './icons.js?v=20261109-1202';
-import { ordem, guardarOrdem } from './store.js?v=20261109-1202';
+import { icon } from './icons.js?v=20261110-1018';
+import { ordem, guardarOrdem } from './store.js?v=20261110-1018';
 
 const idDe = card => (card.getAttribute('aria-labelledby') || '').replace(/^h-/, '');
 const cartoes = raiz => [...raiz.querySelectorAll('section.card[aria-labelledby]')];

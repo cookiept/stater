@@ -1,5 +1,5 @@
 // Pequenas peças de interface partilhadas.
-import { icon } from './icons.js?v=20261109-1202';
+import { icon } from './icons.js?v=20261110-1018';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 

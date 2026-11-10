@@ -1,11 +1,11 @@
 // Tipo "Text iQ": média da recomendação (0 a 10) de quem mencionou cada tema nas sugestões,
 // comparada com quem não o mencionou (linhas CHECKED / UNCHECKED do Stats iQ).
 // Serve para Topics, Causa Raiz (Text iQ), Drivers e Subtopics. Não é NPS: é a média das notas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261109-1202';
-import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261109-1202';
-import { esc } from '../ui.js?v=20261109-1202';
-import { baseGrafico, textoDe } from '../export.js?v=20261109-1202';
-import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261109-1202';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261110-1018';
+import { base, junta, desenhar, comBrilho, EIXO_VAL } from '../charts.js?v=20261110-1018';
+import { esc } from '../ui.js?v=20261110-1018';
+import { baseGrafico, textoDe } from '../export.js?v=20261110-1018';
+import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261110-1018';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'tema', varios: 'temas', col: 'Tema' };

@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261109-1202';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261109-1202';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261109-1202';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261109-1202';
-import { icon } from '../icons.js?v=20261109-1202';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261110-1018';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261110-1018';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261110-1018';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261110-1018';
+import { icon } from '../icons.js?v=20261110-1018';
 
 // ---------- Período e comparação (só com o Excel de respostas, que traz a data de cada resposta) ----------
 const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -170,7 +170,20 @@ export function html(rec, meta) {
       <div class="aviso-ficticio">${icon('info')}<div><b>Dados fictícios</b> Para ver os meses reais, carrega a exportação das respostas do Qualtrics (Start Date e nota do NPS).</div></div>
       <div class="chart-ficticio"><div id="ch-mes" class="chart" role="img" aria-label="NPS por mês com dados fictícios"></div><span class="marca-agua" aria-hidden="true">Dados fictícios</span></div>
     `}
-    </section>`;
+    </section>
+    ${M ? `<section class="card" aria-labelledby="h-dp">
+      <div class="card-head">
+        <h3 id="h-dp">Desvio padrão por mês ${info('Desvio padrão por mês', `Desvio padrão das notas de 0 a 10 em cada mês. Mostra se as pessoas dão notas parecidas (desvio baixo) ou muito diferentes umas das outras (desvio alto, com notas altas e baixas ao mesmo tempo). A linha cinzenta é o desvio padrão do período escolhido (${M.rot}): ${fmt(r.dp, 2)}. Os meses marcados com * estão incompletos.`)}</h3>
+        <div class="note">Linha cinzenta: desvio do período (${fmt(r.dp, 2)}).</div>${btnPptx('dp')}
+      </div>
+      <div id="ch-dp" class="chart" role="img" aria-label="Desvio padrão das notas por mês"></div>
+    </section>` : `<section class="card ficticio" aria-labelledby="h-dp">
+      <div class="card-head">
+        <h3 id="h-dp">Desvio padrão por mês ${info('Desvio padrão por mês', `Dados fictícios. Este Excel não traz o mês de cada resposta, por isso os valores foram inventados à volta do desvio padrão real (${fmt(r.dp, 2)}) só para mostrar como o gráfico vai ficar. Para ver os meses reais, carrega a exportação das respostas (Start Date e nota do NPS).`)}</h3>
+      </div>
+      <div class="aviso-ficticio">${icon('info')}<div><b>Dados fictícios</b> Para ver os meses reais, carrega a exportação das respostas do Qualtrics (Start Date e nota do NPS).</div></div>
+      <div class="chart-ficticio"><div id="ch-dp" class="chart" role="img" aria-label="Desvio padrão por mês com dados fictícios"></div><span class="marca-agua" aria-hidden="true">Dados fictícios</span></div>
+    </section>`}`;
 }
 
 // Escreve "Objetivo" em curva, por dentro do arco, centrado no traço da meta (SVG por cima do gráfico)
@@ -245,6 +258,7 @@ export function mount(rec, brand, meta) {
   }), 300);
 
   const M = rec.data.mensal;
+  desvioMes(rec, b, r);
   if (M) {
     const xs = M.meses.map(x => `${curtoMes(x.m)}${x.parcial ? '*' : ''}${x.m.slice(5) === '01' || x === M.meses[0] ? `\n${x.m.slice(0, 4)}` : ''}`);
     const rs = M.meses.map(x => resumoNps(x.c));
@@ -291,6 +305,36 @@ export function mount(rec, brand, meta) {
   }), 240);
 }
 
+// Desvio padrão das notas em cada mês (real com a exportação das respostas; fictício sem ela)
+function desvioMes(rec, b, r) {
+  const M = rec.data.mensal;
+  const el = document.getElementById('ch-dp');
+  if (!el) return;
+  const xs = M ? M.meses.map(x => `${curtoMes(x.m)}${x.parcial ? '*' : ''}${x.m.slice(5) === '01' || x === M.meses[0] ? `\n${x.m.slice(0, 4)}` : ''}`) : ['set', 'out', 'nov', 'dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago'];
+  const rs = M ? M.meses.map(x => resumoNps(x.c)) : null;
+  const vals = M ? rs.map(q => Math.round(q.dp * 100) / 100) : [0.12, 0.05, 0.1, -0.04, 0.08, -0.02, 0, 0.06, -0.05, 0.03, -0.07, 0.02].map(d => Math.round((r.dp + d) * 100) / 100);
+  const faixa = (de, ate, cor, nome) => { const i = M.meses.findIndex(x => x.m >= de), j = M.meses.map(x => x.m <= ate).lastIndexOf(true); return i >= 0 && j >= i ? [[{ xAxis: i, name: nome, itemStyle: { color: cor } }, { xAxis: j }]] : []; };
+  const max = Math.ceil(Math.max(...vals, r.dp) + 0.5);
+  desenhar(el, junta(b, {
+    grid: { left: 4, right: 16, top: 34, bottom: 4, containLabel: true },
+    tooltip: { trigger: 'axis', formatter: p => { const i = p[0].dataIndex; return M ? `<b>${nomeMes(M.meses[i].m)}</b>${M.meses[i].parcial ? ' (incompleto)' : ''}<br>Desvio padrão ${fmt(vals[i], 2)} · média ${fmt(rs[i].media, 2)}<br>${fmt(rs[i].total)} respostas` : `<b>${p[0].name}</b><br>Desvio padrão ${fmt(vals[i], 2)} (fictício)`; } },
+    xAxis: { type: 'category', boundaryGap: !!M, data: xs, ...EIXO_CAT, axisLine: { show: true, lineStyle: { color: '#e6e6e6' } } },
+    yAxis: { type: 'value', min: 0, max, ...EIXO_VAL, axisLabel: { ...(EIXO_VAL.axisLabel || {}), formatter: v => fmt(v, 1) } },
+    series: [{
+      type: 'line', smooth: 0.3, data: vals, symbol: 'circle', symbolSize: 9,
+      lineStyle: { width: 3, color: '#1f4bff' },
+      itemStyle: { color: '#fff', borderColor: '#1f4bff', borderWidth: 2 },
+      areaStyle: { color: grad('rgba(31,75,255,.16)', 'rgba(31,75,255,0)') },
+      label: { show: true, position: 'top', distance: 8, ...ROTULO, formatter: q => fmt(q.value, 2) },
+      ...(M ? { markArea: { silent: true, label: { color: '#494949', fontSize: 12, position: 'insideTop', distance: 4 }, data: [
+        ...faixa(M.de, M.ate, 'rgba(20,120,156,.10)', 'Período'),
+        ...(M.rotComp ? faixa(M.cDe, M.cAte, 'rgba(0,0,0,.05)', 'Comparação') : []),
+      ] } } : {}),
+      markLine: { symbol: 'none', silent: true, lineStyle: { color: '#9a9a9a', type: [5, 4], width: 1.5 }, label: { show: false }, data: [{ yAxis: Math.round(r.dp * 100) / 100 }] },
+    }],
+  }), 260);
+}
+
 // Para exportar: números principais, resumo e gráficos nativos do PowerPoint
 export function exportar(rec, brand, meta) {
   const c = rec.data.contagens;
@@ -309,6 +353,9 @@ export function exportar(rec, brand, meta) {
     resumo: [textoDe(resumo(rec, meta).texto)],
     filtros: rec.data.filtros,
     graficos: [
+      ...(rec.data.mensal ? [{ id: 'dp', titulo: 'Desvio padrão por mês', desenhar: (s, p) => s.addChart(p.ChartType.line, [
+        { name: 'Desvio padrão', labels: rec.data.mensal.meses.map(x => nomeMes(x.m) + (x.parcial ? '*' : '')), values: rec.data.mensal.meses.map(x => Math.round(resumoNps(x.c).dp * 100) / 100) },
+      ], { ...b, chartColors: ['1F4BFF'], lineSize: 2, lineDataSymbol: 'circle', lineDataSymbolSize: 7, showValue: true, dataLabelPosition: 't', dataLabelFormatCode: '0.00', showLegend: false, valAxisMinVal: 0 }) }] : []),
       ...(rec.data.mensal ? [{ id: 'mes', titulo: 'NPS por mês', desenhar: (s, p) => s.addChart(p.ChartType.line, [
         { name: 'NPS', labels: rec.data.mensal.meses.map(x => nomeMes(x.m) + (x.parcial ? '*' : '')), values: rec.data.mensal.meses.map(x => resumoNps(x.c).nps) },
         { name: `Objetivo ${meta}`, labels: rec.data.mensal.meses.map(x => nomeMes(x.m)), values: rec.data.mensal.meses.map(() => meta) },
