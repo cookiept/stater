@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261110-1018';
-import { esc } from '../ui.js?v=20261110-1018';
-import { ordemEscala } from '../excel.js?v=20261110-1018';
-import { baseGrafico, textoDe } from '../export.js?v=20261110-1018';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261110-1018';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261111-1419';
+import { esc } from '../ui.js?v=20261111-1419';
+import { ordemEscala } from '../excel.js?v=20261111-1419';
+import { baseGrafico, textoDe } from '../export.js?v=20261111-1419';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261111-1419';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -53,8 +53,7 @@ export function resumo(rec, meta, tab) {
     tom: g.nps < meta ? 'bad' : 'good',
     texto: partes.join(' '),
     factos: [
-      ...(melhor && pior && melhor !== pior ? [{ valor: fmt(melhor.nps - pior.nps), rot: `pontos de NPS entre o melhor ${T.um} e o pior`, tip: `${melhor.nome} tem NPS ${fmt(melhor.nps)} e ${pior.nome} tem ${fmt(pior.nps)}: ${fmt(melhor.nps - pior.nps)} pontos de diferença. Só contam ${T.varios} com ${LIM} ou mais respostas${f.length ? '' : ' (aqui nenhum tem, por isso entram todos)'}.` }] : []),
-      { valor: `${fmt(abaixo.length)}/${fmt(f.length)}`, rot: `${T.varios} com NPS abaixo do objetivo (${meta})`, tom: abaixo.length ? 'bad' : 'good', tip: `${T.varios[0].toUpperCase() + T.varios.slice(1)} com ${LIM} ou mais respostas e NPS abaixo do objetivo (${meta}). ${abaixo.length ? `São: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)})`).join('; ')}.` : 'Nenhum neste Excel.'}` },
+      ...(melhor && pior && melhor !== pior ? [{ valor: fmt(melhor.nps - pior.nps), rot: `Variação NPS entre o melhor e o pior ${T.um}`, tip: `${melhor.nome} tem NPS ${fmt(melhor.nps)} e ${pior.nome} tem ${fmt(pior.nps)}: ${fmt(melhor.nps - pior.nps)} pontos de diferença. Só contam ${T.varios} com ${LIM} ou mais respostas${f.length ? '' : ' (aqui nenhum tem, por isso entram todos)'}.` }] : []),
     ],
   };
 }

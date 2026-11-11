@@ -1,10 +1,10 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261110-1018';
-import { icon } from '../icons.js?v=20261110-1018';
-import { formatarPeriodo } from '../excel.js?v=20261110-1018';
-import * as C from './causas.js?v=20261110-1018';
+import { esc } from '../ui.js?v=20261111-1419';
+import { icon } from '../icons.js?v=20261111-1419';
+import { formatarPeriodo } from '../excel.js?v=20261111-1419';
+import * as C from './causas.js?v=20261111-1419';
 
 const TODOS = '*';
 export const multi = true;
@@ -34,8 +34,10 @@ export function preparar(rec) {
   // A amostra é a de quem respondeu ao NPS: igual em todos os Excels com os mesmos filtros; fica a maior
   const amostra = fs.map(f => f.amostraGrupo).filter(Boolean).sort((a, b) => (b.d + b.n + b.p) - (a.d + a.n + a.p))[0] || null;
   const data = um ? { ...um } : {
-    causas: fs.flatMap(f => f.causas.map(c => ({ ...c, nome: `${c.nome} · ${f.driver}` }))),
-    semRespostas: fs.flatMap(f => (f.semRespostas || []).map(n => `${n} · ${f.driver}`)),
+    // Cada causa guarda o seu driver (causa = nome sem o driver, para a tabela); as de 0 menções também
+    causas: fs.flatMap(f => [...f.causas, ...(f.semRespostas || []).map(n => ({ nome: n, d: 0, n: 0, p: 0, total: 0 }))]
+      .map(c => ({ ...c, nome: `${c.nome} · ${f.driver}`, causa: c.nome, driver: f.driver }))),
+    semRespostas: [], drivers: fs.map(f => f.driver),
     amostraGrupo: amostra, multi: true, periodo: fs[0].periodo, pergunta: fs[0].pergunta,
     filtros: [...fs[0].filtros, { campo: 'Drivers', valor: `todos (${fs.length})` }],
   };

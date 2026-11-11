@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261110-1018';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261110-1018';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261110-1018';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261110-1018';
-import { icon } from '../icons.js?v=20261110-1018';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1419';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1419';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1419';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1419';
+import { icon } from '../icons.js?v=20261111-1419';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -19,6 +19,10 @@ const comImpacto = (cs, g) => cs.map(c => ({ ...c, impNps: c.zero || !g ? null :
 export const todasCausas = data => comImpacto(enriquecerCausas(comZeros(data.causas, data.semRespostas), npsGlobal(data)?.total), npsGlobal(data));
 const IMPNPS_TIP = g => `Quanto esta causa puxa o NPS da marca${g ? ` (${fmt(g.nps)})` : ''} para cima (+) ou para baixo (−), em pontos: % das respostas × (NPS da causa − NPS da marca). Ex.: 6% das respostas com NPS 56 numa marca com NPS 41 dá 0,06 × (56 − 41) = +0,9.`;
 const um = v => (v > 0 ? '+' : '') + fmt(v, 1);
+// Causa Raiz com vários drivers ("Todos"): cada causa tem o seu driver, com uma cor fixa
+const driversDe = data => (data.drivers?.length > 1 ? data.drivers : null);
+export const CORES_DRIVER = ['#1f4bff', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b', '#0d9488', '#a16207', '#4f46e5', '#db2777'];
+const corDriver = (ds, d) => CORES_DRIVER[Math.max(0, ds.indexOf(d)) % CORES_DRIVER.length];
 
 export function chips(rec) {
   const g = npsGlobal(rec.data);
@@ -64,6 +68,7 @@ export function html(rec, meta, depoisKpis = '') {
     <div class="kpi${hero ? ' hero' : ''}"><span class="kl">${rot} ${k}</span><span class="kv num">${val}</span><span class="kd">${det}</span></div>`;
   const abaixo = causasFiaveis(cs).filter(c => c.nps < meta);
   const dz = destaques(cs);
+  const ds = driversDe(rec.data);
   return `
     <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · objetivo ${meta}`, info('NPS de quem respondeu', `NPS de todas as ${fmt(g.total)} pessoas que responderam a esta pergunta: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Vem do tamanho de cada grupo (Sample Size) no Excel, por isso conta pessoas e não menções. O objetivo da marca é ${meta}: ${g.nps >= meta ? `está ${fmt(g.nps - meta)} pontos acima` : `está ${fmt(meta - g.nps)} pontos abaixo`}.`), true) : ''}
@@ -81,13 +86,13 @@ export function html(rec, meta, depoisKpis = '') {
       <div id="ch-comp" class="chart" role="img" aria-label="Composição de detratores, neutros e promotores por causa"></div>
     </section>
     <section class="card" aria-labelledby="h-mat">
-      <div class="card-head"><h3 id="h-mat">Onde atuar primeiro ${info('Onde atuar primeiro', `Cada ponto é uma causa com menções. Para a direita: mais menções. Para baixo: pior NPS. A linha amarela é o objetivo da marca (${meta})${g ? ` e a linha cinzenta o NPS de quem respondeu (${fmt(g.nps)})` : ''}. Os pontos vermelhos estão abaixo do objetivo. As causas mais à direita e mais abaixo são muito referidas e estão mal avaliadas: é por aí que vale a pena começar.`)}</h3>
-        <div class="note">Linha amarela: objetivo (${meta}). Pontos a vermelho estão abaixo dele.</div>${btnPptx('mat')}</div>
+      <div class="card-head"><h3 id="h-mat">Onde atuar primeiro ${info('Onde atuar primeiro', `Cada ponto é uma causa com menções. Para a direita: mais menções. Para baixo: pior NPS. A linha amarela é o objetivo da marca (${meta})${g ? ` e a linha cinzenta o NPS de quem respondeu (${fmt(g.nps)})` : ''}. ${ds ? 'Cada cor é um driver (legenda por cima do gráfico).' : 'Os pontos vermelhos estão abaixo do objetivo.'} As causas mais à direita e mais abaixo são muito referidas e estão mal avaliadas: é por aí que vale a pena começar.`)}</h3>
+        <div class="note">Linha amarela: objetivo (${meta}).${ds ? '' : ' Pontos a vermelho estão abaixo dele.'}</div>${btnPptx('mat')}</div>
       <div id="ch-mat" class="chart" role="img" aria-label="Menções e NPS por causa"></div>
     </section>
     <section class="card" aria-labelledby="h-tab" style="padding-bottom:16px">
       <div class="card-head" style="margin-bottom:10px">
-        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: das pessoas que responderam ao NPS${g ? ` (${fmt(g.total)})` : ''}, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
+        <h3 id="h-tab">Tabela ${info('Tabela', `Uma linha por causa${ds ? ', agrupadas por driver (cada grupo começa com o nome do driver)' : ''}. NPS: % de promotores − % de detratores entre quem escolheu a causa (vermelho se abaixo do objetivo, ${meta}). Menções: quantas vezes foi escolhida. Detratores · Neutros · Promotores: a divisão de quem a escolheu, em %. % das respostas: dos ${g ? fmt(g.total) : ''} clientes que responderam ao NPS, quantas escolheram a causa (uma pessoa pode escolher várias, por isso somam mais de 100%). Impacto no NPS: quantos pontos a causa puxa o NPS da marca para cima ou para baixo. Clica no título de uma coluna para ordenar.`)}</h3>
         <div class="tbl-tools" style="margin-left:auto">
           <label class="search">${icon('search')}<span class="sr-only">Procurar causa</span><input id="q-causa" type="search" placeholder="Procurar causa"></label>
           ${btnPptx('tab')}
@@ -96,10 +101,11 @@ export function html(rec, meta, depoisKpis = '') {
       <div class="tbl-wrap"><table class="tbl" id="tbl-causas">
         <thead><tr>
           <th scope="col"><button data-sort="nome">Causa ${icon('sort')}</button></th>
+          ${ds ? `<th scope="col"><button data-sort="driver">Driver ${icon('sort')}</button></th>` : ''}
           <th scope="col" class="r"><button data-sort="nps">NPS ${icon('sort')}</button></th>
           <th scope="col" class="r"><button data-sort="total">Menções ${icon('sort')}</button></th>
           <th scope="col">Detratores · Neutros · Promotores</th>
-          <th scope="col" class="r"><button data-sort="quota">% das respostas ${icon('sort')}</button></th>
+          <th scope="col" class="r"><button data-sort="quota">% das respostas ${icon('sort')}</button> ${info('% das respostas', `Das ${g ? fmt(g.total) : ''} pessoas que responderam ao NPS, quantas escolheram esta causa: menções a dividir por ${g ? fmt(g.total) : 'quem respondeu'}. Uma pessoa pode escolher várias causas, por isso as % podem somar mais de 100%.`)}${g ? `<span class="th-sub">de ${fmt(g.total)} clientes</span>` : ''}</th>
           <th scope="col" class="r"><button data-sort="impNps">Impacto no NPS ${icon('sort')}</button> ${info('Impacto no NPS', IMPNPS_TIP(g))}</th>
         </tr></thead>
         <tbody></tbody>
@@ -121,7 +127,7 @@ export function destaquesHtml(dz, comDriver = false) {
 export function linhas(cs, meta, pior, extra = () => '') {
   return cs.map(c => c.zero ? `
     <tr class="is-zero">
-      <td><span class="name">${esc(c.nome)}</span></td>${extra(c)}
+      <td><span class="name">${esc(c.causa ?? c.nome)}</span></td>${extra(c)}
       <td class="r muted">–</td>
       <td class="r num">0</td>
       <td><div class="minibar vazia" aria-hidden="true"></div></td>
@@ -130,13 +136,13 @@ export function linhas(cs, meta, pior, extra = () => '') {
       <td class="r muted">–</td>
     </tr>` : `
     <tr class="${c.amostraPequena ? 'is-pequena' : ''}">
-      <td><span class="name">${esc(c.nome)}</span></td>${extra(c)}
+      <td><span class="name">${esc(c.causa ?? c.nome)}</span></td>${extra(c)}
       <td class="r"><span class="badge ${c.nps < meta ? 'bad' : 'good'} num" title="${c.nps < meta ? `Abaixo do objetivo (${meta})` : `No objetivo (${meta}) ou acima`}">${fmt(c.nps)}</span></td>
       <td class="r num">${fmt(c.total)}</td>
-      <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)} · ${fmt(c.pctN)} · ${fmt(c.pctP)}%</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:10px"><div class="minibar" aria-hidden="true"><div class="d" style="flex:${c.pctD}"></div><div class="n" style="flex:${c.pctN}"></div><div class="p" style="flex:${c.pctP}"></div></div><span class="muted num" style="white-space:nowrap">${fmt(c.pctD)}% · ${fmt(c.pctN)}% · ${fmt(c.pctP)}%</span></div></td>
  <td class="r"><span class="muted num">${fmt(c.quota, 1)}%</span></td>
       <td class="r num ${c.impNps == null ? 'muted' : c.impNps < 0 ? 'neg' : 'pos'}">${c.impNps == null ? '–' : um(c.impNps)}</td>
-    </tr>`).join('') || `<tr><td colspan="${7}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
+    </tr>`).join('') || `<tr><td colspan="${extra({}) ? 7 : 6}" class="muted">Nenhuma causa com esse nome.</td></tr>`;
 }
 
 export function mount(rec, brand, meta) {
@@ -147,6 +153,7 @@ export function mount(rec, brand, meta) {
   const b = base(brand);
   const nomes = cs.map(c => c.nome);
   const altura = Math.max(220, cs.length * 54 + 60);
+  const ds = driversDe(rec.data);
 
   // Quem escolheu cada causa: barras 100% (detratores, neutros, promotores) com cantos redondos
   const pct = [cs.map(c => c.pctD), cs.map(c => c.pctN), cs.map(c => c.pctP)];
@@ -173,20 +180,22 @@ export function mount(rec, brand, meta) {
   const maxX = Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15);
   const minY = Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10);
   desenhar(document.getElementById('ch-mat'), junta(b, {
-    grid: { left: 8, right: 24, top: 34, bottom: 30, containLabel: true },
-    tooltip: { trigger: 'item', formatter: p => { const c = comM[p.dataIndex]; return `<b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções`; } },
+    grid: { left: 8, right: 24, top: ds ? 58 : 34, bottom: 30, containLabel: true },
+    tooltip: { trigger: 'item', formatter: p => { const c = p.data.causa; return `<b>${esc(c.causa ?? c.nome)}</b>${c.driver ? `<br>Driver: ${esc(c.driver)}` : ''}<br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções`; } },
     xAxis: { type: 'value', min: 0, max: maxX, splitNumber: 5, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => fmt(v) },
       name: 'Menções', nameLocation: 'middle', nameGap: 28, nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
     yAxis: { type: 'value', min: minY, max: 100, ...EIXO_VAL, name: 'NPS', nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
-    series: [{
-      type: 'scatter', symbolSize: 18,
-      data: comM.map(c => ({ value: [c.total, c.nps], itemStyle: { color: comBrilho(c.nps < meta ? CORES.det : CORES.pro), borderColor: '#fff', borderWidth: 3, shadowBlur: 8, shadowColor: 'rgba(0,0,0,.18)' } })),
-      emphasis: { scale: 1.3 },
-      markLine: { symbol: 'none', silent: true, data: [
+    ...(ds ? { legend: { top: 0, left: 0, icon: 'circle', itemWidth: 10, itemHeight: 10, textStyle: { color: '#494949', fontSize: 12 } } } : {}),
+    series: (ds ? ds.map(d => ({ nome: d, lista: comM.filter(c => c.driver === d), cor: corDriver(ds, d) })) : [{ nome: 'Causas', lista: comM }]).map((sr, k) => ({
+      name: sr.nome, type: 'scatter', symbolSize: 18,
+      data: sr.lista.map(c => ({ value: [c.total, c.nps], causa: c, itemStyle: { color: comBrilho(sr.cor || (c.nps < meta ? CORES.det : CORES.pro)), borderColor: '#fff', borderWidth: 3, shadowBlur: 8, shadowColor: 'rgba(0,0,0,.18)' } })),
+      ...(sr.cor ? { itemStyle: { color: sr.cor } } : {}),
+      emphasis: { scale: 1.3 }, blur: { itemStyle: { opacity: 0.25 } },
+      ...(k ? {} : { markLine: { symbol: 'none', silent: true, data: [
         { yAxis: meta, lineStyle: { color: CORES.ama, type: [5, 4], width: 1.5 }, label: { formatter: `Objetivo ${meta}`, position: 'insideEndTop', ...ETIQ_META } },
         ...(g ? [{ yAxis: g.nps, lineStyle: { color: '#b4b4b4', type: [2, 3], width: 1 }, label: { formatter: `NPS geral ${fmt(g.nps)}`, position: 'insideStartTop', color: '#494949', backgroundColor: '#f0f0f0', padding: [3, 6], borderRadius: 6, fontSize: 12 } }] : []),
-      ] },
-    }],
+      ] } }),
+    })),
   }), 340);
 
 
@@ -200,7 +209,17 @@ export function mount(rec, brand, meta) {
       if (x == null || y == null) return (x == null) - (y == null);
       return (typeof x === 'string' ? x.localeCompare(y, 'pt') : x - y) * dir;
     });
-    tbody.innerHTML = linhas(lista, meta, dz.pior);
+    if (!ds) { tbody.innerHTML = linhas(lista, meta, dz.pior); }
+    else {
+      // Separador por driver: uma linha com o nome do driver e, por baixo, as suas causas
+      const extra = c => `<td><span class="drv-tag"><i style="background:${corDriver(ds, c.driver)}"></i>${esc(c.driver)}</span></td>`;
+      tbody.innerHTML = ds.map(d => {
+        const do_ = lista.filter(c => c.driver === d);
+        if (!do_.length) return '';
+        const m = do_.reduce((a, c) => a + c.total, 0);
+        return `<tr class="grp-drv"><td colspan="7"><span class="drv-tag"><i style="background:${corDriver(ds, d)}"></i>${esc(d)}</span><span class="grp-n">${fmt(do_.filter(c => !c.zero).length)}/${fmt(do_.length)} causas com menções · ${fmt(m)} menções</span></td></tr>` + linhas(do_, meta, dz.pior, extra);
+      }).join('') || `<tr><td colspan="7" class="muted">Nenhuma causa com esse nome.</td></tr>`;
+    }
     document.querySelectorAll('#tbl-causas th').forEach(th => th.removeAttribute('aria-sort'));
     document.querySelector(`#tbl-causas [data-sort="${chave}"]`)?.closest('th').setAttribute('aria-sort', dir > 0 ? 'ascending' : 'descending');
   };
@@ -261,7 +280,7 @@ export function exportar(rec, brand, meta) {
     graficos: [
       { id: 'comp', titulo: 'Quem escolheu cada causa', desenhar: graficoComposicao(b, brand, cs) },
       { id: 'mat', titulo: 'Onde atuar primeiro (menções vs NPS)', desenhar: graficoMatriz(b, brand, cs, meta) },
-      { id: 'tab', titulo: 'Tabela de causas', desenhar: tabelaPptx(b, brand, cs, meta) },
+      { id: 'tab', titulo: 'Tabela de causas', desenhar: driversDe(rec.data) ? tabelaPptx(b, brand, driversDe(rec.data).flatMap(d => cs.filter(c => c.driver === d).map(c => ({ ...c, nome: c.causa }))), meta, true) : tabelaPptx(b, brand, cs, meta) },
     ],
   };
 }

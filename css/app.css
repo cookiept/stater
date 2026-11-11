@@ -834,3 +834,11 @@ body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: n
 [data-modo][hidden] { display: none !important; }
 .modo-sw { margin-left: 14px; }
 .ordenar { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-tertiary); }
+
+/* Causa Raiz com vários drivers: separador por driver, coluna Driver e total de clientes no cabeçalho */
+.tbl th .th-sub { display: block; font-weight: 400; font-size: 12px; color: #d6d6d6; margin-top: 2px; }
+.drv-tag { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.drv-tag i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.tbl tr.grp-drv td { background: var(--surface-2, #f4f5f8); font-weight: 600; color: #1a1a1a; padding-top: 9px; padding-bottom: 9px; border-top: 2px solid #e2e4ea; }
+.tbl tr.grp-drv .grp-n { font-weight: 400; color: var(--text-secondary, #5f5f5f); margin-left: 12px; font-size: 13px; }
+#tbl-causas td:first-child { min-width: 240px; }
