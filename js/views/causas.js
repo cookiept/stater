@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1419';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1419';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1419';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1419';
-import { icon } from '../icons.js?v=20261111-1419';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1427';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1427';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1427';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1427';
+import { icon } from '../icons.js?v=20261111-1427';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -101,7 +101,6 @@ export function html(rec, meta, depoisKpis = '') {
       <div class="tbl-wrap"><table class="tbl" id="tbl-causas">
         <thead><tr>
           <th scope="col"><button data-sort="nome">Causa ${icon('sort')}</button></th>
-          ${ds ? `<th scope="col"><button data-sort="driver">Driver ${icon('sort')}</button></th>` : ''}
           <th scope="col" class="r"><button data-sort="nps">NPS ${icon('sort')}</button></th>
           <th scope="col" class="r"><button data-sort="total">Menções ${icon('sort')}</button></th>
           <th scope="col">Detratores · Neutros · Promotores</th>
@@ -212,13 +211,12 @@ export function mount(rec, brand, meta) {
     if (!ds) { tbody.innerHTML = linhas(lista, meta, dz.pior); }
     else {
       // Separador por driver: uma linha com o nome do driver e, por baixo, as suas causas
-      const extra = c => `<td><span class="drv-tag"><i style="background:${corDriver(ds, c.driver)}"></i>${esc(c.driver)}</span></td>`;
       tbody.innerHTML = ds.map(d => {
         const do_ = lista.filter(c => c.driver === d);
         if (!do_.length) return '';
         const m = do_.reduce((a, c) => a + c.total, 0);
-        return `<tr class="grp-drv"><td colspan="7"><span class="drv-tag"><i style="background:${corDriver(ds, d)}"></i>${esc(d)}</span><span class="grp-n">${fmt(do_.filter(c => !c.zero).length)}/${fmt(do_.length)} causas com menções · ${fmt(m)} menções</span></td></tr>` + linhas(do_, meta, dz.pior, extra);
-      }).join('') || `<tr><td colspan="7" class="muted">Nenhuma causa com esse nome.</td></tr>`;
+        return `<tr class="grp-drv"><td colspan="6"><span class="drv-tag"><i style="background:${corDriver(ds, d)}"></i>${esc(d)}</span><span class="grp-n">${fmt(do_.filter(c => !c.zero).length)}/${fmt(do_.length)} causas com menções · ${fmt(m)} menções</span></td></tr>` + linhas(do_, meta, dz.pior);
+      }).join('') || `<tr><td colspan="6" class="muted">Nenhuma causa com esse nome.</td></tr>`;
     }
     document.querySelectorAll('#tbl-causas th').forEach(th => th.removeAttribute('aria-sort'));
     document.querySelector(`#tbl-causas [data-sort="${chave}"]`)?.closest('th').setAttribute('aria-sort', dir > 0 ? 'ascending' : 'descending');
