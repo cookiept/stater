@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1427';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1427';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1427';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1427';
-import { icon } from '../icons.js?v=20261111-1427';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1436';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1436';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1436';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1436';
+import { icon } from '../icons.js?v=20261111-1436';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -151,24 +151,29 @@ export function mount(rec, brand, meta) {
   const g = npsGlobal(rec.data);
   const b = base(brand);
   const nomes = cs.map(c => c.nome);
-  const altura = Math.max(220, cs.length * 54 + 60);
   const ds = driversDe(rec.data);
+  // Com vários drivers, o gráfico separa as causas por driver: uma linha de título por driver e as suas causas por baixo
+  const lin = ds ? ds.flatMap((d, i) => {
+    const l = cs.filter(c => c.driver === d).sort((a, b2) => (a.zero - b2.zero) || (b2.total - a.total));
+    return l.length ? [{ hdr: d, i, n: l.filter(c => !c.zero).length, of: l.length, m: l.reduce((a, c) => a + c.total, 0) }, ...l] : [];
+  }) : cs;
+  const altura = Math.max(220, lin.length * 54 + 60);
 
   // Quem escolheu cada causa: barras 100% (detratores, neutros, promotores) com cantos redondos
-  const pct = [cs.map(c => c.pctD), cs.map(c => c.pctN), cs.map(c => c.pctP)];
-  const rotY = cs.map(c => `{n|${c.nome.length > 30 ? c.nome.slice(0, 29) + '…' : c.nome}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`}}`);
+  const pct = [lin.map(c => c.pctD), lin.map(c => c.pctN), lin.map(c => c.pctP)];
+  const rotY = lin.map(c => c.hdr ? `{d${c.i % CORES_DRIVER.length}|●} {h|${c.hdr}}\n{m|${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções}` : `{n|${(c.causa ?? c.nome).length > 30 ? (c.causa ?? c.nome).slice(0, 29) + '…' : (c.causa ?? c.nome)}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`}}`);
   const cor3 = [CORES.det, CORES.neu, CORES.pro];
   const nomes3 = ['Detratores', 'Neutros', 'Promotores'];
   desenhar(document.getElementById('ch-comp'), junta(b, {
     grid: { left: 8, right: 16, top: 6, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } },
-      formatter: p => { const c = cs[p[0].dataIndex]; return `<b>${esc(c.nome)}</b><br>` + (c.zero ? '0 menções' : p.map(x => `${x.marker}${x.seriesName}: ${fmt([c.d, c.n, c.p][x.seriesIndex])} (${fmt(x.value, 1)}%)`).join('<br>')); } },
+      formatter: p => { const c = lin[p[0].dataIndex]; if (c.hdr) return `<b>${esc(c.hdr)}</b><br>${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções`; return `<b>${esc(c.causa ?? c.nome)}</b>${c.driver ? ` · ${esc(c.driver)}` : ''}<br>` + (c.zero ? '0 menções' : p.map(x => `${x.marker}${x.seriesName}: ${fmt([c.d, c.n, c.p][x.seriesIndex])} (${fmt(x.value, 1)}%)`).join('<br>')); } },
     xAxis: { type: 'value', max: 100, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => `${v}%` } },
     yAxis: { type: 'category', inverse: true, data: rotY, ...EIXO_CAT,
-      axisLabel: { margin: 12, align: 'right', rich: { n: { fontSize: 12, color: '#1a1a1a', lineHeight: 16 }, m: { fontSize: 12, color: '#6b6b6b', lineHeight: 15 } } } },
+      axisLabel: { margin: 12, align: 'right', rich: { n: { fontSize: 12, color: '#1a1a1a', lineHeight: 16 }, h: { fontSize: 13, fontWeight: 700, color: '#1a1a1a', lineHeight: 18 }, ...Object.fromEntries(CORES_DRIVER.map((c, i) => [`d${i}`, { color: c, fontSize: 13 }])), m: { fontSize: 12, color: '#6b6b6b', lineHeight: 15 } } } },
     series: [0, 1, 2].map(k => ({
       name: nomes3[k], type: 'bar', stack: 't', barWidth: '58%',
-      data: pct[k].map((v, i) => (cs[i].zero ? null : v)),
+      data: pct[k].map((v, i) => (lin[i].hdr || lin[i].zero ? null : v)),
       itemStyle: { color: comBrilho(cor3[k], true), borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
       label: { show: true, color: k === 1 ? '#1a1a1a' : '#fff', fontSize: 12, fontWeight: 600, formatter: p => (p.value >= 8 ? `${fmt(p.value)}%` : '') },
       emphasis: { focus: 'series' }, blur: { itemStyle: { opacity: 0.35 } },
