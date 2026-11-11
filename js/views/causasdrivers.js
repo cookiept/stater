@@ -1,10 +1,10 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261111-1436';
-import { icon } from '../icons.js?v=20261111-1436';
-import { formatarPeriodo } from '../excel.js?v=20261111-1436';
-import * as C from './causas.js?v=20261111-1436';
+import { esc } from '../ui.js?v=20261111-1439';
+import { icon } from '../icons.js?v=20261111-1439';
+import { formatarPeriodo } from '../excel.js?v=20261111-1439';
+import * as C from './causas.js?v=20261111-1439';
 
 const TODOS = '*';
 export const multi = true;
@@ -33,11 +33,13 @@ export function preparar(rec) {
   const um = sel === TODOS ? null : fs[nomes.indexOf(sel)];
   // A amostra é a de quem respondeu ao NPS: igual em todos os Excels com os mesmos filtros; fica a maior
   const amostra = fs.map(f => f.amostraGrupo).filter(Boolean).sort((a, b) => (b.d + b.n + b.p) - (a.d + a.n + a.p))[0] || null;
-  const data = um ? { ...um } : {
+  // Um driver escolhido (de vários): as causas guardam o driver, para a tabela e o gráfico mostrarem o separador
+  const comDriver = f => [...f.causas, ...(f.semRespostas || []).map(n => ({ nome: n, d: 0, n: 0, p: 0, total: 0 }))].map(c => ({ ...c, causa: c.nome, driver: f.driver }));
+  const data = um ? (fs.length > 1 ? { ...um, causas: comDriver(um), semRespostas: [], drivers: [um.driver], todosDrivers: nomes } : { ...um }) : {
     // Cada causa guarda o seu driver (causa = nome sem o driver, para a tabela); as de 0 menções também
     causas: fs.flatMap(f => [...f.causas, ...(f.semRespostas || []).map(n => ({ nome: n, d: 0, n: 0, p: 0, total: 0 }))]
       .map(c => ({ ...c, nome: `${c.nome} · ${f.driver}`, causa: c.nome, driver: f.driver }))),
-    semRespostas: [], drivers: fs.map(f => f.driver),
+    semRespostas: [], drivers: nomes, todosDrivers: nomes,
     amostraGrupo: amostra, multi: true, periodo: fs[0].periodo, pergunta: fs[0].pergunta,
     filtros: [...fs[0].filtros, { campo: 'Drivers', valor: `todos (${fs.length})` }],
   };

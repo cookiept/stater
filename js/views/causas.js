@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1436';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1436';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1436';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1436';
-import { icon } from '../icons.js?v=20261111-1436';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261111-1439';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261111-1439';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261111-1439';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261111-1439';
+import { icon } from '../icons.js?v=20261111-1439';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -20,9 +20,11 @@ export const todasCausas = data => comImpacto(enriquecerCausas(comZeros(data.cau
 const IMPNPS_TIP = g => `Quanto esta causa puxa o NPS da marca${g ? ` (${fmt(g.nps)})` : ''} para cima (+) ou para baixo (−), em pontos: % das respostas × (NPS da causa − NPS da marca). Ex.: 6% das respostas com NPS 56 numa marca com NPS 41 dá 0,06 × (56 − 41) = +0,9.`;
 const um = v => (v > 0 ? '+' : '') + fmt(v, 1);
 // Causa Raiz com vários drivers ("Todos"): cada causa tem o seu driver, com uma cor fixa
-const driversDe = data => (data.drivers?.length > 1 ? data.drivers : null);
+// drivers: os que se veem (todos, ou só o escolhido); todosDrivers fixa a cor de cada um
+const driversDe = data => (data.drivers?.length ? data.drivers : null);
 export const CORES_DRIVER = ['#1f4bff', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b', '#0d9488', '#a16207', '#4f46e5', '#db2777'];
 const corDriver = (ds, d) => CORES_DRIVER[Math.max(0, ds.indexOf(d)) % CORES_DRIVER.length];
+const paleta = (data, ds) => data.todosDrivers || ds;
 
 export function chips(rec) {
   const g = npsGlobal(rec.data);
@@ -68,7 +70,7 @@ export function html(rec, meta, depoisKpis = '') {
     <div class="kpi${hero ? ' hero' : ''}"><span class="kl">${rot} ${k}</span><span class="kv num">${val}</span><span class="kd">${det}</span></div>`;
   const abaixo = causasFiaveis(cs).filter(c => c.nps < meta);
   const dz = destaques(cs);
-  const ds = driversDe(rec.data);
+  const ds = driversDe(rec.data)?.length > 1 ? driversDe(rec.data) : null;
   return `
     <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       ${g ? kpi('NPS de quem respondeu', fmt(g.nps), `${fmt(g.total)} pessoas · objetivo ${meta}`, info('NPS de quem respondeu', `NPS de todas as ${fmt(g.total)} pessoas que responderam a esta pergunta: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Vem do tamanho de cada grupo (Sample Size) no Excel, por isso conta pessoas e não menções. O objetivo da marca é ${meta}: ${g.nps >= meta ? `está ${fmt(g.nps - meta)} pontos acima` : `está ${fmt(meta - g.nps)} pontos abaixo`}.`), true) : ''}
@@ -152,16 +154,18 @@ export function mount(rec, brand, meta) {
   const b = base(brand);
   const nomes = cs.map(c => c.nome);
   const ds = driversDe(rec.data);
+  const pal = paleta(rec.data, ds || []);
+  const dsCor = ds?.length > 1 ? ds : null;
   // Com vários drivers, o gráfico separa as causas por driver: uma linha de título por driver e as suas causas por baixo
   const lin = ds ? ds.flatMap((d, i) => {
     const l = cs.filter(c => c.driver === d).sort((a, b2) => (a.zero - b2.zero) || (b2.total - a.total));
-    return l.length ? [{ hdr: d, i, n: l.filter(c => !c.zero).length, of: l.length, m: l.reduce((a, c) => a + c.total, 0) }, ...l] : [];
+    return l.length ? [{ hdr: d, i: pal.indexOf(d), n: l.filter(c => !c.zero).length, of: l.length, m: l.reduce((a, c) => a + c.total, 0) }, ...l] : [];
   }) : cs;
   const altura = Math.max(220, lin.length * 54 + 60);
 
   // Quem escolheu cada causa: barras 100% (detratores, neutros, promotores) com cantos redondos
   const pct = [lin.map(c => c.pctD), lin.map(c => c.pctN), lin.map(c => c.pctP)];
-  const rotY = lin.map(c => c.hdr ? `{d${c.i % CORES_DRIVER.length}|●} {h|${c.hdr}}\n{m|${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções}` : `{n|${(c.causa ?? c.nome).length > 30 ? (c.causa ?? c.nome).slice(0, 29) + '…' : (c.causa ?? c.nome)}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`}}`);
+  const rotY = lin.map(c => c.hdr ? `{d${Math.max(0, c.i) % CORES_DRIVER.length}|●} {h|${c.hdr}}\n{m|${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções}` : `{n|${(c.causa ?? c.nome).length > 30 ? (c.causa ?? c.nome).slice(0, 29) + '…' : (c.causa ?? c.nome)}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`}}`);
   const cor3 = [CORES.det, CORES.neu, CORES.pro];
   const nomes3 = ['Detratores', 'Neutros', 'Promotores'];
   desenhar(document.getElementById('ch-comp'), junta(b, {
@@ -184,13 +188,13 @@ export function mount(rec, brand, meta) {
   const maxX = Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15);
   const minY = Math.min(-20, Math.floor(Math.min(...comM.map(c => c.nps)) / 10) * 10 - 10);
   desenhar(document.getElementById('ch-mat'), junta(b, {
-    grid: { left: 8, right: 24, top: ds ? 58 : 34, bottom: 30, containLabel: true },
+    grid: { left: 8, right: 24, top: dsCor ? 58 : 34, bottom: 30, containLabel: true },
     tooltip: { trigger: 'item', formatter: p => { const c = p.data.causa; return `<b>${esc(c.causa ?? c.nome)}</b>${c.driver ? `<br>Driver: ${esc(c.driver)}` : ''}<br>NPS ${fmt(c.nps)} · ${fmt(c.total)} menções`; } },
     xAxis: { type: 'value', min: 0, max: maxX, splitNumber: 5, ...EIXO_VAL, axisLabel: { ...EIXO_VAL.axisLabel, formatter: v => fmt(v) },
       name: 'Menções', nameLocation: 'middle', nameGap: 28, nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
     yAxis: { type: 'value', min: minY, max: 100, ...EIXO_VAL, name: 'NPS', nameTextStyle: { color: '#5f5f5f', fontSize: 12 } },
-    ...(ds ? { legend: { top: 0, left: 0, icon: 'circle', itemWidth: 10, itemHeight: 10, textStyle: { color: '#494949', fontSize: 12 } } } : {}),
-    series: (ds ? ds.map(d => ({ nome: d, lista: comM.filter(c => c.driver === d), cor: corDriver(ds, d) })) : [{ nome: 'Causas', lista: comM }]).map((sr, k) => ({
+    ...(dsCor ? { legend: { top: 0, left: 0, icon: 'circle', itemWidth: 10, itemHeight: 10, textStyle: { color: '#494949', fontSize: 12 } } } : {}),
+    series: (dsCor ? dsCor.map(d => ({ nome: d, lista: comM.filter(c => c.driver === d), cor: corDriver(pal, d) })) : [{ nome: 'Causas', lista: comM }]).map((sr, k) => ({
       name: sr.nome, type: 'scatter', symbolSize: 18,
       data: sr.lista.map(c => ({ value: [c.total, c.nps], causa: c, itemStyle: { color: comBrilho(sr.cor || (c.nps < meta ? CORES.det : CORES.pro)), borderColor: '#fff', borderWidth: 3, shadowBlur: 8, shadowColor: 'rgba(0,0,0,.18)' } })),
       ...(sr.cor ? { itemStyle: { color: sr.cor } } : {}),
@@ -220,7 +224,7 @@ export function mount(rec, brand, meta) {
         const do_ = lista.filter(c => c.driver === d);
         if (!do_.length) return '';
         const m = do_.reduce((a, c) => a + c.total, 0);
-        return `<tr class="grp-drv"><td colspan="6"><span class="drv-tag"><i style="background:${corDriver(ds, d)}"></i>${esc(d)}</span><span class="grp-n">${fmt(do_.filter(c => !c.zero).length)}/${fmt(do_.length)} causas com menções · ${fmt(m)} menções</span></td></tr>` + linhas(do_, meta, dz.pior);
+        return `<tr class="grp-drv"><td colspan="6"><span class="drv-tag"><i style="background:${corDriver(pal, d)}"></i>${esc(d)}</span><span class="grp-n">${fmt(do_.filter(c => !c.zero).length)}/${fmt(do_.length)} causas com menções · ${fmt(m)} menções</span></td></tr>` + linhas(do_, meta, dz.pior);
       }).join('') || `<tr><td colspan="6" class="muted">Nenhuma causa com esse nome.</td></tr>`;
     }
     document.querySelectorAll('#tbl-causas th').forEach(th => th.removeAttribute('aria-sort'));
