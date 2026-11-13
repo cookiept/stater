@@ -1,10 +1,10 @@
 // Tipo "CES": distribuição das respostas numa escala de concordância (1 a 7, Describe do Stats iQ).
 // 1 a 3 = discordam, 4 e 5 = ao meio, 6 e 7 = concordam (a regra do Stater v10 olha para 6 e 7).
-import { CORES, fmt } from '../stats.js?v=20261113-1215';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261113-1215';
-import { esc } from '../ui.js?v=20261113-1215';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261113-1215';
-import { kpi, kpis, cartao } from './comum.js?v=20261113-1215';
+import { CORES, fmt } from '../stats.js?v=20261113-1219';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261113-1219';
+import { esc } from '../ui.js?v=20261113-1219';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261113-1219';
+import { kpi, kpis, cartao } from './comum.js?v=20261113-1219';
 
 function contas(data) {
   const c = data.contagens, min = data.min;
@@ -24,10 +24,10 @@ export function resumo(rec) {
   const k = contas(rec.data), d = rec.data;
   return {
     tom: k.pctAlto >= 60 ? 'good' : 'bad',
-    texto: `Em <strong>${fmt(k.total)}</strong> respostas, o CES médio foi <strong>${fmt(k.media, 1)}</strong> em ${d.max}. Do total de respostas ao CES, <strong>${fmt(k.pctAlto)}%</strong> deram ${d.max - 1} ou ${d.max} (concordam) e <strong>${fmt(k.pctBaixo)}%</strong> deram ${d.min} a ${d.min + 2} (discordam).`,
+    texto: `Em <strong>${fmt(k.total)}</strong> respostas, o CES médio foi <strong>${fmt(k.media, 1)}</strong> em ${d.max}. Do total de respostas, <strong>${fmt(k.pctAlto)}%</strong> deram ${d.max - 1} ou ${d.max} (concordam) e <strong>${fmt(k.pctBaixo)}%</strong> deram ${d.min} a ${d.min + 2} (discordam).`,
     factos: [
-      { valor: `${fmt(k.pctAlto)}%`, rot: `do total de respostas ao CES deram ${d.max - 1} ou ${d.max}`, tom: 'good', tip: `${fmt(k.alto)}/${fmt(k.total)} respostas deram ${d.max - 1} ou ${d.max} (concordam): ${fmt(k.pctAlto, 1)}%.` },
-      { valor: `${fmt(k.pctBaixo)}%`, rot: `do total de respostas ao CES deram ${d.min} a ${d.min + 2}`, tom: 'bad', tip: `${fmt(k.baixo)}/${fmt(k.total)} respostas deram ${d.min}, ${d.min + 1} ou ${d.min + 2} (discordam): ${fmt(k.pctBaixo, 1)}%.` },
+      { valor: `${fmt(k.pctAlto)}%`, rot: `do total de respostas deram ${d.max - 1} ou ${d.max}`, tom: 'good', tip: `${fmt(k.alto)}/${fmt(k.total)} respostas deram ${d.max - 1} ou ${d.max} (concordam): ${fmt(k.pctAlto, 1)}%.` },
+      { valor: `${fmt(k.pctBaixo)}%`, rot: `do total de respostas deram ${d.min} a ${d.min + 2}`, tom: 'bad', tip: `${fmt(k.baixo)}/${fmt(k.total)} respostas deram ${d.min}, ${d.min + 1} ou ${d.min + 2} (discordam): ${fmt(k.pctBaixo, 1)}%.` },
     ],
   };
 }
@@ -39,8 +39,8 @@ export function html(rec) {
     ${kpis([
       kpi('CES médio', fmt(k.media, 1), `de ${d.min} a ${d.max} · mediana ${k.mediana}`, `Média de todas as ${fmt(k.total)} respostas, numa escala de ${d.min} (discordo totalmente) a ${d.max} (concordo totalmente): ${fmt(k.media, 2)}. A mediana é ${k.mediana}: metade das pessoas deu ${k.mediana} ou menos.${perg}`, true),
       kpi('Respostas', fmt(k.total), `valores de ${d.min} a ${d.max}`, `Pessoas que responderam à pergunta do CES no período do ficheiro.${perg}`),
-      kpi(`Deram ${d.max - 1} ou ${d.max}`, `${fmt(k.pctAlto)}%`, `do total de respostas ao CES (${fmt(k.alto)}/${fmt(k.total)})`, `${fmt(k.alto)}/${fmt(k.total)} respostas deram ${d.max - 1} ou ${d.max}: ${fmt(k.pctAlto, 1)}%. É o indicador do Stater v10.`),
-      kpi(`Deram ${d.min} a ${d.min + 2}`, `${fmt(k.pctBaixo)}%`, `do total de respostas ao CES (${fmt(k.baixo)}/${fmt(k.total)})`, `${fmt(k.baixo)}/${fmt(k.total)} respostas deram ${d.min} a ${d.min + 2}: ${fmt(k.pctBaixo, 1)}%.`),
+      kpi(`Deram ${d.max - 1} ou ${d.max}`, `${fmt(k.pctAlto)}%`, `do total de respostas (${fmt(k.alto)}/${fmt(k.total)})`, `${fmt(k.alto)}/${fmt(k.total)} respostas deram ${d.max - 1} ou ${d.max}: ${fmt(k.pctAlto, 1)}%. É o indicador do Stater v10.`),
+      kpi(`Deram ${d.min} a ${d.min + 2}`, `${fmt(k.pctBaixo)}%`, `do total de respostas (${fmt(k.baixo)}/${fmt(k.total)})`, `${fmt(k.baixo)}/${fmt(k.total)} respostas deram ${d.min} a ${d.min + 2}: ${fmt(k.pctBaixo, 1)}%.`),
     ])}
     ${cartao('dist', 'Respostas por valor', `Quantas pessoas deram cada valor, de ${d.min} (discordo totalmente) a ${d.max} (concordo totalmente). A percentagem por cima é em relação a todas as ${fmt(k.total)} respostas. Vermelho: ${d.min} a ${d.min + 2}. Cinzento: ${d.min + 3} e ${d.min + 4}. Verde: ${d.max - 1} e ${d.max}. A barra de baixo junta os três grupos.`, {
       legenda: `<span><i style="background:var(--detractor)"></i>Discordam (${d.min}–${d.min + 2})</span><span><i style="background:var(--passive)"></i>Ao meio (${d.min + 3}–${d.min + 4})</span><span><i style="background:var(--promoter)"></i>Concordam (${d.max - 1}–${d.max})</span>`,
@@ -69,8 +69,8 @@ export function exportar(rec, brand) {
     kpis: [
       { rot: 'CES médio', val: fmt(k.media, 1), det: `de ${d.min} a ${d.max}` },
       { rot: 'Respostas', val: fmt(k.total), det: '' },
-      { rot: `Deram ${d.max - 1} ou ${d.max}`, val: `${fmt(k.pctAlto)}%`, det: `do total de respostas ao CES (${fmt(k.alto)}/${fmt(k.total)})` },
-      { rot: `Deram ${d.min} a ${d.min + 2}`, val: `${fmt(k.pctBaixo)}%`, det: `do total de respostas ao CES (${fmt(k.baixo)}/${fmt(k.total)})` },
+      { rot: `Deram ${d.max - 1} ou ${d.max}`, val: `${fmt(k.pctAlto)}%`, det: `do total de respostas (${fmt(k.alto)}/${fmt(k.total)})` },
+      { rot: `Deram ${d.min} a ${d.min + 2}`, val: `${fmt(k.pctBaixo)}%`, det: `do total de respostas (${fmt(k.baixo)}/${fmt(k.total)})` },
     ],
     resumo: [textoDe(resumo(rec).texto)],
     filtros: d.filtros,
