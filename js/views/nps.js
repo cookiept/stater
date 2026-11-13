@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261111-1439';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261111-1439';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261111-1439';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261111-1439';
-import { icon } from '../icons.js?v=20261111-1439';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261113-1213';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261113-1213';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261113-1213';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261113-1213';
+import { icon } from '../icons.js?v=20261113-1213';
 
 // ---------- Período e comparação (só com o Excel de respostas, que traz a data de cada resposta) ----------
 const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
