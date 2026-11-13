@@ -1,10 +1,10 @@
 // Tipo "CES": distribuição das respostas numa escala de concordância (1 a 7, Describe do Stats iQ).
 // 1 a 3 = discordam, 4 e 5 = ao meio, 6 e 7 = concordam (a regra do Stater v10 olha para 6 e 7).
-import { CORES, fmt } from '../stats.js?v=20261113-1219';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261113-1219';
-import { esc } from '../ui.js?v=20261113-1219';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261113-1219';
-import { kpi, kpis, cartao } from './comum.js?v=20261113-1219';
+import { CORES, fmt } from '../stats.js?v=20261113-1557';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261113-1557';
+import { esc } from '../ui.js?v=20261113-1557';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261113-1557';
+import { kpi, kpis, cartao } from './comum.js?v=20261113-1557';
 
 function contas(data) {
   const c = data.contagens, min = data.min;
@@ -25,10 +25,6 @@ export function resumo(rec) {
   return {
     tom: k.pctAlto >= 60 ? 'good' : 'bad',
     texto: `Em <strong>${fmt(k.total)}</strong> respostas, o CES médio foi <strong>${fmt(k.media, 1)}</strong> em ${d.max}. Do total de respostas, <strong>${fmt(k.pctAlto)}%</strong> deram ${d.max - 1} ou ${d.max} (concordam) e <strong>${fmt(k.pctBaixo)}%</strong> deram ${d.min} a ${d.min + 2} (discordam).`,
-    factos: [
-      { valor: `${fmt(k.pctAlto)}%`, rot: `do total de respostas deram ${d.max - 1} ou ${d.max}`, tom: 'good', tip: `${fmt(k.alto)}/${fmt(k.total)} respostas deram ${d.max - 1} ou ${d.max} (concordam): ${fmt(k.pctAlto, 1)}%.` },
-      { valor: `${fmt(k.pctBaixo)}%`, rot: `do total de respostas deram ${d.min} a ${d.min + 2}`, tom: 'bad', tip: `${fmt(k.baixo)}/${fmt(k.total)} respostas deram ${d.min}, ${d.min + 1} ou ${d.min + 2} (discordam): ${fmt(k.pctBaixo, 1)}%.` },
-    ],
   };
 }
 

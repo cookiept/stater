@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261113-1219';
-import { esc, info } from './ui.js?v=20261113-1219';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261113-1219';
-import { fmt } from './stats.js?v=20261113-1219';
-import { store, meta, ordem } from './store.js?v=20261113-1219';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261113-1219';
-import { tileVars } from './layout.js?v=20261113-1219';
+import { icon } from './icons.js?v=20261113-1557';
+import { esc, info } from './ui.js?v=20261113-1557';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261113-1557';
+import { fmt } from './stats.js?v=20261113-1557';
+import { store, meta, ordem } from './store.js?v=20261113-1557';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261113-1557';
+import { tileVars } from './layout.js?v=20261113-1557';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -94,7 +94,7 @@ function resumoHtml(r) {
   return `<div class="resumo">
     <h3 class="sec-title">Resumo</h3>
     ${blocos.map(b => `<div class="rs-bloco ${b.tom || ''}">${b.titulo ? `<b class="rs-t">${b.titulo}</b>` : ''}<p>${b.texto}</p></div>`).join('')}
-    ${r.factos ? `<div class="rs-factos">${r.factos.map(f => `<div class="rs-f ${f.tom || ''}">${f.tip ? `<span class="rs-i">${info(f.rot, f.tip)}</span>` : ''}<b class="num">${f.valor}</b><span>${f.rot}</span></div>`).join('')}</div>` : ''}
+    ${r.factos?.length ? `<div class="rs-factos">${r.factos.map(f => `<div class="rs-f ${f.tom || ''}">${f.tip ? `<span class="rs-i">${info(f.rot, f.tip)}</span>` : ''}<b class="num">${f.valor}</b><span>${f.rot}</span></div>`).join('')}</div>` : ''}
   </div>`;
 }
 
