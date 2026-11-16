@@ -6,17 +6,17 @@
 //   2. a vista em js/views/ (chips, resumo, html, mount, exportar, importar, e lado/multi/juntar/preparar se precisar);
 //   3. uma linha aqui;
 //   4. `live: true` (e `tipo`, se o id da tab for outro) nas tabs de brands.js.
-import { parseNps, parseCausas, parseGrupos, parseTextiq, parseCes, parseCsatGrupos, parseRegressao, parseBreakdown } from './excel.js?v=20261116-1008';
-import * as vNps from './views/nps.js?v=20261116-1008';
-import * as vCausas from './views/causas.js?v=20261116-1008';
-import * as vMolho from './views/molho.js?v=20261116-1008';
-import * as vGrupos from './views/grupos.js?v=20261116-1008';
-import * as vTextiq from './views/textiq.js?v=20261116-1008';
-import * as vCes from './views/ces.js?v=20261116-1008';
-import * as vCsat from './views/csat.js?v=20261116-1008';
-import * as vRegressao from './views/regressao.js?v=20261116-1008';
-import * as vBreakdown from './views/breakdown.js?v=20261116-1008';
-import * as vCausasDrivers from './views/causasdrivers.js?v=20261116-1008';
+import { parseNps, parseCausas, parseGrupos, parseTextiq, parseCes, parseCsatGrupos, parseRegressao, parseBreakdown } from './excel.js?v=20261116-1010';
+import * as vNps from './views/nps.js?v=20261116-1010';
+import * as vCausas from './views/causas.js?v=20261116-1010';
+import * as vMolho from './views/molho.js?v=20261116-1010';
+import * as vGrupos from './views/grupos.js?v=20261116-1010';
+import * as vTextiq from './views/textiq.js?v=20261116-1010';
+import * as vCes from './views/ces.js?v=20261116-1010';
+import * as vCsat from './views/csat.js?v=20261116-1010';
+import * as vRegressao from './views/regressao.js?v=20261116-1010';
+import * as vBreakdown from './views/breakdown.js?v=20261116-1010';
+import * as vCausasDrivers from './views/causasdrivers.js?v=20261116-1010';
 
 export const ANALISES = {
   nps: { parse: parseNps, view: vNps },
