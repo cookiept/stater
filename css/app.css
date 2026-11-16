@@ -804,7 +804,7 @@ dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
 .tbl.cruz tr.is-sel td { background: #f1f4ff !important; }
 
 /* Logótipo com o nome completo (S de duas linhas + "tater" em IBM Plex Sans) */
-.sb-logo-nome { height: 40px; width: auto; display: block; flex: none; }
+.sb-logo-nome { height: 30px; width: auto; display: block; flex: none; }
 
 /* Overview: seta (para cima no objetivo ou acima, para baixo abaixo) em vez do ponto */
 .badge.seta::before { display: none; }

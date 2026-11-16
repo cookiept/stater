@@ -1,10 +1,10 @@
 // Menu lateral e barra de topo
-import { BRANDS, GROUP } from './brands.js?v=20261116-1010';
-import { icon } from './icons.js?v=20261116-1010';
-import { logo } from './logos.js?v=20261116-1010';
-import { esc } from './ui.js?v=20261116-1010';
-import { formatarData } from './excel.js?v=20261116-1010';
-import { store, abertas } from './store.js?v=20261116-1010';
+import { BRANDS, GROUP } from './brands.js?v=20261116-1041';
+import { icon } from './icons.js?v=20261116-1041';
+import { logo } from './logos.js?v=20261116-1041';
+import { esc } from './ui.js?v=20261116-1041';
+import { formatarData } from './excel.js?v=20261116-1041';
+import { store, abertas } from './store.js?v=20261116-1041';
 
 export function tileVars(b) {
   return `--tile-bg:${b.colors.main};--tile-on:${b.colors.on};--tile-soft:${b.colors.lightest};--tile-ink:${b.colors.darkest}`;
@@ -24,7 +24,7 @@ export function sidebar({ brand, tab }) {
       </div>${sub}`;
   }).join('');
   return `
-    <div class="sb-head"><img class="sb-logo-nome" src="assets/stater-logo.svg?v=1" alt="Stater" width="117" height="40"></div>
+    <div class="sb-head"><img class="sb-logo-nome" src="assets/stater-logo.svg?v=2" alt="Stater" width="148" height="30"></div>
     <div>
       <div class="sb-label">Marcas</div>
       <nav class="sb-nav" aria-label="Marcas">
