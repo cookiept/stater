@@ -1,9 +1,9 @@
 // Tab "NPS por Causa Raiz": Relate de Group NPS com a causa raiz (resposta múltipla).
-import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261116-1001';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261116-1001';
-import { info, esc, btnPptx, faixa } from '../ui.js?v=20261116-1001';
-import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261116-1001';
-import { icon } from '../icons.js?v=20261116-1001';
+import { enriquecerCausas, comZeros, npsDe, fmt, sinal, destaques, causasFiaveis, CORES, LIMITES } from '../stats.js?v=20261116-1004';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL, ETIQ_META } from '../charts.js?v=20261116-1004';
+import { info, esc, btnPptx, faixa } from '../ui.js?v=20261116-1004';
+import { baseGrafico, hex, textoDe, TPL } from '../export.js?v=20261116-1004';
+import { icon } from '../icons.js?v=20261116-1004';
 
 const LIM = LIMITES.amostraPequena;
 
@@ -168,7 +168,7 @@ export function mount(rec, brand, meta) {
   const rotY = lin.map(c => c.hdr ? `{d${Math.max(0, c.i) % CORES_DRIVER.length}|●} {h|${c.hdr}}\n{m|${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções}` : `{n|${(c.causa ?? c.nome).length > 30 ? (c.causa ?? c.nome).slice(0, 29) + '…' : (c.causa ?? c.nome)}}\n{m|${c.zero ? '0 menções' : `${fmt(c.total)} menções · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`}}`);
   const cor3 = [CORES.det, CORES.neu, CORES.pro];
   const nomes3 = ['Detratores', 'Neutros', 'Promotores'];
-  desenhar(document.getElementById('ch-comp'), junta(b, {
+  const gComp = desenhar(document.getElementById('ch-comp'), junta(b, {
     grid: { left: 8, right: 16, top: 6, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.04)' } },
       formatter: p => { const c = lin[p[0].dataIndex]; if (c.hdr) return `<b>${esc(c.hdr)}</b><br>${fmt(c.n)}/${fmt(c.of)} causas com menções · ${fmt(c.m)} menções`; return `<b>${esc(c.causa ?? c.nome)}</b>${c.driver ? ` · ${esc(c.driver)}` : ''}<br>` + (c.zero ? '0 menções' : p.map(x => `${x.marker}${x.seriesName}: ${fmt([c.d, c.n, c.p][x.seriesIndex])} (${fmt(x.value, 1)}%)`).join('<br>')); } },
@@ -183,6 +183,20 @@ export function mount(rec, brand, meta) {
       emphasis: { focus: 'series' }, blur: { itemStyle: { opacity: 0.35 } },
     })),
   }), altura);
+  // Faixa cinzenta por trás do título de cada driver (como na tabela), a toda a largura do cartão
+  if (ds && gComp) {
+    let ultimo = '';
+    const faixas = () => {
+      const w = gComp.getWidth(), y0 = gComp.convertToPixel({ yAxisIndex: 0 }, 0), y1 = gComp.convertToPixel({ yAxisIndex: 0 }, 1);
+      if (y0 == null || y1 == null) return;
+      const h = Math.abs(y1 - y0), chave = `${w}|${h}`;
+      if (chave === ultimo) return;
+      ultimo = chave;
+      gComp.setOption({ graphic: lin.map((c, i) => (c.hdr ? { type: 'rect', silent: true, z: -10, shape: { x: 0, y: gComp.convertToPixel({ yAxisIndex: 0 }, i) - h / 2, width: w, height: h, r: 6 }, style: { fill: '#f4f5f8' } } : null)).filter(Boolean) }, { replaceMerge: ['graphic'] });
+    };
+    gComp.on('finished', faixas);
+    faixas();
+  }
 
   // Onde atuar primeiro: bolhas por causa, linha da meta e do NPS geral
   const maxX = Math.ceil(Math.max(...comM.map(c => c.total)) * 1.15);
