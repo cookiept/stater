@@ -1,9 +1,9 @@
-// Tipo "Regressão": quanto cada CSAT pesa na recomendação (importância relativa do Stats iQ).
+// Tipo "Regressão": quanto cada CSAT pesa na recomendação (relative importance do Stats iQ).
 // Ex.: Overview CSAT's da Colibri (Instalações, Serviço, Produtos).
-import { fmt } from '../stats.js?v=20261113-1557';
-import { esc } from '../ui.js?v=20261113-1557';
-import { baseGrafico, textoDe } from '../export.js?v=20261113-1557';
-import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261113-1557';
+import { fmt } from '../stats.js?v=20261116-0938';
+import { esc } from '../ui.js?v=20261116-0938';
+import { baseGrafico, textoDe } from '../export.js?v=20261116-0938';
+import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261116-0938';
 
 // Cor neutra: a importância não é boa nem má
 const NEUTRA = '#14789c';
@@ -18,7 +18,7 @@ export function resumo(rec) {
     tom: 'good',
     texto: partes.join(' '),
     factos: [
-      { valor: `${fmt(+a.imp.toFixed(1))}%`, rot: `peso de ${a.nome}`, tip: `Importância relativa de ${a.nome}: ${fmt(a.imp, 1)}%. As importâncias somam 100%: dizem que parte do efeito explicado vem de cada CSAT.` },
+      { valor: `${fmt(+a.imp.toFixed(1))}%`, rot: `peso de ${a.nome}`, tip: `Relative importance de ${a.nome}: ${fmt(a.imp, 1)}%. As relative importances somam 100%: dizem que parte do efeito explicado vem de cada CSAT.` },
       ...(d.r2 != null ? [{ valor: `${fmt(d.r2 * 100)}%`, rot: 'da nota explicada pelos CSAT', tip: `R² da regressão: ${fmt(d.r2, 3)}. Os CSAT juntos explicam ${fmt(d.r2 * 100, 1)}% das diferenças na nota de recomendação; o resto vem de outros fatores.` }] : []),
     ],
   };
@@ -31,11 +31,11 @@ export function html(rec) {
       kpi('Nota explicada', d.r2 != null ? `${fmt(d.r2 * 100)}%` : '–', 'R² da regressão', `R² = ${d.r2 != null ? fmt(d.r2, 3) : '–'}. Diz quanto das diferenças na nota de recomendação (0 a 10) é explicado pelos CSAT. 0% = nada, 100% = tudo.`, true),
       kpi('Respostas', d.n ? fmt(d.n) : '–', 'com todos os CSAT respondidos', 'Respostas usadas na regressão: só entram as que têm a nota de recomendação e todos os CSAT.'),
       kpi('CSAT no modelo', fmt(d.variaveis.length), d.variaveis.map(v => v.nome).join(', '), 'Variáveis de entrada da regressão.'),
-      kpi('O que mais pesa', esc(a.nome), `${fmt(+a.imp.toFixed(1))}% da importância`, `${a.nome} tem a maior importância relativa: ${fmt(a.imp, 1)}%.`),
+      kpi('O que mais pesa', esc(a.nome), `${fmt(+a.imp.toFixed(1))}% da relative importance`, `${a.nome} é o CSAT com a maior relative importance: ${fmt(a.imp, 1)}%. Como se calcula: o Stats iQ vê quanto da nota de recomendação os CSAT explicam juntos (a nota explicada, ${d.r2 != null ? fmt(d.r2 * 100) + '%' : ''}) e reparte essa parte pelos CSAT, conforme o que cada um acrescenta. Por isso as relative importances somam 100%. Ex.: ${fmt(+a.imp.toFixed(1))}% quer dizer que ${fmt(+a.imp.toFixed(1))}% do que os CSAT explicam vem de ${a.nome}.`),
     ])}
-    ${cartao('imp', 'Peso de cada CSAT na recomendação', 'Importância relativa de cada CSAT, em %. Somam 100%. Quanto maior, mais esse CSAT ajuda a explicar a nota de recomendação.')}
-    ${tabelaHtml('tab', 'Tabela', 'Importância relativa: a parte do efeito explicado que vem de cada CSAT (somam 100%). Coeficiente: quanto sobe a nota de recomendação quando o CSAT sobe 1 ponto, com os outros iguais.',
-      [{ k: 'nome', rot: 'CSAT' }, { k: 'imp', rot: 'Importância relativa', r: true }, { k: 'coef', rot: 'Coeficiente', r: true }], 'Procurar CSAT')}`;
+    ${cartao('imp', 'Peso de cada CSAT na recomendação', 'Relative importance de cada CSAT, em %. Somam 100%. Quanto maior, mais esse CSAT ajuda a explicar a nota de recomendação.')}
+    ${tabelaHtml('tab', 'Tabela', 'Relative importance: a parte do efeito explicado que vem de cada CSAT (somam 100%). Coeficiente: quanto sobe a nota de recomendação quando o CSAT sobe 1 ponto, com os outros iguais.',
+      [{ k: 'nome', rot: 'CSAT' }, { k: 'imp', rot: 'Relative importance', r: true }, { k: 'coef', rot: 'Coeficiente', r: true }], 'Procurar CSAT')}`;
 }
 
 export function mount(rec, brand) {
@@ -57,8 +57,8 @@ export function exportar(rec, brand) {
     resumo: [textoDe(resumo(rec).texto)],
     filtros: d.filtros,
     graficos: [
-      { id: 'imp', titulo: 'Peso de cada CSAT na recomendação', desenhar: pptBarras(b, d.variaveis.map(v => ({ ...v, valor: v.imp })), { nome: 'Importância (%)', cor: NEUTRA, min: 0, formato: '0' }) },
-      { id: 'tab', titulo: 'Tabela', desenhar: pptTabela(b, ['CSAT', 'Importância relativa', 'Coeficiente'], d.variaveis.map(v => [v.nome, `${fmt(v.imp, 1)}%`, v.coef != null ? fmt(v.coef, 2) : '–']), { dir: [1, 2] }) },
+      { id: 'imp', titulo: 'Peso de cada CSAT na recomendação', desenhar: pptBarras(b, d.variaveis.map(v => ({ ...v, valor: v.imp })), { nome: 'Relative importance (%)', cor: NEUTRA, min: 0, formato: '0' }) },
+      { id: 'tab', titulo: 'Tabela', desenhar: pptTabela(b, ['CSAT', 'Relative importance', 'Coeficiente'], d.variaveis.map(v => [v.nome, `${fmt(v.imp, 1)}%`, v.coef != null ? fmt(v.coef, 2) : '–']), { dir: [1, 2] }) },
     ],
   };
 }

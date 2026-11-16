@@ -141,7 +141,7 @@ export const TIPOS = {
   textiq: { nome: 'Text iQ (média de quem mencionou cada tema)', analises: ['textiq'] },
   ces: { nome: 'Describe do CES (escala de 1 a 7)', analises: ['ces'] },
   csat: { nome: 'Relate de Group NPS com um CSAT', analises: ['csat-grupos'] },
-  regressao: { nome: 'Regressão (importância relativa)', analises: ['regressao'] },
+  regressao: { nome: 'Regressão (relative importance)', analises: ['regressao'] },
   pivot: { nome: 'Pivot Table de Group NPS por driver e área', analises: ['breakdown'] },
   respostas: { nome: 'Exportação das respostas (data e nota do NPS)', analises: ['nps'] },
 };

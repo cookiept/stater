@@ -26,7 +26,7 @@ export const BRANDS = [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
       { id: 'csat', name: "Overview CSAT's", icon: 'smile', tipo: 'regressao', live: true },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'área de conforto', varios: 'áreas de conforto', col: 'Área de conforto' } }, live: true },
-      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', live: true },
+      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
       { id: 'topics-l1', name: 'NPS por Topic Hierarchy Level 1 (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
       { id: 'topics-l2', name: 'NPS por Topic Hierarchy Level 2 (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
       { id: 'molho', name: 'Todos ao molho', icon: 'layers', off: 'Desativada até encontrarmos uma forma simples de juntar as causas de todos os drivers.' },
