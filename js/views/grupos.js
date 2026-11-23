@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261117-1602';
-import { esc } from '../ui.js?v=20261117-1602';
-import { ordemEscala } from '../excel.js?v=20261117-1602';
-import { baseGrafico, textoDe } from '../export.js?v=20261117-1602';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261117-1602';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261123-1529';
+import { esc } from '../ui.js?v=20261123-1529';
+import { ordemEscala } from '../excel.js?v=20261123-1529';
+import { baseGrafico, textoDe } from '../export.js?v=20261123-1529';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261123-1529';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
