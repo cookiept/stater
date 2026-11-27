@@ -1,11 +1,11 @@
 // Tipo "NPS por grupo": o NPS de cada valor de outra variável.
 // Serve para NPS por Driver, NPS x Resultado Inspeção, Segmento, NPS x CES, NPS x CSAT e Topics (resposta múltipla).
 // As palavras mudam com a tab (brands.js → termos): ex. { um: 'driver', varios: 'drivers', col: 'Driver' }.
-import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261127-1427';
-import { esc } from '../ui.js?v=20261127-1427';
-import { ordemEscala } from '../excel.js?v=20261127-1427';
-import { baseGrafico, textoDe } from '../export.js?v=20261127-1427';
-import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261127-1427';
+import { CORES, corMeta, enriquecerCausas, comZeros, npsDe, fmt, sinal, LIMITES } from '../stats.js?v=20261127-1434';
+import { esc } from '../ui.js?v=20261127-1434';
+import { ordemEscala } from '../excel.js?v=20261127-1434';
+import { baseGrafico, textoDe } from '../export.js?v=20261127-1434';
+import { kpi, kpis, cartao, LEGENDA_DNP, tabelaHtml, ligarTabela, alternar, ligarAlternar, ligarModo, barrasH, composicao, pptBarras, pptComposicao, pptTabela } from './comum.js?v=20261127-1434';
 
 const LIM = LIMITES.amostraPequena;
 const T0 = { um: 'grupo', varios: 'grupos', col: 'Grupo' };
@@ -43,8 +43,8 @@ export function resumo(rec, meta, tab) {
   const abaixo = f.filter(c => c.nps < meta);
   const partes = [`Com base em <strong>${fmt(g.total)}</strong> ${rec.data.multi ? 'pessoas' : 'respostas'}, o NPS foi <strong>${fmt(g.nps)}</strong>, ${g.nps > meta ? 'acima do' : g.nps === meta ? 'em linha com o' : 'abaixo do'} objetivo (${meta}).`];
   if (ordem && f.length >= 2) {
-    const [a, z] = [f[0], f[f.length - 1]];
-    partes.push(`De <strong>${esc(a.nome)}</strong> para <strong>${esc(z.nome)}</strong>, o NPS vai de <strong>${sinal(a.nps)}</strong> a <strong>${sinal(z.nps)}</strong>.`);
+    // Do pior ao melhor NPS (não dos extremos da escala, que podem não ser o pior e o melhor)
+    partes.push(`O NPS vai de <strong>${sinal(pior.nps)}</strong> (${esc(pior.nome)}) a <strong>${sinal(melhor.nps)}</strong> (${esc(melhor.nome)}).`);
   } else if (melhor && pior && melhor !== pior) {
     partes.push(`O ${T.um} com melhor NPS é <strong>${esc(melhor.nome)}</strong> (${sinal(melhor.nps)}) e o com pior é <strong>${esc(pior.nome)}</strong> (${sinal(pior.nps)}, ${fmt(pior.pctD)}% de detratores).`);
   }
@@ -64,7 +64,9 @@ const colunasTab = (T, multi, temMedia, meta) => [{ k: 'nome', rot: T.col }, { k
   { k: 'vD', rot: 'Detratores', r: true }, { k: 'vN', rot: 'Neutros', r: true }, { k: 'vP', rot: 'Promotores', r: true },
   { k: 'quota', rot: '% das respostas', r: true }, ...(temMedia ? [{ k: 'media', rot: 'Nota média', r: true }] : [])];
 
-const sub = (c, multi) => (c.zero ? `0 ${multi ? 'menções' : 'respostas'}` : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${fmt(c.quota)}% · NPS ${fmt(c.nps)}`);
+// % arredondada; abaixo de 1% (mas com respostas) mostra "<1" em vez de 0
+const pq = q => (q > 0 && q < 0.5 ? '<1' : fmt(q));
+const sub = (c, multi) => (c.zero ? `0 ${multi ? 'menções' : 'respostas'}` : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${pq(c.quota)}% · NPS ${fmt(c.nps)}`);
 
 export function html(rec, meta, tab) {
   const T = termos(tab);
@@ -81,7 +83,7 @@ export function html(rec, meta, tab) {
       kpi('NPS geral', fmt(g.nps), `${fmt(g.total)} ${multi ? 'pessoas' : 'respostas'} · objetivo ${meta}`, `NPS de todas as ${fmt(g.total)} ${multi ? 'pessoas que responderam' : 'respostas do Excel'}: ${fmt(g.pctP, 1)}% promotores − ${fmt(g.pctD, 1)}% detratores = ${fmt(g.pctP - g.pctD, 1)}, arredondado a ${fmt(g.nps)}. Objetivo da marca: ${meta} (${g.nps >= meta ? `${fmt(g.nps - meta)} pontos acima` : `${fmt(meta - g.nps)} pontos abaixo`}).`, true),
       multi ? kpi('Menções', fmt(mencoes), 'uma pessoa pode escolher vários', `Soma das vezes que cada ${T.um} foi escolhido: ${fmt(mencoes)}. Uma pessoa pode escolher mais do que um, por isso não é o número de pessoas (${fmt(g.total)}).`)
         : kpi('Respostas', fmt(g.total), `notas de 0 a 10`, `Respostas com nota de 0 a 10, somando todos os ${T.varios}: ${fmt(g.total)}.`),
-      maisPeso ? kpi(`${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, `<span class="kv-txt">${esc(maisPeso.nome)}</span>`, `${fmt(maisPeso.quota)}% das ${multi ? 'pessoas' : 'respostas'} · NPS ${fmt(maisPeso.nps)}`, `${maisPeso.nome} é o ${T.um} com mais ${multi ? 'menções' : 'respostas'}: ${fmt(maisPeso.total)}/${fmt(g.total)} (${fmt(maisPeso.quota, 1)}%), com NPS ${fmt(maisPeso.nps)}. Como junta a maior parte dos clientes, é o que mais mexe no NPS geral.`)
+      maisPeso ? kpi(`${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, `<span class="kv-txt">${esc(maisPeso.nome)}</span>`, `${pq(maisPeso.quota)}% das ${multi ? 'pessoas' : 'respostas'} · NPS ${fmt(maisPeso.nps)}`, `${maisPeso.nome} é o ${T.um} com mais ${multi ? 'menções' : 'respostas'}: ${fmt(maisPeso.total)}/${fmt(g.total)} (${fmt(maisPeso.quota, 1)}%), com NPS ${fmt(maisPeso.nps)}. Como junta a maior parte dos clientes, é o que mais mexe no NPS geral.`)
         : kpi('Com respostas', `${fmt(comResp.length)}/${fmt(todos.length)}`, T.varios, ''),
       kpi('Abaixo do objetivo', `${fmt(abaixo.length)}/${fmt(fiaveis(todos).length)}`, abaixo.length ? `${T.varios} com NPS abaixo de ${meta}` : `nenhum ${T.um}`, `${T.varios[0].toUpperCase() + T.varios.slice(1)} com ${LIM} ou mais respostas cujo NPS fica abaixo do objetivo (${meta}). ${abaixo.length ? `Neste Excel: ${abaixo.map(c => `${c.nome} (NPS ${fmt(c.nps)}, ${fmt(c.total)} respostas)`).join('; ')}.` : 'Neste Excel nenhum está abaixo.'}`),
     ])}
@@ -97,7 +99,7 @@ export function mount(rec, brand, meta, tab) {
   const multi = rec.data.multi;
   const temMedia = todos.some(c => c.media != null);
   const comSub = todos.map(c => ({ ...c, sub: sub(c, multi) }));
-  barrasH(document.getElementById('ch-nps'), brand, comSub.map(c => ({ ...c, valor: c.nps, cor: corMeta(c.nps, meta), sub: c.zero ? c.sub : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${fmt(c.quota)}%${c.media != null ? ` · média ${fmt(c.media, 1)}` : ''}` })),
+  barrasH(document.getElementById('ch-nps'), brand, comSub.map(c => ({ ...c, valor: c.nps, cor: corMeta(c.nps, meta), sub: c.zero ? c.sub : `${fmt(c.total)} ${multi ? 'menções' : 'respostas'} · ${pq(c.quota)}%${c.media != null ? ` · média ${fmt(c.media, 1)}` : ''}` })),
     { min: -100, max: 100, linha: { valor: meta, rotulo: `Objetivo ${meta}` },
       tooltip: c => `<b>${esc(c.nome)}</b><br>NPS ${fmt(c.nps)} · ${fmt(c.total)} ${multi ? 'menções' : 'respostas'}${c.media != null ? `<br>Nota média ${fmt(c.media, 1)}` : ''}${c.amostraPequena ? `<br><i>Menos de ${LIM} respostas</i>` : ''}` });
   composicao(document.getElementById('ch-comp'), brand, comSub);
@@ -130,7 +132,7 @@ export function exportar(rec, brand, meta, tab) {
   return {
     kpis: [
       { rot: 'NPS geral', val: fmt(g.nps), det: `${fmt(g.total)} ${rec.data.multi ? 'pessoas' : 'respostas'} · objetivo ${meta}` },
-      ...(() => { const m = [...todos].filter(c => !c.zero).sort((x, y) => y.total - x.total)[0]; return m ? [{ rot: `${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, val: m.nome, det: `${fmt(m.quota)}% · NPS ${fmt(m.nps)}` }] : []; })(),
+      ...(() => { const m = [...todos].filter(c => !c.zero).sort((x, y) => y.total - x.total)[0]; return m ? [{ rot: `${T.um[0].toUpperCase() + T.um.slice(1)} que mais pesa`, val: m.nome, det: `${pq(m.quota)}% · NPS ${fmt(m.nps)}` }] : []; })(),
       { rot: 'Abaixo do objetivo', val: `${fmt(abaixo.length)}/${fmt(fiaveis(todos).length)}`, det: abaixo.map(c => c.nome).join(', ') || `nenhum ${T.um}` },
     ],
     resumo: [textoDe(resumo(rec, meta, tab).texto)],
