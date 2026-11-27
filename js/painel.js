@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261127-1245';
-import { esc, info } from './ui.js?v=20261127-1245';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1245';
-import { fmt } from './stats.js?v=20261127-1245';
-import { store, meta, ordem } from './store.js?v=20261127-1245';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1245';
-import { tileVars } from './layout.js?v=20261127-1245';
+import { icon } from './icons.js?v=20261127-1248';
+import { esc, info } from './ui.js?v=20261127-1248';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1248';
+import { fmt } from './stats.js?v=20261127-1248';
+import { store, meta, ordem } from './store.js?v=20261127-1248';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1248';
+import { tileVars } from './layout.js?v=20261127-1248';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -68,9 +68,10 @@ export function menuExportar() {
 }
 
 // Tabs com vários Excels: no botão Ficheiro, quantos estão carregados face aos que a tab leva (ex.: 6/8).
-// Uma Pivot Table já traz tudo: 1/1. Sem número fixo (um Excel por área), mostra só quantos há.
+// Tabs de um só Excel e Pivot Tables: 1/1. Sem número fixo (um Excel por área), mostra só quantos há.
 function contagem(rec, A, tab) {
-  if (!A.view.multi || !rec?.data) return '';
+  if (!rec?.data) return '';
+  if (!A.view.multi) return ` <b class="fich-n" title="Esta tab leva 1 Excel: está carregado.">1/1</b>`;
   const n = rec.data.pivot ? 1 : rec.data.ficheiros?.length || 1;
   const total = rec.data.pivot ? 1 : tab.excels;
   const txt = total ? `${n}/${total}` : String(n);
