@@ -1,20 +1,20 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261127-1501';
-import { logo } from './logos.js?v=20261127-1501';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261127-1501';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261127-1501';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261127-1501';
-import { limparGraficos } from './charts.js?v=20261127-1501';
-import { exemplos } from './exemplo.js?v=20261127-1501';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261127-1501';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1501';
-import { sidebar, topbar } from './layout.js?v=20261127-1501';
-import { painel } from './painel.js?v=20261127-1501';
-import { ligarArrastar, reporOrdem } from './arrastar.js?v=20261127-1501';
-import { ligarEscolhas } from './escolha.js?v=20261127-1501';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261127-1501';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261127-1518';
+import { logo } from './logos.js?v=20261127-1518';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261127-1518';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261127-1518';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261127-1518';
+import { limparGraficos } from './charts.js?v=20261127-1518';
+import { exemplos } from './exemplo.js?v=20261127-1518';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261127-1518';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1518';
+import { sidebar, topbar } from './layout.js?v=20261127-1518';
+import { painel } from './painel.js?v=20261127-1518';
+import { ligarArrastar, reporOrdem } from './arrastar.js?v=20261127-1518';
+import { ligarEscolhas } from './escolha.js?v=20261127-1518';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261127-1518';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
@@ -96,14 +96,18 @@ async function carregar(files) {
   const A = analiseDe(r.tab);
   if (!A.view.multi) files = files.slice(0, 1);
   erro = null;
-  let ok = 0;
+  let ok = 0, aMais = 0;
   for (const file of files) {
     let rows = null;
     try {
       rows = await lerPrimeiraFolha(file);
       const data = A.parse(rows);
       const ant = store.get(r.brand.id, r.tab.id);
-      store.set(r.brand.id, r.tab.id, { fileName: file.name, savedAt: new Date().toISOString(), data: A.view.multi ? A.view.juntar(ant?.exemplo ? null : ant, data, file.name) : data });
+      const novo = A.view.multi ? A.view.juntar(ant?.exemplo ? null : ant, data, file.name) : data;
+      // Tab com número fixo de Excels: um ficheiro que passaria do limite é recusado (um repetido substitui o anterior)
+      const n = novo.ficheiros?.length || 0;
+      if (r.tab.excels && !novo.pivot && n > r.tab.excels && n > (ant?.exemplo ? 0 : ant?.data?.ficheiros?.length || 0)) { aMais++; continue; }
+      store.set(r.brand.id, r.tab.id, { fileName: file.name, savedAt: new Date().toISOString(), data: novo });
       ok++;
     } catch (e) {
       erro = { ficheiro: file.name, msg: e instanceof FicheiroErrado ? e.message : `Não consegui ler o ficheiro (${e.message}).`, faltas: e.faltas || [], sugestoes: rows ? sugestoesPara(rows, r.brand, r.tab) : [] };
@@ -111,6 +115,7 @@ async function carregar(files) {
     }
   }
   if (ok) toast(ok === 1 ? `${files.length === 1 ? files[0].name : '1 ficheiro'} carregado com sucesso.` : `${ok} ficheiros carregados com sucesso.`, 'ok');
+  if (aMais) toast(`Submeteu ${aMais} ${aMais === 1 ? 'ficheiro' : 'ficheiros'} a mais. Esta tab só leva ${r.tab.excels} Excels${ok ? `; ${ok === 1 ? 'entrou 1' : `entraram ${ok}`}` : ''}.`, 'erro');
   render();
 }
 

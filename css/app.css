@@ -868,3 +868,4 @@ body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: n
 .howto-n { display: flex; align-items: center; gap: 6px; margin: 4px 0 12px; font-size: 13px; color: var(--text-secondary, #5f5f5f); }
 .howto-n .ico { width: 15px; height: 15px; }
 .howto-n b { color: #1a1a1a; }
+.toast-erro { background: #b42318; font-weight: 600; }

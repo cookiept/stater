@@ -1,5 +1,5 @@
 // Pequenas peças de interface partilhadas.
-import { icon } from './icons.js?v=20261127-1501';
+import { icon } from './icons.js?v=20261127-1518';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -60,7 +60,7 @@ export function toast(msg, tipo = '') {
   const t = document.createElement('div');
   t.className = `toast${tipo ? ` toast-${tipo}` : ''}`;
   t.setAttribute('role', 'status');
-  t.innerHTML = `${icon(tipo === 'ok' ? 'tick' : 'sparkle')}<span>${esc(msg)}</span>`;
+  t.innerHTML = `${tipo === 'ok' ? icon('tick') : tipo === 'erro' ? icon('alert') : ''}<span>${esc(msg)}</span>`;
   document.body.appendChild(t);
   requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('is-in')));
   setTimeout(() => {
