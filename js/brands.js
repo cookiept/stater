@@ -52,7 +52,7 @@ export const BRANDS = [
       { id: 'inspecao', name: 'NPS x Resultado Inspeção', icon: 'check', tipo: 'breakdown', termos: { um: 'resultado', varios: 'resultados', col: 'Resultado', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true,
         importar: { titulo: 'Como importar os dados de NPS x Resultado Inspeção', texto: 'No Stats iQ, selecione o "Resultado da inspeção", o Centro e "(Group) NPS". Vá a Advanced → Pivot Table: nas linhas o Resultado da inspeção e, por baixo, o Centro; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel". Também serve o Relate de sempre (um Excel, sem centros).' } },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true },
-      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', excels: 6, live: true },
+      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', excels: 7, live: true },
       { id: 'nps-ces', name: 'NPS x CES', icon: 'gauge', tipo: 'grupos', termos: { um: 'nível de concordância', varios: 'níveis de concordância', col: 'Resposta ao CES' }, live: true },
       { id: 'topics', name: 'NPS por Topic Hierarchy Level 1 (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
       { id: 'causas', name: 'NPS por Topic Hierarchy Level 2 (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
