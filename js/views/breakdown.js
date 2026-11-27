@@ -2,13 +2,13 @@
 // (área de conforto, centro de inspeção…). Cada Excel vem filtrado no Stats iQ por uma área; o Stater lê esse
 // filtro, dá o nome à área e junta tudo. Mostra "Todas" (soma de todos os Excels) ou uma área de cada vez,
 // mais uma tabela cruzada área × driver. O resto da página é a vista "NPS por grupo" (grupos.js).
-import { npsDe, fmt, LIMITES } from '../stats.js?v=20261127-1256';
-import { esc } from '../ui.js?v=20261127-1256';
-import { icon } from '../icons.js?v=20261127-1256';
-import { formatarPeriodo } from '../excel.js?v=20261127-1256';
-import { baseGrafico } from '../export.js?v=20261127-1256';
-import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261127-1256';
-import * as G from './grupos.js?v=20261127-1256';
+import { npsDe, fmt, LIMITES } from '../stats.js?v=20261127-1259';
+import { esc } from '../ui.js?v=20261127-1259';
+import { icon } from '../icons.js?v=20261127-1259';
+import { formatarPeriodo } from '../excel.js?v=20261127-1259';
+import { baseGrafico } from '../export.js?v=20261127-1259';
+import { tabelaHtml, ligarTabela, pptTabela } from './comum.js?v=20261127-1259';
+import * as G from './grupos.js?v=20261127-1259';
 
 const LIM = LIMITES.amostraPequena;
 const TODAS = '*';
@@ -158,6 +158,9 @@ function tabelaCruz(rec, meta, tab) {
     .replace('class="tbl"', 'class="tbl cruz"');
 }
 
+// Com uma área escolhida no filtro, a tabela mostra só essa área.
+const soSel = (rec, linhas) => rec.data.sel === TODAS ? linhas : linhas.filter(l => l.nome === rec.data.sel);
+
 export function html(rec, meta, tab) {
   return seletor(rec, tab) + G.html(rec, meta, tab) + tabelaCruz(rec, meta, tab);
 }
@@ -166,8 +169,8 @@ export function mount(rec, brand, meta, tab) {
   G.mount(rec, brand, meta, tab);
   if (rec.data.ficheiros.length < 2) return;
   const { grupos, linhas } = cruz(rec);
-  ligarTabela('cruz', linhas, l => `
-    <tr class="${rec.data.sel === l.nome ? 'is-sel' : ''}"><td><span class="name">${esc(l.nome)}</span></td>${celula(l.nps, l.total, meta)}<td class="r num">${fmt(l.total)}</td>${grupos.map((_, i) => celula(l[`g${i}`], l[`n${i}`], meta)).join('')}</tr>`,
+  ligarTabela('cruz', soSel(rec, linhas), l => `
+    <tr><td><span class="name">${esc(l.nome)}</span></td>${celula(l.nps, l.total, meta)}<td class="r num">${fmt(l.total)}</td>${grupos.map((_, i) => celula(l[`g${i}`], l[`n${i}`], meta)).join('')}</tr>`,
   { chave: 'total', ncol: grupos.length + 3, vazio: `${areaT(tab).nenhuma} com esse nome.` });
 }
 
@@ -178,7 +181,7 @@ export function exportar(rec, brand, meta, tab) {
   if (fs.length >= 2) {
     const { grupos, linhas } = cruz(rec);
     e.graficos.push({ id: 'cruz', titulo: `NPS de cada ${T.um} por ${A.um}`, desenhar: pptTabela(baseGrafico(brand), [A.col, 'NPS geral', 'Respostas', ...grupos],
-      linhas.sort((a, b) => b.total - a.total).map(l => [l.nome, l.nps == null ? '–' : fmt(l.nps), fmt(l.total), ...grupos.map((_, i) => (l[`g${i}`] == null ? '–' : fmt(l[`g${i}`])))]),
+      soSel(rec, linhas).sort((a, b) => b.total - a.total).map(l => [l.nome, l.nps == null ? '–' : fmt(l.nps), fmt(l.total), ...grupos.map((_, i) => (l[`g${i}`] == null ? '–' : fmt(l[`g${i}`])))]),
       { dir: [1, 2, ...grupos.map((_, i) => i + 3)] }) });
   }
   return e;

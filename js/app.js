@@ -1,20 +1,20 @@
 // Stater: rotas, desenho da página e ações (upload, apagar, exportar).
 // O resto está em módulos: store (browser), analises (tipos de análise), layout (menu e topo),
 // painel (tab de marca), overview (Grupo Brisa) e views/ (uma vista por tipo de análise).
-import { GROUP, brandById, applyTheme } from './brands.js?v=20261127-1256';
-import { logo } from './logos.js?v=20261127-1256';
-import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261127-1256';
-import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261127-1256';
-import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261127-1256';
-import { limparGraficos } from './charts.js?v=20261127-1256';
-import { exemplos } from './exemplo.js?v=20261127-1256';
-import { store, meta, abertas, guardarAbertas } from './store.js?v=20261127-1256';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1256';
-import { sidebar, topbar } from './layout.js?v=20261127-1256';
-import { painel } from './painel.js?v=20261127-1256';
-import { ligarArrastar, reporOrdem } from './arrastar.js?v=20261127-1256';
-import { ligarEscolhas } from './escolha.js?v=20261127-1256';
-import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261127-1256';
+import { GROUP, brandById, applyTheme } from './brands.js?v=20261127-1259';
+import { logo } from './logos.js?v=20261127-1259';
+import { esc, ligarTooltips, toast, confirmar } from './ui.js?v=20261127-1259';
+import { lerPrimeiraFolha, FicheiroErrado, formatarPeriodo, identificar, TIPOS } from './excel.js?v=20261127-1259';
+import { exportarGrafico, exportarTab, exportarOverview, imprimir } from './export.js?v=20261127-1259';
+import { limparGraficos } from './charts.js?v=20261127-1259';
+import { exemplos } from './exemplo.js?v=20261127-1259';
+import { store, meta, abertas, guardarAbertas } from './store.js?v=20261127-1259';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1259';
+import { sidebar, topbar } from './layout.js?v=20261127-1259';
+import { painel } from './painel.js?v=20261127-1259';
+import { ligarArrastar, reporOrdem } from './arrastar.js?v=20261127-1259';
+import { ligarEscolhas } from './escolha.js?v=20261127-1259';
+import { overview, montarOverview, editarMetas, dadosOverview } from './overview.js?v=20261127-1259';
 
 // ---------- Estado ----------
 // Último ficheiro recusado (aviso no painel); limpa ao mudar de página
