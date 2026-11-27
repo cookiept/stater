@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261127-1229';
-import { esc, info } from './ui.js?v=20261127-1229';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1229';
-import { fmt } from './stats.js?v=20261127-1229';
-import { store, meta, ordem } from './store.js?v=20261127-1229';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1229';
-import { tileVars } from './layout.js?v=20261127-1229';
+import { icon } from './icons.js?v=20261127-1245';
+import { esc, info } from './ui.js?v=20261127-1245';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1245';
+import { fmt } from './stats.js?v=20261127-1245';
+import { store, meta, ordem } from './store.js?v=20261127-1245';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1245';
+import { tileVars } from './layout.js?v=20261127-1245';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -36,7 +36,7 @@ function painelVazio(A, erro, tab) {
         <div class="drop" id="drop">
           <div class="big">${icon('upload')}</div>
           <h3>${multi ? 'Carrega os Excel desta tab' : 'Carrega o Excel desta tab'}</h3>
-          <p>${multi ? `${esc(A.view.multiTexto || 'Um Excel por driver.')} ` : ''}Aceita .xlsx, .xls e .csv.</p>
+          <p>${multi ? `${tab?.excels ? `Esta tab leva ${tab.excels} Excels. ` : ''}${esc(A.view.multiTexto || 'Um Excel por driver.')} ` : ''}Aceita .xlsx, .xls e .csv.</p>
           <div class="row"><button class="btn btn-primary" data-act="upload">${icon('upload')} Escolher ficheiro</button></div>
         </div>
         <div class="howto">
@@ -67,11 +67,22 @@ export function menuExportar() {
   </details>`;
 }
 
+// Tabs com vários Excels: no botão Ficheiro, quantos estão carregados face aos que a tab leva (ex.: 6/8).
+// Uma Pivot Table já traz tudo: 1/1. Sem número fixo (um Excel por área), mostra só quantos há.
+function contagem(rec, A, tab) {
+  if (!A.view.multi || !rec?.data) return '';
+  const n = rec.data.pivot ? 1 : rec.data.ficheiros?.length || 1;
+  const total = rec.data.pivot ? 1 : tab.excels;
+  const txt = total ? `${n}/${total}` : String(n);
+  const tip = total ? `${n}/${total} Excels carregados${n < total ? `: faltam ${total - n}` : ': estão todos'}.` : `${n} ${n === 1 ? 'Excel carregado' : 'Excels carregados'}.`;
+  return ` <b class="fich-n${total && n < total ? ' falta' : ''}" title="${tip}">${txt}</b>`;
+}
+
 // Menu "Ficheiro": o Excel desta tab, Substituir/Apagar e como importar
 function menuFicheiro(rec, A, m, tab, brand) {
   const imp = importarDe(A, tab);
   return `<details class="menu-exp menu-fich">
-    <summary class="btn btn-secondary btn-sm" role="button" aria-haspopup="true">${icon('file')} Ficheiro</summary>
+    <summary class="btn btn-secondary btn-sm" role="button" aria-haspopup="true">${icon('file')} Ficheiro${contagem(rec, A, tab)}</summary>
     <div class="menu-lista menu-painel">
       ${A.view.lado ? A.view.lado(rec, m, tab) : `
         <div class="filecard">${icon('file')}<div><div class="fn">${esc(rec.fileName)}</div><div class="fm">Carregado a ${formatarData(rec.savedAt)} · ${esc(formatarPeriodo(rec.data.periodo))}</div></div></div>
@@ -101,13 +112,10 @@ function resumoHtml(r) {
 export function painel(brand, tab, erro) {
   const A = analiseDe(tab);
   const rec = vistaDe(A, store.get(brand.id, tab.id));
-  // Tabs que levam vários Excels: indicação junto ao título (e quantos estão carregados)
-  const nFich = rec?.data?.pivot ? 1 : rec?.data?.ficheiros?.length;
-  const variosHtml = A?.view.multi && !tab.off && ativa(brand, tab) ? `<span class="chip-varios" style="${tileVars(brand)}" data-tip-title="Esta tab leva vários Excels" data-tip="${esc(A.view.multiTexto || 'Um Excel por driver.')}" tabindex="0">${icon('files')} Vários Excels${nFich ? ` <b class="num">· ${nFich} ${rec.data.pivot ? 'Pivot Table' : nFich === 1 ? 'carregado' : 'carregados'}</b>` : ''}</span>` : '';
   const head = (chipsHtml = '') => `
     <div class="panel-head">
       <span class="tile" style="${tileVars(brand)}">${icon(tab.icon)}</span>
-      <h2>${esc(tab.name)}</h2>${variosHtml}
+      <h2>${esc(tab.name)}</h2>
       <div class="chips">${chipsHtml}</div>
     </div>`;
   if (tab.off) return `<section class="panel">${head()}<div class="soon-panel"><div class="big">${icon(tab.icon)}</div><h3>Tab desativada</h3><p>${esc(tab.off)}</p></div></section>`;

@@ -1,11 +1,10 @@
 // Menu lateral e barra de topo
-import { BRANDS, GROUP } from './brands.js?v=20261127-1229';
-import { icon } from './icons.js?v=20261127-1229';
-import { logo } from './logos.js?v=20261127-1229';
-import { esc } from './ui.js?v=20261127-1229';
-import { formatarData } from './excel.js?v=20261127-1229';
-import { store, abertas } from './store.js?v=20261127-1229';
-import { analiseDe } from './analises.js?v=20261127-1229';
+import { BRANDS, GROUP } from './brands.js?v=20261127-1245';
+import { icon } from './icons.js?v=20261127-1245';
+import { logo } from './logos.js?v=20261127-1245';
+import { esc } from './ui.js?v=20261127-1245';
+import { formatarData } from './excel.js?v=20261127-1245';
+import { store, abertas } from './store.js?v=20261127-1245';
 
 export function tileVars(b) {
   return `--tile-bg:${b.colors.main};--tile-on:${b.colors.on};--tile-soft:${b.colors.lightest};--tile-ink:${b.colors.darkest}`;
@@ -17,7 +16,7 @@ export function sidebar({ brand, tab }) {
     const aberta = abertas.has(b.id);
     const sub = aberta ? `<div class="sb-sub-nav" id="tabs-${b.id}">${b.tabs.map(t => t.off ? `
         <span class="sb-tab is-off" aria-disabled="true" tabindex="0" data-tip-title="Tab desativada" data-tip="${esc(t.off)}">${icon(t.icon)}<span class="lbl">${esc(t.name)}</span></span>` : `
-        <a class="sb-tab" href="#/${b.id}/${t.id}" ${atual && tab?.id === t.id ? 'aria-current="page"' : ''}>${icon(t.icon)}<span class="lbl" title="${esc(t.name)}">${esc(t.name)}</span>${analiseDe(t)?.view.multi ? `<span class="sb-varios" title="Leva vários Excels">${icon('files')}</span>` : ''}${store.get(b.id, t.id) ? '<span class="dot" title="Com dados"></span>' : ''}</a>`).join('')}</div>` : '';
+        <a class="sb-tab" href="#/${b.id}/${t.id}" ${atual && tab?.id === t.id ? 'aria-current="page"' : ''}>${icon(t.icon)}<span class="lbl" title="${esc(t.name)}">${esc(t.name)}</span>${store.get(b.id, t.id) ? '<span class="dot" title="Com dados"></span>' : ''}</a>`).join('')}</div>` : '';
     return `<div class="sb-row" style="${tileVars(b)}">
         <a class="sb-item${atual ? ' is-open' : ''}" href="#/${b.id}/${b.tabs[0].id}">
         <span class="tile mark">${logo(b.icon)}</span><span class="nm" title="${esc(b.name)}">${esc(b.name)}</span><span class="count" title="${b.tabs.length} tabs">${b.tabs.length}</span></a>

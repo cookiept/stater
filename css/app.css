@@ -864,11 +864,5 @@ body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: n
 .esc-proc input:focus { border-color: #1f4bff; }
 .esc-lista li[hidden] { display: none; }
 
-/* Tabs que levam vários Excels */
-.chip-varios { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--tile-ink, #10152a); background: var(--tile-soft, #eef1fb); border: 1px solid rgba(16, 21, 42, .08); white-space: nowrap; cursor: default; margin-left: -4px; }
-.chip-varios .ico { width: 15px; height: 15px; }
-.chip-varios b { font-weight: 600; opacity: .8; }
-.sb-varios { display: inline-flex; margin-left: 6px; color: var(--text-tertiary, #8a8a8a); flex: none; }
-.sb-varios .ico { width: 13px; height: 13px; }
-.sb-tab .sb-varios + .dot { margin-left: 6px; }
-.sb-tab .sb-varios { margin-left: auto; }
+.fich-n { margin-left: 2px; padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #e8f5ec; color: #10641d; }
+.fich-n.falta { background: #fdecea; color: #ad2c19; }
