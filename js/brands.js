@@ -25,7 +25,7 @@ export const BRANDS = [
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'área de conforto', varios: 'áreas de conforto', col: 'Área de conforto' } }, live: true },
-      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
+      { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', excels: 11, live: true },
       { id: 'topics-l1', name: 'NPS por Topic Hierarchy Level 1 (Text iQ)', icon: 'tag', tipo: 'textiq', live: true },
       { id: 'topics-l2', name: 'NPS por Topic Hierarchy Level 2 (Text iQ)', icon: 'search', tipo: 'textiq', termos: { col: 'Subtopic' }, live: true },
     ],

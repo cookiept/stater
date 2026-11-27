@@ -1,17 +1,27 @@
 // Tipo "Causa Raiz por driver": um Relate de Group NPS com a causa raiz de cada driver (ex.: RC_Marcação,
 // RC_Check-in…), um Excel por driver, carregados de uma vez. Mostra "Todos" (as causas de todos os drivers
 // juntas, cada uma com o seu driver) ou um driver de cada vez. O resto da página é a vista "Causa Raiz" (causas.js).
-import { esc } from '../ui.js?v=20261127-1434';
-import { icon } from '../icons.js?v=20261127-1434';
-import { formatarPeriodo } from '../excel.js?v=20261127-1434';
-import * as C from './causas.js?v=20261127-1434';
+import { esc } from '../ui.js?v=20261127-1501';
+import { icon } from '../icons.js?v=20261127-1501';
+import { formatarPeriodo } from '../excel.js?v=20261127-1501';
+import * as C from './causas.js?v=20261127-1501';
 
 const TODOS = '*';
 export const multi = true;
 export const multiTexto = 'Um Excel por driver, com a causa raiz desse driver. Podes carregar todos de uma vez.';
 
 const maiuscula = s => s.charAt(0).toUpperCase() + s.slice(1);
-const nomeDriver = (novo, fileName) => maiuscula((novo.titulo || '').replace(/\.\.\.$/, '…').replace(/^(RC|CR)[_\s-]*/i, '').trim() || fileName.replace(/\.[^.]+$/, ''));
+// Nomes curtos das variáveis do Stats iQ (ex.: "CR2 Store_ZRef Esplanada") passam ao nome do driver
+const APELIDOS = {
+  'chegada e': 'Chegada e estacionamento', 'inst sanitarias': 'Instalações sanitárias',
+  'prod. alimentação e bebidas': 'Alimentação e bebidas', 'prod. produtos não alimentares': 'Produtos não alimentares',
+  'espinf zinfantil': 'Zona de diversão infantil', 'zref esplanada': 'Esplanada', 'zref interior': 'Zona interior/Balcão Express',
+  'máquinas de vending': 'Máquinas de vending', 'serviço pega e leva': 'Serviço Pega e Leva',
+};
+const nomeDriver = (novo, fileName) => {
+  const n = (novo.titulo || '').replace(/(\.\.\.|…)$/, '').replace(/^(RC|CR)2?[_\s-]*/i, '').replace(/^(Store|LA|Cabine\w*)[_\s-]+/i, '').trim();
+  return APELIDOS[n.toLowerCase()] || maiuscula(n) || fileName.replace(/\.[^.]+$/, '');
+};
 
 // Junta um Excel novo aos que já existem; o mesmo driver é substituído
 export function juntar(rec, novo, fileName) {
