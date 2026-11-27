@@ -49,7 +49,8 @@ export const BRANDS = [
     chart: ['#f96730', '#fc9771', '#a13a13', '#5f1c04', '#febfa7'],
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
-      { id: 'inspecao', name: 'NPS x Resultado Inspeção', icon: 'check', tipo: 'grupos', termos: { um: 'resultado', varios: 'resultados', col: 'Resultado' }, live: true },
+      { id: 'inspecao', name: 'NPS x Resultado Inspeção', icon: 'check', tipo: 'breakdown', termos: { um: 'resultado', varios: 'resultados', col: 'Resultado', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true,
+        importar: { titulo: 'Como importar os dados de NPS x Resultado Inspeção', texto: 'No Stats iQ, selecione o "Resultado da inspeção", o Centro e "(Group) NPS". Vá a Advanced → Pivot Table: nas linhas o Resultado da inspeção e, por baixo, o Centro; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel". Também serve o Relate de sempre (um Excel, sem centros).' } },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true },
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },
       { id: 'nps-ces', name: 'NPS x CES', icon: 'gauge', tipo: 'grupos', termos: { um: 'nível de concordância', varios: 'níveis de concordância', col: 'Resposta ao CES' }, live: true },
@@ -64,7 +65,8 @@ export const BRANDS = [
     chart: ['#e0b52e', '#ffd552', '#4b3c14', '#b39321', '#ffe4a9'],
     tabs: [
       { id: 'nps', name: 'NPS', icon: 'bars', live: true },
-      { id: 'inspecao', name: 'NPS x Resultado Inspeção', icon: 'check', tipo: 'grupos', termos: { um: 'resultado', varios: 'resultados', col: 'Resultado' }, live: true },
+      { id: 'inspecao', name: 'NPS x Resultado Inspeção', icon: 'check', tipo: 'breakdown', termos: { um: 'resultado', varios: 'resultados', col: 'Resultado', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true,
+        importar: { titulo: 'Como importar os dados de NPS x Resultado Inspeção', texto: 'No Stats iQ, selecione o "Resultado da inspeção", o Centro e "(Group) NPS". Vá a Advanced → Pivot Table: nas linhas o Resultado da inspeção e, por baixo, o Centro; nas colunas o "(Group) NPS"; nos valores COUNT. Mude "Data sampled" para All, aplique os filtros de data e exporte com "Export data for Excel". Também serve o Relate de sempre (um Excel, sem centros).' } },
       { id: 'segmento', name: 'Segmento', icon: 'pie', tipo: 'grupos', termos: { um: 'segmento', varios: 'segmentos', col: 'Segmento' }, live: true },
       { id: 'driver-relate', name: 'NPS por Driver', icon: 'wheel', tipo: 'breakdown', termos: { um: 'driver', varios: 'drivers', col: 'Driver', area: { um: 'centro', varios: 'centros', col: 'Centro', masc: true } }, live: true },
       { id: 'causa-raiz', name: 'NPS por Causa Raiz', icon: 'search', tipo: 'causasdrivers', live: true },

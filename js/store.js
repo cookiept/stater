@@ -1,5 +1,5 @@
 // Tudo o que o Stater guarda no browser (localStorage). Nada sai do computador.
-import { brandById } from './brands.js?v=20261124-1637';
+import { brandById } from './brands.js?v=20261127-1229';
 
 const chave = (b, t) => `stater:v1:${b}:${t}`;
 

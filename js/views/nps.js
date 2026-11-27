@@ -1,9 +1,9 @@
 // Tab "NPS": distribuição das notas 0–10 (Stats iQ Describe).
-import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261124-1637';
-import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261124-1637';
-import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261124-1637';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261124-1637';
-import { icon } from '../icons.js?v=20261124-1637';
+import { resumoNps, fmt, sinal, LIMITES, CORES, corNps, corNpsClaro } from '../stats.js?v=20261127-1229';
+import { base, junta, desenhar, grad, comBrilho, EIXO_CAT, EIXO_VAL, ROTULO, ETIQ_META } from '../charts.js?v=20261127-1229';
+import { info, esc, def, GLOSSARIO, btnPptx, faixa } from '../ui.js?v=20261127-1229';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261127-1229';
+import { icon } from '../icons.js?v=20261127-1229';
 
 // ---------- Período e comparação (só com o Excel de respostas, que traz a data de cada resposta) ----------
 const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -93,6 +93,8 @@ export function resumo(rec, meta) {
     tom: r.nps >= meta ? 'good' : 'bad',
     texto: `${M ? `Em <strong>${esc(M.rot)}</strong>, com` : 'Com'} base em <strong>${fmt(r.total)}</strong> avaliações, o NPS foi <strong>${fmt(r.nps)}</strong>. A avaliação é <strong>${avaliacao}</strong>, estando <strong>${comparacao}</strong> (${meta}). A distribuição entre promotores, neutros e detratores indica <strong>${margem}</strong> para reforçar a recomendação, sobretudo através da <strong>${acao}</strong>.${compTxt}`,
     factos: [
+      ...(() => { const n04 = [0, 1, 2, 3, 4].reduce((a, i) => a + (c[i] || 0), 0), p04 = r.total ? (n04 / r.total) * 100 : 0;
+        return [{ valor: `${fmt(p04)}%`, rot: 'do total de respostas deram 0 a 4', tom: 'bad', tip: `${fmt(n04)}/${fmt(r.total)} respostas deram uma nota de 0 a 4: ${fmt(p04, 1)}%. São os detratores mais insatisfeitos (os detratores são de 0 a 6). Por nota: ${[0, 1, 2, 3, 4].map(i => `${i}: ${fmt(c[i] || 0)}`).join(' · ')}.` }]; })(),
       { valor: `${fmt(p6D)}%`, rot: 'do total de detratores deram 6', tip: `Dos ${fmt(r.d)} detratores (notas 0 a 6), ${fmt(c[6])} deram 6, ou seja ${fmt(p6D)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p6T)}%, o valor do gráfico das notas. Estão a um ponto de passar a neutros: se passassem, o NPS subia ${fmt(Math.round(p6T))} pontos. A margem é boa a partir de 40% dos detratores (ou 15% de todas as respostas).` },
       { valor: `${fmt(p8N)}%`, rot: 'do total de neutros deram 8', tip: `Dos ${fmt(r.n)} neutros (notas 7 e 8), ${fmt(c[8])} deram 8, ou seja ${fmt(p8N)}%. Em relação a todas as respostas (${fmt(r.total)}) são ${fmt(p8T)}%, o valor do gráfico das notas. Estão a um ponto de passar a promotores: se passassem, o NPS subia ${fmt(Math.round(p8T))} pontos. A margem é boa a partir de 50% dos neutros (ou 15% de todas as respostas).` },
     ],

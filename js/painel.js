@@ -1,11 +1,11 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261124-1637';
-import { esc, info } from './ui.js?v=20261124-1637';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261124-1637';
-import { fmt } from './stats.js?v=20261124-1637';
-import { store, meta, ordem } from './store.js?v=20261124-1637';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261124-1637';
-import { tileVars } from './layout.js?v=20261124-1637';
+import { icon } from './icons.js?v=20261127-1229';
+import { esc, info } from './ui.js?v=20261127-1229';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1229';
+import { fmt } from './stats.js?v=20261127-1229';
+import { store, meta, ordem } from './store.js?v=20261127-1229';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1229';
+import { tileVars } from './layout.js?v=20261127-1229';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
@@ -101,10 +101,13 @@ function resumoHtml(r) {
 export function painel(brand, tab, erro) {
   const A = analiseDe(tab);
   const rec = vistaDe(A, store.get(brand.id, tab.id));
+  // Tabs que levam vários Excels: indicação junto ao título (e quantos estão carregados)
+  const nFich = rec?.data?.pivot ? 1 : rec?.data?.ficheiros?.length;
+  const variosHtml = A?.view.multi && !tab.off && ativa(brand, tab) ? `<span class="chip-varios" style="${tileVars(brand)}" data-tip-title="Esta tab leva vários Excels" data-tip="${esc(A.view.multiTexto || 'Um Excel por driver.')}" tabindex="0">${icon('files')} Vários Excels${nFich ? ` <b class="num">· ${nFich} ${rec.data.pivot ? 'Pivot Table' : nFich === 1 ? 'carregado' : 'carregados'}</b>` : ''}</span>` : '';
   const head = (chipsHtml = '') => `
     <div class="panel-head">
       <span class="tile" style="${tileVars(brand)}">${icon(tab.icon)}</span>
-      <h2>${esc(tab.name)}</h2>
+      <h2>${esc(tab.name)}</h2>${variosHtml}
       <div class="chips">${chipsHtml}</div>
     </div>`;
   if (tab.off) return `<section class="panel">${head()}<div class="soon-panel"><div class="big">${icon(tab.icon)}</div><h3>Tab desativada</h3><p>${esc(tab.off)}</p></div></section>`;

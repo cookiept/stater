@@ -23,6 +23,7 @@ const P = {
   pie: '<path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5H12V3.5z"/><path d="M15 3.8A8.5 8.5 0 0 1 20.2 9H15V3.8z"/>',
   // UI
   upload: '<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4.5 15v3.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V15"/>',
+  files: '<path d="M9 6.5V4.5a1 1 0 0 1 1-1h6l3.5 3.5v10a1 1 0 0 1-1 1H17"/><path d="M5.5 7.5h6l3.5 3.5v8.5a1 1 0 0 1-1 1h-8.5a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1z"/><path d="M11.5 7.5v3.5H15"/>',
   file: '<path d="M6.5 3.5h7l4 4v12a1 1 0 0 1-1 1h-10a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z"/><path d="M13.5 3.5v4h4"/><path d="M8.5 13h7M8.5 16.5h5"/>',
   trash: '<path d="M4.5 6.5h15M9.5 6.5V4.5h5v2M6.5 6.5l1 13h9l1-13"/>',
   info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5"/><path d="M12 7.6h.01" stroke-width="2.4"/>',
