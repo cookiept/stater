@@ -1,13 +1,13 @@
 // Tipo "CSAT por grupo de NPS": um Excel por CSAT (ex.: Eficiência do Serviço, Simpatia, Tempo de espera),
 // cada um com as notas do CSAT (0 a 10) de detratores, neutros e promotores. Carregam-se vários de uma vez.
 // Ex.: Overview CSAT's da Brisa Autoestradas.
-import { CORES, fmt, LIMITES } from '../stats.js?v=20261127-1248';
-import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261127-1248';
-import { esc } from '../ui.js?v=20261127-1248';
-import { icon } from '../icons.js?v=20261127-1248';
-import { formatarPeriodo } from '../excel.js?v=20261127-1248';
-import { baseGrafico, hex, textoDe } from '../export.js?v=20261127-1248';
-import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261127-1248';
+import { CORES, fmt, LIMITES } from '../stats.js?v=20261127-1250';
+import { base, junta, desenhar, comBrilho, EIXO_CAT, EIXO_VAL } from '../charts.js?v=20261127-1250';
+import { esc } from '../ui.js?v=20261127-1250';
+import { icon } from '../icons.js?v=20261127-1250';
+import { formatarPeriodo } from '../excel.js?v=20261127-1250';
+import { baseGrafico, hex, textoDe } from '../export.js?v=20261127-1250';
+import { kpi, kpis, cartao, tabelaHtml, ligarTabela, barrasH, pptBarras, pptTabela } from './comum.js?v=20261127-1250';
 
 export const multi = true;
 export const multiTexto = 'Um Excel por CSAT.';

@@ -1,14 +1,24 @@
 // Painel de uma tab de marca: cabeçalho com chips, upload vazio, "em breve", Resumo e a vista da análise
-import { icon } from './icons.js?v=20261127-1248';
-import { esc, info } from './ui.js?v=20261127-1248';
-import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1248';
-import { fmt } from './stats.js?v=20261127-1248';
-import { store, meta, ordem } from './store.js?v=20261127-1248';
-import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1248';
-import { tileVars } from './layout.js?v=20261127-1248';
+import { icon } from './icons.js?v=20261127-1250';
+import { esc, info } from './ui.js?v=20261127-1250';
+import { formatarPeriodo, formatarData } from './excel.js?v=20261127-1250';
+import { fmt } from './stats.js?v=20261127-1250';
+import { store, meta, ordem } from './store.js?v=20261127-1250';
+import { analiseDe, ativa, vistaDe } from './analises.js?v=20261127-1250';
+import { tileVars } from './layout.js?v=20261127-1250';
 
 // Como importar: o texto da tab (brands.js → importar) ou o do tipo de análise
 const importarDe = (A, tab) => tab?.importar || A.view.importar;
+
+// Quantos ficheiros entram na tab, para o "Como importar"
+function quantos(A, tab) {
+  if (!A.view.multi) return '1 Excel';
+  if (tab?.excels) return `${tab.excels} Excels (um por ${A.view.lado && tab.tipo === 'causasdrivers' ? 'driver' : tab.tipo === 'csat-grupos' ? 'CSAT' : 'ficheiro'})`;
+  if (tab?.tipo === 'breakdown') return `1 Pivot Table (ou um Excel por ${tab.termos?.area?.um || 'área'})`;
+  if (tab?.tipo === 'causasdrivers') return 'um Excel por driver';
+  return 'Vários Excels';
+}
+const quantosHtml = (A, tab) => `<p class="howto-n">${icon('file')} Entra${A.view.multi && !/^1 /.test(quantos(A, tab)) ? 'm' : ''}: <b>${esc(quantos(A, tab))}</b></p>`;
 
 // Aviso de ficheiro errado: o que é o ficheiro, o que falta e em que tab entra
 function avisoErro(erro, extra = '') {
@@ -41,6 +51,7 @@ function painelVazio(A, erro, tab) {
         </div>
         <div class="howto">
           <h3>${esc(imp.titulo)}</h3>
+          ${quantosHtml(A, tab)}
           <ol class="passos">${passos.map((p, i) => `<li><span class="passo-n">${i + 1}</span><span>${esc(p)}</span></li>`).join('')}</ol>
         </div>
       </div>
@@ -94,7 +105,7 @@ function menuFicheiro(rec, A, m, tab, brand) {
       ${brand && ordem(brand.id, tab.id).length ? `<button type="button" class="btn btn-ghost btn-sm repor" data-act="repor-ordem">${icon('grip')} Repor a ordem dos gráficos</button>` : ''}
       <details class="fold">
         <summary>${icon('chevron')} ${esc(imp.titulo)}</summary>
-        <div class="fold-body"><p class="import-txt">${esc(imp.texto)}</p></div>
+        <div class="fold-body">${quantosHtml(A, tab)}<p class="import-txt">${esc(imp.texto)}</p></div>
       </details>
     </div>
   </details>`;

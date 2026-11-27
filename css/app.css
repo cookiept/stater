@@ -866,3 +866,6 @@ body.a-arrastar, body.a-arrastar * { cursor: grabbing !important; user-select: n
 
 .fich-n { margin-left: 2px; padding: 1px 7px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #e8f5ec; color: #10641d; }
 .fich-n.falta { background: #fdecea; color: #ad2c19; }
+.howto-n { display: flex; align-items: center; gap: 6px; margin: 4px 0 12px; font-size: 13px; color: var(--text-secondary, #5f5f5f); }
+.howto-n .ico { width: 15px; height: 15px; }
+.howto-n b { color: #1a1a1a; }
